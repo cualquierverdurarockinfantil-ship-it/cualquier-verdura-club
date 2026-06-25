@@ -1,0 +1,274 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@300;400;500;600;700&family=Boogaloo&display=swap');
+
+/* KG Happy Solid - load from local or CDN if available */
+/* Great Friend - custom font for Cualquier Verdura logo */
+@font-face {
+  font-family: 'Great Friend';
+  src: url('https://fonts.gstatic.com/s/boogaloo/v36/kmK-Zq45GAvOdnaW6x1F_SqE.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KG Happy Solid';
+  src: url('https://fonts.gstatic.com/s/fredokaone/v14/k3kUo8kEI-tA1RRcTZGmTlHGCaen8wf-.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
+    --primary: 142 70% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 355 85% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 322 80% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 142 70% 45%;
+    --radius: 1rem;
+
+    /* Club Verdura Brand Colors */
+    --cv-green: #22c55e;
+    --cv-red: #ef4444;
+    --cv-fuchsia: #ec4899;
+    --cv-cyan: #06b6d4;
+    --cv-yellow: #facc15;
+    --cv-orange: #f97316;
+    --cv-purple: #a855f7;
+    --cv-dark: #1a1a1a;
+  }
+
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 142 70% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 355 85% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 322 80% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 142 70% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-white text-foreground;
+    font-family: 'Fredoka', sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Bangers', cursive;
+    letter-spacing: 0.03em;
+  }
+}
+
+/* ============================================
+   CLUB VERDURA ANIMATIONS
+   ============================================ */
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.04) rotate(1deg); }
+}
+
+@keyframes breathe-slow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes rock {
+  0%, 100% { transform: rotate(-5deg) translateY(0px); }
+  25% { transform: rotate(5deg) translateY(-4px); }
+  50% { transform: rotate(-3deg) translateY(-2px); }
+  75% { transform: rotate(4deg) translateY(-6px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-12px) rotate(2deg); }
+  66% { transform: translateY(-6px) rotate(-1deg); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+  50% { transform: scale(1.1) rotate(5deg); }
+  70% { transform: scale(0.9) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(236, 72, 153, 0); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes vibrate {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-3deg); }
+  40% { transform: rotate(3deg); }
+  60% { transform: rotate(-2deg); }
+  80% { transform: rotate(2deg); }
+}
+
+@keyframes star-pop {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  60% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+  100% { transform: scale(1) rotate(360deg); opacity: 1; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Animation classes */
+.animate-breathe { animation: breathe 3s ease-in-out infinite; }
+.animate-breathe-slow { animation: breathe-slow 4s ease-in-out infinite; }
+.animate-rock { animation: rock 0.8s ease-in-out infinite; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+.animate-wiggle { animation: wiggle 0.6s ease-in-out infinite; }
+.animate-bounce-in { animation: bounce-in 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+.animate-slide-up { animation: slide-up 0.5s ease-out forwards; }
+.animate-pulse-border { animation: pulse-border 2s infinite; }
+.animate-spin-slow { animation: spin-slow 20s linear infinite; }
+.animate-vibrate { animation: vibrate 0.3s ease-in-out; }
+.animate-star-pop { animation: star-pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards; }
+.animate-marquee { animation: marquee 20s linear infinite; }
+
+/* Hover interactions */
+.hover-rock:hover { animation: rock 0.8s ease-in-out infinite; }
+.hover-wiggle:hover { animation: wiggle 0.5s ease-in-out infinite; }
+.hover-float:hover { animation: float 2s ease-in-out infinite; }
+
+/* Button styles Club Verdura */
+.btn-cv-primary {
+  @apply inline-flex items-center justify-center font-bold text-white rounded-full px-8 py-4 transition-all duration-200;
+  background: #ec4899;
+  border: 3px solid #1a1a1a;
+  box-shadow: 4px 4px 0px #1a1a1a;
+  font-family: 'Bangers', cursive;
+  letter-spacing: 0.06em;
+  font-size: 1.1rem;
+  min-height: 48px;
+}
+.btn-cv-primary:hover {
+  transform: translate(-2px, -2px) rotate(-2deg);
+  box-shadow: 6px 6px 0px #1a1a1a;
+}
+.btn-cv-primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1a1a1a;
+}
+
+.btn-cv-secondary {
+  @apply inline-flex items-center justify-center font-bold rounded-full px-8 py-4 transition-all duration-200;
+  background: #facc15;
+  color: #1a1a1a;
+  border: 3px solid #1a1a1a;
+  box-shadow: 4px 4px 0px #1a1a1a;
+  font-family: 'Bangers', cursive;
+  letter-spacing: 0.06em;
+  font-size: 1.1rem;
+  min-height: 48px;
+}
+.btn-cv-secondary:hover {
+  transform: translate(-2px, -2px) rotate(2deg);
+  box-shadow: 6px 6px 0px #1a1a1a;
+}
+
+/* Card styles */
+.card-cv {
+  @apply rounded-3xl bg-white transition-all duration-300;
+  border: 3px solid #1a1a1a;
+  box-shadow: 6px 6px 0px #1a1a1a;
+}
+.card-cv:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0px #1a1a1a;
+}
+
+/* Section pill badges */
+.badge-cv {
+  @apply inline-flex items-center gap-1 px-4 py-1 rounded-full text-sm font-bold;
+  border: 2px solid #1a1a1a;
+  font-family: 'Fredoka One', sans-serif;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-breathe,
+  .animate-breathe-slow,
+  .animate-rock,
+  .animate-float,
+  .animate-float-slow,
+  .animate-wiggle,
+  .hover-rock:hover,
+  .hover-wiggle:hover,
+  .hover-float:hover {
+    animation: none !important;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f0f0f0; }
+::-webkit-scrollbar-thumb { background: #22c55e; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #ec4899; }
