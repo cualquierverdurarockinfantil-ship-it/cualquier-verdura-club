@@ -40,6 +40,44 @@ function DrawingCard({ drawing, index }) {
   );
 }
 
+function PackCard() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0 }}
+      className="col-span-2 md:col-span-3 lg:col-span-4"
+    >
+      <motion.div
+        className="overflow-hidden flex flex-col md:flex-row items-center gap-6 p-8 rounded-3xl bg-white"
+        style={{ border: "3px solid #ec4899", boxShadow: "6px 6px 0 #ec4899" }}
+        whileHover={{ scale: 1.01 }}
+      >
+        <div className="text-5xl">📦</div>
+        <div className="flex-1 text-center md:text-left">
+          <h3 className="font-bangers text-cv-dark text-2xl tracking-wider mb-1">
+            Pack Completo — 1 sola hoja
+          </h3>
+          <p className="font-fredoka text-gray-500 text-base">
+            Todas las verduras juntas en una sola hoja, listas para imprimir y colorear
+          </p>
+        </div>
+        <a
+          href="/assets/dibujos/pack-completo.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          download="cualquier-verdura-pack-completo.pdf"
+          className="btn-cv-primary flex-shrink-0"
+          style={{ background: "#ec4899" }}
+        >
+          📥 Descargar Pack Completo
+        </a>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function Dibujos() {
   return (
     <div className="min-h-screen bg-white">
@@ -92,6 +130,7 @@ export default function Dibujos() {
       <section className="py-16 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <PackCard />
             {DRAWINGS.map((drawing, i) => (
               <DrawingCard key={drawing.id} drawing={drawing} index={i} />
             ))}
