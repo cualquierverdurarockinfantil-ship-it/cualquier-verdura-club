@@ -47,9 +47,6 @@ export const KARAOKE_SONGS = [
     character: "tomate",
     difficulty: "fácil",
     finishMessage: "¡¡Llegaste al final, muy bien!!",
-    // cuántos segundos mostrar el finishMessage DESPUÉS de la última línea
-    // antes de que el audio termine solo — 0 = aparece cuando termina el audio
-    finishMessageOffset: 0,
 
     // ── BLOQUES ESPECIALES ──────────────────────────────────────────────────
     specialBlocks: [
@@ -76,14 +73,6 @@ export const KARAOKE_SONGS = [
         title: "SOLO DE GUITARRA",
         message: "¡¡Momento de bailar!!",
         emoji: "🎸",
-      },
-      {
-        type: "final",
-        start: 155,
-        end: 164,
-        title: "¡¡Llegaste al final, muy bien!!",
-        message: "",
-        emoji: "🤘",
       },
     ],
 

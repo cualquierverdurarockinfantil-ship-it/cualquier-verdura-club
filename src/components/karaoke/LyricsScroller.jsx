@@ -39,12 +39,14 @@ export default function LyricsScroller({
   const lyricsScrollRef = useRef(null);
   const lineRefs = useRef([]);
   const wasInGapRef = useRef(false);
+  // Guardamos el último activeIndex válido (>=0) para usarlo al salir del gap
+  const lastValidIndexRef = useRef(0);
+
+  if (activeIndex >= 0) lastValidIndexRef.current = activeIndex;
 
   const specialBlocks = song?.specialBlocks || [];
   const activeBlock = getActiveBlock(specialBlocks, currentTime);
-
-  // Un bloque es "gap" si no es de tipo "final" (el final lo manejamos como finishMessage)
-  const isGap = !!activeBlock && activeBlock.type !== "final";
+  const isGap = !!activeBlock;
 
   // ── Scroll a la línea activa ─────────────────────────────────────────────
   useEffect(() => {
@@ -65,8 +67,10 @@ export default function LyricsScroller({
   // Detectar transición gap→letra para el scroll instantáneo
   useEffect(() => {
     if (!isGap && wasInGapRef.current) {
-      // El gap acaba de terminar — pre-posicionar antes de que aparezca la letra
-      const el = lineRefs.current[activeIndex];
+      // El gap acaba de terminar — pre-posicionar usando el último índice válido
+      // (activeIndex puede ser -1 en este instante exacto)
+      const targetIndex = activeIndex >= 0 ? activeIndex : lastValidIndexRef.current;
+      const el = lineRefs.current[targetIndex];
       const container = lyricsScrollRef.current;
       if (el && container) {
         const top = el.offsetTop - container.clientHeight / 2 + el.clientHeight / 2;

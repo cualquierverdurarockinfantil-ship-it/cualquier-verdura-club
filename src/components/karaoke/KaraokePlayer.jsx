@@ -104,6 +104,7 @@ export default function KaraokePlayer({ song, onClose }) {
   }
   function handleEnded() {
     setIsPlaying(false);
+    // Solo disparar si no se había mostrado ya al terminar la última línea
     setShowFinalMessage(true);
   }
   function handleSeek(e) {
