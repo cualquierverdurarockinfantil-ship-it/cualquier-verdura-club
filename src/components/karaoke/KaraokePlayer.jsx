@@ -10,7 +10,6 @@ const MODE_OPTIONS = [
   { id: "solo",  label: "Cantar solo",          icon: "⭐", desc: "Solo instrumental" },
 ];
 
-// Modo Tomate: tomate animado que guía la línea activa.
 const TOMATE_MODE = true;
 
 function formatTime(secs) {
@@ -20,34 +19,34 @@ function formatTime(secs) {
 }
 
 export default function KaraokePlayer({ song, onClose }) {
-  const [mode, setMode] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [finished, setFinished] = useState(false);
+  const [mode, setMode]                   = useState(null);
+  const [isPlaying, setIsPlaying]         = useState(false);
+  const [currentTime, setCurrentTime]     = useState(0);
+  const [duration, setDuration]           = useState(0);
+  const [finished, setFinished]           = useState(false);
   const [showFinalMessage, setShowFinalMessage] = useState(false);
-  const audioRef = useRef(null);
+  const audioRef   = useRef(null);
   const wakeLockRef = useRef(null);
+  // Para no disparar showFinalMessage dos veces
+  const finalShownRef = useRef(false);
 
-  // Mantener pantalla encendida mientras el karaoke está abierto
+  // ── Wake Lock: pantalla encendida mientras el karaoke está abierto ──────
   useEffect(() => {
     if ("wakeLock" in navigator) {
-      navigator.wakeLock.request("screen").then(lock => {
-        wakeLockRef.current = lock;
-      }).catch(() => {});
+      navigator.wakeLock.request("screen")
+        .then(lock => { wakeLockRef.current = lock; })
+        .catch(() => {});
     }
     return () => {
-      if (wakeLockRef.current) {
-        wakeLockRef.current.release().catch(() => {});
-        wakeLockRef.current = null;
-      }
+      wakeLockRef.current?.release().catch(() => {});
+      wakeLockRef.current = null;
     };
   }, []);
 
-  // Pausar cuando otro reproductor comienza (ej: reproductor persistente)
+  // ── Pausa si otro reproductor arranca ───────────────────────────────────
   useEffect(() => {
     const handler = (e) => {
-      if (e.detail.source !== "karaoke" && audioRef.current && !audioRef.current.paused) {
+      if (e.detail?.source !== "karaoke" && audioRef.current && !audioRef.current.paused) {
         audioRef.current.pause();
         setIsPlaying(false);
       }
@@ -56,69 +55,87 @@ export default function KaraokePlayer({ song, onClose }) {
     return () => window.removeEventListener("cv-audio-play", handler);
   }, []);
 
-  const audioUrl = mode === "solo" ? song.audioInstrumental : song.audioOriginal;
-  const activeIndex = getActiveLineIndex(song.lines, currentTime);
-
+  // ── Reset al cambiar de modo ─────────────────────────────────────────────
   useEffect(() => {
     setIsPlaying(false);
     setCurrentTime(0);
     setFinished(false);
     setShowFinalMessage(false);
+    finalShownRef.current = false;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
   }, [mode]);
 
-  // Transición: mensaje del FINAL → pantalla de fin
-  useEffect(() => {
-    if (showFinalMessage) {
-      const timer = setTimeout(() => {
-        setShowFinalMessage(false);
-        setFinished(true);
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
-  }, [showFinalMessage]);
-
+  // ── Play / Pause ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!audioRef.current || !mode) return;
-    if (isPlaying) audioRef.current.play();
+    if (isPlaying) audioRef.current.play().catch(() => {});
     else audioRef.current.pause();
   }, [isPlaying, mode]);
 
+  // ── Transición: finishMessage → pantalla de fin ──────────────────────────
+  useEffect(() => {
+    if (!showFinalMessage) return;
+    const t = setTimeout(() => {
+      setShowFinalMessage(false);
+      setFinished(true);
+    }, 3500);
+    return () => clearTimeout(t);
+  }, [showFinalMessage]);
+
+  const audioUrl   = mode === "solo" ? song.audioInstrumental : song.audioOriginal;
+  const activeIndex = getActiveLineIndex(song.lines, currentTime);
+
+  // ── Handlers de audio ────────────────────────────────────────────────────
   function handleTimeUpdate() {
     if (!audioRef.current) return;
     const t = audioRef.current.currentTime;
     setCurrentTime(t);
 
-    // Mostrar finishMessage cuando pasa la última línea de letra,
-    // aunque el audio todavía siga unos segundos más
+    // Mostrar finishMessage al pasar la ÚLTIMA LÍNEA de letra
+    // (el audio puede seguir unos segundos más — no lo interrumpimos)
     const lastLine = song.lines[song.lines.length - 1];
-    if (lastLine && t >= lastLine.end && !showFinalMessage && !finished) {
+    if (lastLine && t >= lastLine.end && !finalShownRef.current && !finished) {
+      finalShownRef.current = true;
       setShowFinalMessage(true);
     }
   }
+
   function handleLoadedMetadata() {
     if (audioRef.current) setDuration(audioRef.current.duration);
   }
+
   function handleEnded() {
+    // El audio llegó a su fin natural — si el finishMessage no apareció aún, mostrarlo
     setIsPlaying(false);
-    // Solo disparar si no se había mostrado ya al terminar la última línea
-    setShowFinalMessage(true);
+    if (!finalShownRef.current) {
+      finalShownRef.current = true;
+      setShowFinalMessage(true);
+    }
   }
+
   function handleSeek(e) {
     const val = parseFloat(e.target.value);
     setCurrentTime(val);
     if (audioRef.current) audioRef.current.currentTime = val;
+    // Si el usuario retrocede antes de la última línea, resetear el flag
+    const lastLine = song.lines[song.lines.length - 1];
+    if (lastLine && val < lastLine.end) {
+      finalShownRef.current = false;
+      setShowFinalMessage(false);
+    }
   }
+
   function handleRestart() {
     setFinished(false);
     setShowFinalMessage(false);
+    finalShownRef.current = false;
     setCurrentTime(0);
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play();
+      audioRef.current.play().catch(() => {});
     }
     setIsPlaying(true);
   }
@@ -141,8 +158,9 @@ export default function KaraokePlayer({ song, onClose }) {
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.85, y: 40 }}
         transition={{ type: "spring", damping: 22 }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
+        {/* Botón cerrar */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-cv-red text-white font-bangers flex items-center justify-center text-lg"
@@ -154,7 +172,7 @@ export default function KaraokePlayer({ song, onClose }) {
           <KaraokeFinishScreen song={song} onRestart={handleRestart} />
         ) : (
           <>
-            {/* Header: cover + info */}
+            {/* Header */}
             <div className="flex gap-3 sm:gap-4 p-4 sm:p-6 pb-3 sm:pb-4">
               <img
                 src={song.cover}
@@ -163,19 +181,26 @@ export default function KaraokePlayer({ song, onClose }) {
                 style={{ border: "3px solid #1a1a1a", boxShadow: "4px 4px 0 #1a1a1a" }}
               />
               <div className="flex-1 min-w-0">
-                <h2 className="text-2xl md:text-3xl font-bangers text-cv-dark tracking-wider leading-tight">{song.title}</h2>
+                <h2 className="text-2xl md:text-3xl font-bangers text-cv-dark tracking-wider leading-tight">
+                  {song.title}
+                </h2>
                 <p className="font-fredoka text-gray-500">{song.artist}</p>
-                <span className="badge-cv text-xs mt-2 inline-block" style={{ background: "#22c55e20", borderColor: "#22c55e", color: "#22c55e" }}>
-                  {song.difficulty === "fácil" ? "😊 Fácil" : song.difficulty === "medio" ? "🔥 Medio" : "⚡ Difícil"}
+                <span
+                  className="badge-cv text-xs mt-2 inline-block"
+                  style={{ background: "#22c55e20", borderColor: "#22c55e", color: "#22c55e" }}
+                >
+                  {song.difficulty === "fácil" ? "😊 Fácil"
+                    : song.difficulty === "medio" ? "🔥 Medio"
+                    : "⚡ Difícil"}
                 </span>
               </div>
             </div>
 
-            {/* Mode selector */}
+            {/* Selector de modo */}
             <div className="px-4 sm:px-6 pb-4">
               <p className="font-fredoka text-sm text-gray-500 mb-2">Elegí cómo cantar:</p>
               <div className="grid grid-cols-2 gap-3">
-                {MODE_OPTIONS.map((m) => (
+                {MODE_OPTIONS.map(m => (
                   <button
                     key={m.id}
                     onClick={() => setMode(m.id)}
@@ -188,12 +213,13 @@ export default function KaraokePlayer({ song, onClose }) {
                   >
                     <div className="text-2xl mb-1">{m.icon}</div>
                     <div className="font-bangers text-sm sm:text-base text-cv-dark tracking-wide">{m.label}</div>
-                    <div className="font-fredoka text-xs text-gray-400 leading-tight">{m.desc}</div>
+                    <div className="font-fredoka text-xs text-gray-400">{m.desc}</div>
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* Audio (oculto) */}
             {mode && (
               <audio
                 key={audioUrl}
@@ -202,18 +228,30 @@ export default function KaraokePlayer({ song, onClose }) {
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={handleEnded}
-                onPlay={() => window.dispatchEvent(new CustomEvent("cv-audio-play", { detail: { source: "karaoke" } }))}
+                onPlay={() => window.dispatchEvent(
+                  new CustomEvent("cv-audio-play", { detail: { source: "karaoke" } })
+                )}
                 preload="metadata"
               />
             )}
 
-            {/* Lyrics + controls */}
+            {/* Letra + controles */}
             {mode && (
               <div className="px-4 sm:px-6 pb-6">
-                <LyricsScroller song={song} lines={song.lines} activeIndex={activeIndex} tomateMode={TOMATE_MODE} currentTime={currentTime} showFinalMessage={showFinalMessage} />
+                <LyricsScroller
+                  song={song}
+                  lines={song.lines}
+                  activeIndex={activeIndex}
+                  tomateMode={TOMATE_MODE}
+                  currentTime={currentTime}
+                  showFinalMessage={showFinalMessage}
+                />
 
+                {/* Barra de progreso */}
                 <div className="flex items-center gap-3 mt-4 mb-3">
-                  <span className="font-fredoka text-xs text-gray-400 w-10 text-right">{formatTime(currentTime)}</span>
+                  <span className="font-fredoka text-xs text-gray-400 w-10 text-right">
+                    {formatTime(currentTime)}
+                  </span>
                   <input
                     type="range"
                     min={0}
@@ -223,17 +261,24 @@ export default function KaraokePlayer({ song, onClose }) {
                     onChange={handleSeek}
                     className="flex-1 accent-pink-500 h-2"
                   />
-                  <span className="font-fredoka text-xs text-gray-400 w-10">{formatTime(duration || song.durationSecs)}</span>
+                  <span className="font-fredoka text-xs text-gray-400 w-10">
+                    {formatTime(duration || song.durationSecs)}
+                  </span>
                 </div>
 
+                {/* Botón play */}
                 <div className="flex items-center justify-center gap-4">
                   {vegImg && (
                     <motion.img
                       src={vegImg}
                       alt={song.character}
                       className="w-12 h-12 object-contain flex-shrink-0"
-                      animate={isPlaying ? { rotate: [-8, 8, -8], y: [0, -4, 0], scale: [1, 1.08, 1] } : { rotate: [-3, 3, -3] }}
-                      transition={{ duration: isPlaying ? 0.7 : 3, repeat: Infinity, ease: "easeInOut" }}
+                      animate={
+                        isPlaying
+                          ? { rotate: [-8, 8, -8], y: [0, -4, 0], scale: [1, 1.08, 1] }
+                          : { rotate: [-3, 3, -3] }
+                      }
+                      transition={{ duration: isPlaying ? 0.7 : 3, repeat: Infinity }}
                     />
                   )}
                   <motion.button
