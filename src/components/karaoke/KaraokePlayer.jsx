@@ -76,14 +76,9 @@ export default function KaraokePlayer({ song, onClose }) {
   }, [isPlaying, mode]);
 
   // ── Transición: finishMessage → pantalla de fin ──────────────────────────
-  useEffect(() => {
-    if (!showFinalMessage) return;
-    const t = setTimeout(() => {
-      setShowFinalMessage(false);
-      setFinished(true);
-    }, 3500);
-    return () => clearTimeout(t);
-  }, [showFinalMessage]);
+  // IMPORTANTE: no usamos un timer fijo para setFinished porque cortaría el audio.
+  // La pantalla de fin aparece cuando el audio termina naturalmente (handleEnded).
+  // showFinalMessage solo controla la pantalla del mensaje, no la del fin.
 
   const audioUrl   = mode === "solo" ? song.audioInstrumental : song.audioOriginal;
   const activeIndex = getActiveLineIndex(song.lines, currentTime);
@@ -108,12 +103,17 @@ export default function KaraokePlayer({ song, onClose }) {
   }
 
   function handleEnded() {
-    // El audio llegó a su fin natural — si el finishMessage no apareció aún, mostrarlo
+    // El audio llegó a su fin natural
     setIsPlaying(false);
     if (!finalShownRef.current) {
       finalShownRef.current = true;
       setShowFinalMessage(true);
     }
+    // Mostrar pantalla de fin después de que el mensaje final tenga tiempo de verse
+    setTimeout(() => {
+      setShowFinalMessage(false);
+      setFinished(true);
+    }, 3500);
   }
 
   function handleSeek(e) {
@@ -168,6 +168,22 @@ export default function KaraokePlayer({ song, onClose }) {
           ✕
         </button>
 
+        {/* Audio siempre en DOM para que no se corte cuando showFinalMessage aparece */}
+        {mode && (
+          <audio
+            key={audioUrl}
+            ref={audioRef}
+            src={audioUrl}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
+            onEnded={handleEnded}
+            onPlay={() => window.dispatchEvent(
+              new CustomEvent("cv-audio-play", { detail: { source: "karaoke" } })
+            )}
+            preload="metadata"
+          />
+        )}
+
         {finished ? (
           <KaraokeFinishScreen song={song} onRestart={handleRestart} />
         ) : (
@@ -218,22 +234,6 @@ export default function KaraokePlayer({ song, onClose }) {
                 ))}
               </div>
             </div>
-
-            {/* Audio (oculto) */}
-            {mode && (
-              <audio
-                key={audioUrl}
-                ref={audioRef}
-                src={audioUrl}
-                onTimeUpdate={handleTimeUpdate}
-                onLoadedMetadata={handleLoadedMetadata}
-                onEnded={handleEnded}
-                onPlay={() => window.dispatchEvent(
-                  new CustomEvent("cv-audio-play", { detail: { source: "karaoke" } })
-                )}
-                preload="metadata"
-              />
-            )}
 
             {/* Letra + controles */}
             {mode && (

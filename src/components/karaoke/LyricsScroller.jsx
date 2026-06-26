@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VEG_IMAGES } from "@/lib/clubData";
 
@@ -69,20 +69,17 @@ export default function LyricsScroller({
   const containerRef = useRef(null);
   const lineRefs = useRef([]);
 
-  // Guardamos el último índice real (≥0) para posicionar el scroll al salir del gap
-  const lastRealIndex = useRef(0);
-  if (activeIndex >= 0) lastRealIndex.current = activeIndex;
-
-  // Flag: ¿estábamos en gap en el render anterior?
-  const prevWasGap = useRef(false);
-
   const specialBlocks = song?.specialBlocks ?? [];
   const activeBlock = getActiveBlock(specialBlocks, currentTime);
   const isGap = !!activeBlock;
 
-  // ── Scroll normal (letra corriendo) ────────────────────────────────────
+  // Guardamos el último índice REAL (≥0) para scroll durante el gap
+  const lastRealIndex = useRef(0);
+  if (activeIndex >= 0) lastRealIndex.current = activeIndex;
+
+  // ── Scroll normal: cuando cambia la línea activa y NO estamos en gap ────
   useEffect(() => {
-    if (isGap) return;          // durante gap no tocamos el scroll
+    if (isGap) return;
     if (activeIndex < 0) return;
     const el = lineRefs.current[activeIndex];
     const box = containerRef.current;
@@ -91,24 +88,32 @@ export default function LyricsScroller({
     box.scrollTo({ top, behavior: "smooth" });
   }, [activeIndex, isGap]);
 
-  // ── Al SALIR del gap: posicionar el scroll INSTANTÁNEO antes del fade-in ─
+  // ── Scroll durante gap: mantener actualizado MIENTRAS estamos en el gap ──
+  // Esto es la clave: en vez de intentar posicionar al SALIR del gap
+  // (donde el DOM todavía tiene la geometría vieja), posicionamos
+  // CONTINUAMENTE durante el gap, DESPUÉS de que React colapsa las líneas.
+  // Cuando el gap termina, el scroll ya está exactamente donde debe estar.
   useEffect(() => {
-    const justLeftGap = prevWasGap.current && !isGap;
-    prevWasGap.current = isGap;
+    if (!isGap) return;
+    // La próxima línea después del bloque
+    const nextLine = activeBlock
+      ? lines.find(l => l.start >= activeBlock.end)
+      : null;
+    if (!nextLine) return;
+    const nextIndex = lines.indexOf(nextLine);
+    if (nextIndex < 0) return;
 
-    if (!justLeftGap) return;
-
-    // Usamos el último índice real (puede que activeIndex sea todavía -1
-    // en el frame exacto en que termina el bloque)
-    const targetIndex = activeIndex >= 0 ? activeIndex : lastRealIndex.current;
-    const el = lineRefs.current[targetIndex];
-    const box = containerRef.current;
-    if (!el || !box) return;
-    const top = el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2;
-    // Scroll instantáneo — sin animación para que no se vea el "viaje"
-    box.scrollTop = top;
-  });
-  // Sin dependencias → corre en cada render, pero solo actúa cuando justLeftGap
+    // Usamos requestAnimationFrame para asegurarnos que React ya commitió
+    // el colapso de líneas pasadas al DOM antes de medir y scrollear
+    const raf = requestAnimationFrame(() => {
+      const el = lineRefs.current[nextIndex];
+      const box = containerRef.current;
+      if (!el || !box) return;
+      const top = el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2;
+      box.scrollTop = top;
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [isGap, activeIndex, activeBlock, lines]);
 
   // ── Progreso en la línea activa ─────────────────────────────────────────
   const lineProgress = (() => {
@@ -132,10 +137,50 @@ export default function LyricsScroller({
     ? Math.ceil(secsUntilNext)
     : null;
 
+  // ── Calcular cuáles líneas son "de esta sección" ────────────────────────
+  // Solo mostramos hasta el próximo bloque especial, el resto no se renderiza.
+  // Esto resuelve que se vean líneas de la siguiente sección durante un gap.
+  function getLinesForCurrentSection() {
+    if (!activeBlock) {
+      // No estamos en gap: mostrar desde el principio hasta el próximo bloque
+      // que sea POSTERIOR a la línea activa
+      let cutoff = lines.length;
+      for (let i = 0; i < specialBlocks.length; i++) {
+        const block = specialBlocks[i];
+        // Buscar la primera línea después del tiempo actual que quede antes de un bloque
+        if (block.start > currentTime) {
+          const idx = lines.findIndex(l => l.end > block.start);
+          if (idx >= 0) { cutoff = idx + 1; break; }
+        }
+      }
+      return { sectionLines: lines.slice(0, cutoff), offset: 0 };
+    } else {
+      // Estamos en gap: mostrar las líneas DESPUÉS de este bloque (próxima sección)
+      const nextBlockEnd = activeBlock.end;
+      const startIdx = lines.findIndex(l => l.start >= nextBlockEnd);
+      if (startIdx < 0) return { sectionLines: [], offset: 0 };
+
+      // Encontrar el fin de esta sección (próximo bloque)
+      let endIdx = lines.length;
+      for (const b of specialBlocks) {
+        if (b.start >= activeBlock.end) {
+          const idx = lines.findIndex((l, i) => i >= startIdx && l.end > b.start);
+          if (idx >= 0) { endIdx = idx + 1; break; }
+        }
+      }
+      return { sectionLines: lines.slice(startIdx, endIdx), offset: startIdx };
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // Render
   // ─────────────────────────────────────────────────────────────────────────
   const BG = "linear-gradient(160deg, #1f1147 0%, #1a1a1a 60%, #2a0a1e 100%)";
+
+  // Durante el gap mostramos TODAS las líneas en el DOM para que el scroll
+  // pueda posicionarse correctamente. La sección "getLinesForCurrentSection"
+  // solo determina lo que mostramos visualmente cuando NO hay gap.
+  // Cuando hay gap, la capa oscura lo tapa todo de todas formas.
 
   return (
     <div
@@ -143,15 +188,13 @@ export default function LyricsScroller({
       style={{ border: "3px solid #1a1a1a", background: BG }}
     >
 
-      {/* ── LETRA (siempre montada en el DOM) ──────────────────────────── */}
+      {/* ── LETRA (siempre en DOM) ──────────────────────────────────────── */}
       <div
         ref={containerRef}
         className="absolute inset-0 overflow-y-scroll px-3 sm:px-4 py-6"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
-          // Ocultar visualmente durante gap o mensaje final (pero mantener en DOM
-          // para que el scroll esté listo cuando vuelva)
           opacity: (isGap || showFinalMessage) ? 0 : 1,
           pointerEvents: (isGap || showFinalMessage) ? "none" : "auto",
           transition: "opacity 0.4s ease",
@@ -169,14 +212,12 @@ export default function LyricsScroller({
                 ref={el => (lineRefs.current[i] = el)}
                 className="w-full flex flex-col items-center overflow-hidden"
                 animate={{
-                  // Líneas pasadas: colapsar sin ocupar espacio
                   maxHeight: isPast ? 0 : 300,
                   opacity:   isPast ? 0 : 1,
                   scale:     isActive ? 1.08 : 0.96,
                 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                {/* Tomate corredor */}
                 {tomateMode && (
                   <div style={{ height: isActive ? 44 : 0, transition: "height 0.3s ease", overflow: "hidden", width: "100%" }}>
                     <AnimatePresence>
@@ -185,12 +226,9 @@ export default function LyricsScroller({
                   </div>
                 )}
 
-                {/* Texto */}
                 <motion.p
                   className="font-bangers text-center tracking-wider leading-tight px-2 py-1"
-                  animate={{
-                    color: isActive ? "#ffd60a" : "#c9c9d6",
-                  }}
+                  animate={{ color: isActive ? "#ffd60a" : "#c9c9d6" }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                   style={{
                     fontSize: isActive ? (isLong ? "1.3rem" : "1.85rem") : "1.2rem",
@@ -209,7 +247,7 @@ export default function LyricsScroller({
         </div>
       </div>
 
-      {/* ── BLOQUE ESPECIAL (intermedio musical) ───────────────────────── */}
+      {/* ── BLOQUE ESPECIAL ─────────────────────────────────────────────── */}
       <AnimatePresence>
         {isGap && !showFinalMessage && (
           <motion.div
@@ -222,7 +260,6 @@ export default function LyricsScroller({
             transition={{ duration: 0.4 }}
           >
             {countdown ? (
-              /* 3 - 2 - 1 */
               <>
                 <motion.p
                   className="font-bangers text-white text-3xl tracking-widest text-center mb-3"
@@ -245,7 +282,6 @@ export default function LyricsScroller({
                 </AnimatePresence>
               </>
             ) : (
-              /* Pantalla del intermedio */
               <>
                 <motion.p
                   className="text-4xl mb-2"
@@ -272,7 +308,7 @@ export default function LyricsScroller({
         )}
       </AnimatePresence>
 
-      {/* ── MENSAJE FINAL ──────────────────────────────────────────────── */}
+      {/* ── MENSAJE FINAL ───────────────────────────────────────────────── */}
       <AnimatePresence>
         {showFinalMessage && song?.finishMessage && (
           <motion.div
