@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { getActiveLineIndex } from "@/lib/karaokeData";
+import { getKaraokeState } from "@/lib/karaokeData";
 import { VEG_IMAGES } from "@/lib/clubData";
 import LyricsScroller from "./LyricsScroller";
 import KaraokeFinishScreen from "./KaraokeFinishScreen";
@@ -10,8 +10,6 @@ const MODE_OPTIONS = [
   { id: "solo",  label: "Cantar solo",          icon: "⭐", desc: "Solo instrumental" },
 ];
 
-const TOMATE_MODE = true;
-
 function formatTime(secs) {
   const m = Math.floor(secs / 60);
   const s = Math.floor(secs % 60);
@@ -19,33 +17,29 @@ function formatTime(secs) {
 }
 
 export default function KaraokePlayer({ song, onClose }) {
-  const [mode, setMode]                   = useState(null);
-  const [isPlaying, setIsPlaying]         = useState(false);
-  const [currentTime, setCurrentTime]     = useState(0);
-  const [duration, setDuration]           = useState(0);
-  const [finished, setFinished]           = useState(false);
+  const [mode, setMode]             = useState(null);
+  const [isPlaying, setIsPlaying]   = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration]     = useState(0);
+  const [finished, setFinished]     = useState(false);
   const [showFinalMessage, setShowFinalMessage] = useState(false);
-  const audioRef   = useRef(null);
+  const audioRef    = useRef(null);
   const wakeLockRef = useRef(null);
-  // Para no disparar showFinalMessage dos veces
   const finalShownRef = useRef(false);
 
-  // ── Wake Lock: pantalla encendida mientras el karaoke está abierto ──────
+  // ── Wake Lock: pantalla encendida ───────────────────────────────────────
   useEffect(() => {
     if ("wakeLock" in navigator) {
       navigator.wakeLock.request("screen")
         .then(lock => { wakeLockRef.current = lock; })
         .catch(() => {});
     }
-    return () => {
-      wakeLockRef.current?.release().catch(() => {});
-      wakeLockRef.current = null;
-    };
+    return () => { wakeLockRef.current?.release().catch(() => {}); };
   }, []);
 
-  // ── Pausa si otro reproductor arranca ───────────────────────────────────
+  // ── Pausar si otro reproductor arranca ─────────────────────────────────
   useEffect(() => {
-    const handler = (e) => {
+    const handler = e => {
       if (e.detail?.source !== "karaoke" && audioRef.current && !audioRef.current.paused) {
         audioRef.current.pause();
         setIsPlaying(false);
@@ -55,7 +49,7 @@ export default function KaraokePlayer({ song, onClose }) {
     return () => window.removeEventListener("cv-audio-play", handler);
   }, []);
 
-  // ── Reset al cambiar de modo ─────────────────────────────────────────────
+  // ── Reset al cambiar modo ───────────────────────────────────────────────
   useEffect(() => {
     setIsPlaying(false);
     setCurrentTime(0);
@@ -68,30 +62,31 @@ export default function KaraokePlayer({ song, onClose }) {
     }
   }, [mode]);
 
-  // ── Play / Pause ─────────────────────────────────────────────────────────
+  // ── Play / Pause ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!audioRef.current || !mode) return;
     if (isPlaying) audioRef.current.play().catch(() => {});
     else audioRef.current.pause();
   }, [isPlaying, mode]);
 
-  // ── Transición: finishMessage → pantalla de fin ──────────────────────────
-  // IMPORTANTE: no usamos un timer fijo para setFinished porque cortaría el audio.
-  // La pantalla de fin aparece cuando el audio termina naturalmente (handleEnded).
-  // showFinalMessage solo controla la pantalla del mensaje, no la del fin.
+  const audioUrl = mode === "solo" ? song.audioInstrumental : song.audioOriginal;
 
-  const audioUrl   = mode === "solo" ? song.audioInstrumental : song.audioOriginal;
-  const activeIndex = getActiveLineIndex(song.lines, currentTime);
+  // Estado de karaoke: sección, línea, si estamos en intro
+  const { sectionIndex, lineIndex, inIntro } = getKaraokeState(song, currentTime);
 
-  // ── Handlers de audio ────────────────────────────────────────────────────
+  // Última línea de la última sección con líneas
+  const lastSectionWithLines = [...(song.sections ?? [])]
+    .reverse()
+    .find(s => s.lines?.length > 0);
+  const lastLine = lastSectionWithLines?.lines?.at(-1);
+
+  // ── Handlers de audio ───────────────────────────────────────────────────
   function handleTimeUpdate() {
     if (!audioRef.current) return;
     const t = audioRef.current.currentTime;
     setCurrentTime(t);
 
-    // Mostrar finishMessage al pasar la ÚLTIMA LÍNEA de letra
-    // (el audio puede seguir unos segundos más — no lo interrumpimos)
-    const lastLine = song.lines[song.lines.length - 1];
+    // showFinalMessage cuando termina la última línea de letra
     if (lastLine && t >= lastLine.end && !finalShownRef.current && !finished) {
       finalShownRef.current = true;
       setShowFinalMessage(true);
@@ -103,13 +98,12 @@ export default function KaraokePlayer({ song, onClose }) {
   }
 
   function handleEnded() {
-    // El audio llegó a su fin natural
     setIsPlaying(false);
     if (!finalShownRef.current) {
       finalShownRef.current = true;
       setShowFinalMessage(true);
     }
-    // Mostrar pantalla de fin después de que el mensaje final tenga tiempo de verse
+    // Pantalla de fin después del mensaje final
     setTimeout(() => {
       setShowFinalMessage(false);
       setFinished(true);
@@ -120,8 +114,7 @@ export default function KaraokePlayer({ song, onClose }) {
     const val = parseFloat(e.target.value);
     setCurrentTime(val);
     if (audioRef.current) audioRef.current.currentTime = val;
-    // Si el usuario retrocede antes de la última línea, resetear el flag
-    const lastLine = song.lines[song.lines.length - 1];
+    // Resetear si retrocede antes del final
     if (lastLine && val < lastLine.end) {
       finalShownRef.current = false;
       setShowFinalMessage(false);
@@ -160,15 +153,13 @@ export default function KaraokePlayer({ song, onClose }) {
         transition={{ type: "spring", damping: 22 }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Botón cerrar */}
+        {/* Cerrar */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-cv-red text-white font-bangers flex items-center justify-center text-lg"
-        >
-          ✕
-        </button>
+        >✕</button>
 
-        {/* Audio siempre en DOM para que no se corte cuando showFinalMessage aparece */}
+        {/* Audio — siempre en DOM para no cortarse */}
         {mode && (
           <audio
             key={audioUrl}
@@ -189,7 +180,7 @@ export default function KaraokePlayer({ song, onClose }) {
         ) : (
           <>
             {/* Header */}
-            <div className="flex gap-3 sm:gap-4 p-4 sm:p-6 pb-3 sm:pb-4">
+            <div className="flex gap-3 sm:gap-4 p-4 sm:p-6 pb-3">
               <img
                 src={song.cover}
                 alt={song.title}
@@ -240,11 +231,12 @@ export default function KaraokePlayer({ song, onClose }) {
               <div className="px-4 sm:px-6 pb-6">
                 <LyricsScroller
                   song={song}
-                  lines={song.lines}
-                  activeIndex={activeIndex}
-                  tomateMode={TOMATE_MODE}
+                  sectionIndex={sectionIndex}
+                  lineIndex={lineIndex}
+                  inIntro={inIntro}
                   currentTime={currentTime}
                   showFinalMessage={showFinalMessage}
+                  tomateMode={true}
                 />
 
                 {/* Barra de progreso */}
