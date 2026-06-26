@@ -110,11 +110,9 @@ function IntroScreen({ intro, countdown }) {
 }
 
 // ── LyricsSection ─────────────────────────────────────────────────────────────
-// Una pantalla de letra: muestra TODAS las líneas de la sección,
-// las pasadas desaparecen arriba, la activa resaltada, las futuras apagadas.
+// Muestra solo 3 líneas: la activa + las 2 siguientes.
+// Sin scroll — siempre centrado en la pantalla.
 function LyricsSection({ lines, activeLineIndex, currentTime, tomateMode }) {
-  const containerRef = useRef(null);
-  const lineRefs = useRef([]);
 
   // Progreso dentro de la línea activa
   const lineProgress = (() => {
@@ -129,49 +127,29 @@ function LyricsSection({ lines, activeLineIndex, currentTime, tomateMode }) {
     : 0.5;
   const xPercent = -28 + wordProgress * 56;
 
-  // Scroll suave a la línea activa
-  useEffect(() => {
-    if (activeLineIndex < 0) return;
-    const el = lineRefs.current[activeLineIndex];
-    const box = containerRef.current;
-    if (!el || !box) return;
-    const top = el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2;
-    box.scrollTo({ top, behavior: "smooth" });
-  }, [activeLineIndex]);
+  // Ventana de 3 líneas: activa (o primera si aún no empezó) + 2 siguientes
+  const startIdx = Math.max(0, activeLineIndex >= 0 ? activeLineIndex : 0);
+  const visibleLines = lines.slice(startIdx, startIdx + 3);
 
   return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0 overflow-y-scroll px-3 sm:px-4 py-6"
-      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-    >
-      <div className="flex flex-col items-center gap-1 py-24">
-        {lines.map((line, i) => {
-          const isActive = i === activeLineIndex;
-          const isPast   = activeLineIndex >= 0 && i < activeLineIndex;
+    <div className="absolute inset-0 flex flex-col items-center justify-center px-4 gap-2">
+      <AnimatePresence mode="popLayout">
+        {visibleLines.map((line, vi) => {
+          const globalIdx = startIdx + vi;
+          const isActive = globalIdx === activeLineIndex;
           const isLong   = line.text.length > 22;
 
           return (
             <motion.div
-              key={i}
-              ref={el => (lineRefs.current[i] = el)}
-              className="w-full flex flex-col items-center overflow-hidden"
-              animate={{
-                maxHeight: isPast ? 0 : 300,
-                opacity:   isPast ? 0 : 1,
-                scale:     isActive ? 1.08 : 0.96,
-              }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              key={globalIdx}
+              className="w-full flex flex-col items-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
-              {tomateMode && (
-                <div
-                  style={{
-                    height: isActive ? 44 : 0,
-                    transition: "height 0.3s ease",
-                    overflow: "hidden",
-                    width: "100%",
-                  }}
-                >
+              {tomateMode && vi === 0 && (
+                <div style={{ height: 44, overflow: "hidden", width: "100%" }}>
                   <AnimatePresence>
                     {isActive && (
                       <TomateRunner key={activeLineIndex} xPercent={xPercent} />
@@ -182,10 +160,13 @@ function LyricsSection({ lines, activeLineIndex, currentTime, tomateMode }) {
 
               <motion.p
                 className="font-bangers text-center tracking-wider leading-tight px-2 py-1"
-                animate={{ color: isActive ? "#ffd60a" : "#c9c9d6" }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
+                animate={{
+                  color: isActive ? "#ffd60a" : "#6b6b80",
+                  scale: isActive ? 1.08 : 0.92,
+                }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 style={{
-                  fontSize: isActive ? (isLong ? "1.3rem" : "1.85rem") : "1.2rem",
+                  fontSize: isActive ? (isLong ? "1.4rem" : "2rem") : "1.1rem",
                   textShadow: isActive ? "0 0 22px rgba(255,214,10,0.55)" : "none",
                   wordBreak: "break-word",
                   lineHeight: "1.3",
@@ -193,12 +174,10 @@ function LyricsSection({ lines, activeLineIndex, currentTime, tomateMode }) {
               >
                 {line.text}
               </motion.p>
-
-              <div style={{ height: isActive ? 8 : 4 }} />
             </motion.div>
           );
         })}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
