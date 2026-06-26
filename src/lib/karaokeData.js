@@ -37,8 +37,8 @@ export const KARAOKE_SONGS = [
     id: "un-buen-plan",
     title: "Un Buen Plan",
     artist: "Cualquier Verdura",
-    duration: "2:35",
-    durationSecs: 155,
+    duration: "2:44",
+    durationSecs: 164,
     cover: "/assets/karaoke/cover-un-buen-plan.jpg",
     audioOriginal: "/assets/karaoke/un-buen-plan-original.wav",
     audioInstrumental: "/assets/karaoke/un-buen-plan-instrumental.mp3",
@@ -47,16 +47,17 @@ export const KARAOKE_SONGS = [
     character: "tomate",
     difficulty: "fácil",
     finishMessage: "¡¡Llegaste al final, muy bien!!",
+    // cuántos segundos mostrar el finishMessage DESPUÉS de la última línea
+    // antes de que el audio termine solo — 0 = aparece cuando termina el audio
+    finishMessageOffset: 0,
 
     // ── BLOQUES ESPECIALES ──────────────────────────────────────────────────
-    // Cada bloque define un momento sin letra con su propio título y mensaje.
-    // Agregar aquí nuevos bloques sin tocar código del componente.
     specialBlocks: [
       {
         type: "instrumental",
         start: 0,
         end: 14,
-        title: "INTRO",
+        title: "RIFF",
         message: "¡¡Anda preparandote!!",
         emoji: "🎸",
       },
@@ -65,6 +66,7 @@ export const KARAOKE_SONGS = [
         start: 50,
         end: 62,
         title: "RIFF LEGENDARIO",
+        message: "¡¡Relaja y baila un poco!!",
         emoji: "🎸",
       },
       {
@@ -75,35 +77,42 @@ export const KARAOKE_SONGS = [
         message: "¡¡Momento de bailar!!",
         emoji: "🎸",
       },
+      {
+        type: "final",
+        start: 155,
+        end: 164,
+        title: "¡¡Llegaste al final, muy bien!!",
+        message: "",
+        emoji: "🤘",
+      },
     ],
 
     // ── LETRA SINCRONIZADA ──────────────────────────────────────────────────
     lines: [
-      // Estrofa 1 (14 - 38)
+      // Estrofa 1 (00:14 - 00:38)
       { text: "Yo te estaré esperando", start: 14, end: 17 },
       { text: "que me pases a buscar", start: 17, end: 20 },
       { text: "a que vengas a mi casa", start: 20, end: 23 },
       { text: "y me lleves a pasear", start: 23, end: 26.5 },
-      { text: "Dar una vuelta", start: 26.5, end: 28.2 },
-      { text: "por la plaza", start: 28.2, end: 30 },
+      { text: "Dar una vuelta por la plaza", start: 26.5, end: 30 },
       { text: "no estaría mal", start: 30, end: 32 },
       { text: "ir a probar gustos de helado", start: 32, end: 35 },
       { text: "ese es un buen plan", start: 35, end: 38 },
-      // Estribillo 1 (38 - 50)
+      // Estribillo 1 (00:38 - 00:50)
       { text: "ES UN BUEN PLAN", start: 38, end: 41 },
       { text: "UN BUEN PLAN", start: 41, end: 44 },
       { text: "SALIR A JUGAR", start: 44, end: 47 },
       { text: "SIEMPRE ES UN BUEN PLAN", start: 47, end: 50 },
-      // Estrofa 2 (62 - 87)
+      // Estrofa 2 (01:02 - 01:27)
       { text: "Mirá que lindo que está el día", start: 62, end: 65.5 },
       { text: "para ir a jugar", start: 65.5, end: 68 },
       { text: "o patear una pelota", start: 68, end: 71 },
       { text: "ese es un buen plan", start: 71, end: 74 },
       { text: "Hacer castillos con arena", start: 74, end: 77.5 },
-      { text: "o ropa para mi muñecas", start: 77.5, end: 81 },
+      { text: "o ropa para mis muñecas", start: 77.5, end: 81 },
       { text: "un pastel de barro", start: 81, end: 84 },
       { text: "un barquito de papel", start: 84, end: 87 },
-      // Estribillo 2 (87 - 110)
+      // Estribillo 2 (01:27 - 01:50)
       { text: "ES UN BUEN PLAN", start: 87, end: 90 },
       { text: "UN BUEN PLAN", start: 90, end: 93 },
       { text: "SALIR A JUGAR", start: 93, end: 96 },
@@ -112,7 +121,7 @@ export const KARAOKE_SONGS = [
       { text: "UN BUEN PLAN", start: 101.5, end: 104 },
       { text: "SALIR A JUGAR", start: 104, end: 107 },
       { text: "SIEMPRE ES UN BUEN PLAN", start: 107, end: 110 },
-      // Estribillo final (135 - 155)
+      // Estribillo final (02:15 - 02:35)
       { text: "ES UN BUEN PLAN", start: 135, end: 137.5 },
       { text: "UN BUEN PLAN", start: 137.5, end: 140 },
       { text: "SALIR A JUGAR", start: 140, end: 143 },

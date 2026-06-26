@@ -88,7 +88,16 @@ export default function KaraokePlayer({ song, onClose }) {
   }, [isPlaying, mode]);
 
   function handleTimeUpdate() {
-    if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
+    if (!audioRef.current) return;
+    const t = audioRef.current.currentTime;
+    setCurrentTime(t);
+
+    // Mostrar finishMessage cuando pasa la última línea de letra,
+    // aunque el audio todavía siga unos segundos más
+    const lastLine = song.lines[song.lines.length - 1];
+    if (lastLine && t >= lastLine.end && !showFinalMessage && !finished) {
+      setShowFinalMessage(true);
+    }
   }
   function handleLoadedMetadata() {
     if (audioRef.current) setDuration(audioRef.current.duration);
