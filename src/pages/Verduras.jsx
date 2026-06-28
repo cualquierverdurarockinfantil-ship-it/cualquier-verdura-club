@@ -182,7 +182,7 @@ export default function Verduras() {
       <section className="py-16 px-4 bg-cv-fuchsia/5">
         <div className="max-w-6xl mx-auto">
           <SectionHeader
-            title="Los Fans"
+            title="Conocé También a los Fans"
             subtitle="Los nenes y nenas del Club Verdura"
             color="#ec4899"
           />

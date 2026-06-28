@@ -200,8 +200,6 @@ function WelcomeSection() {
 
 // ---- Characters Preview ----
 function CharactersPreview() {
-  const featured = VEGETABLES.slice(0, 4);
-
   return (
     <section className="py-20 px-4 bg-cv-green/5">
       <div className="max-w-6xl mx-auto">
@@ -212,13 +210,13 @@ function CharactersPreview() {
         />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-          {featured.map((veg, i) => (
+          {VEGETABLES.map((veg, i) => (
             <motion.div
               key={veg.id}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.07 }}
             >
               <Link to="/verduras">
                 <motion.div
@@ -250,7 +248,7 @@ function CharactersPreview() {
 
         <div className="text-center">
           <Link to="/verduras" className="btn-cv-primary">
-            Ver todos los personajes
+            Entrá a Conocer los Fans
           </Link>
         </div>
       </div>
@@ -265,17 +263,15 @@ function AlbumPreview() {
       <div className="max-w-5xl mx-auto">
         <SectionHeader
           title="El Disco"
-          subtitle="La Niñez Es Una Vez — escuchalo ahora"
+          subtitle="La Niñez Es Una Vez"
           color="#ef4444"
         />
 
-        <div className="flex flex-col lg:flex-row gap-10 items-center">
-          {/* Cover */}
+        <div className="flex flex-col items-center gap-8">
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="flex-shrink-0"
           >
             <motion.img
               src={ALBUM.cover}
@@ -287,46 +283,9 @@ function AlbumPreview() {
             />
           </motion.div>
 
-          {/* Tracklist */}
-          <div className="flex-1 w-full">
-            <div className="space-y-2">
-              {ALBUM.tracks.map((track, i) => (
-                <motion.div
-                  key={track.id}
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.07 }}
-                >
-                  <Link to="/canciones">
-                    <motion.div
-                      className="flex items-center gap-4 p-4 rounded-2xl bg-white cursor-pointer transition-all"
-                      style={{ border: "2px solid #e5e7eb" }}
-                      whileHover={{
-                        borderColor: "#22c55e",
-                        x: 6,
-                        boxShadow: "4px 4px 0 #22c55e"
-                      }}
-                    >
-                      <span className="text-2xl font-bangers text-gray-300 w-8 flex-shrink-0 tracking-wider">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bangers text-cv-dark text-lg truncate tracking-wider">{track.title}</p>
-                      </div>
-                      <span className="text-sm font-fredoka text-gray-400 flex-shrink-0">{track.duration}</span>
-                    </motion.div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="mt-6">
-              <Link to="/canciones" className="btn-cv-primary w-full text-center justify-center">
-                Escuchá Todo
-              </Link>
-            </div>
-          </div>
+          <Link to="/canciones" className="btn-cv-primary text-xl px-12 py-5">
+            Escuchalo Ahora
+          </Link>
         </div>
       </div>
     </section>
