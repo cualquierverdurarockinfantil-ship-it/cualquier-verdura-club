@@ -2,141 +2,123 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ALBUM, VEGETABLES, SHOWS, NEWS, VEG_IMAGES, KID_IMAGES } from "@/lib/clubData";
 import SectionHeader from "@/components/cv/SectionHeader";
-import FloatingCharacters from "@/components/cv/FloatingCharacters";
 
 // ---- Hero Section ----
 function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white py-20 px-4">
-      <FloatingCharacters />
+    <section className="relative flex flex-col items-center overflow-hidden bg-white pt-4 pb-2 px-4">
 
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
-        {/* Logo SVG */}
+      {/* Logo — más chico en mobile */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-3"
+      >
+        <img
+          src="/assets/letras-horizontal.svg"
+          alt="Cualquier Verdura"
+          className="h-12 md:h-24 mx-auto"
+        />
+      </motion.div>
+
+      {/* Album Cover — más chico en mobile */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+        animate={{ opacity: 1, scale: 1, rotate: -2 }}
+        transition={{ duration: 0.7, delay: 0.2, type: "spring" }}
+        whileHover={{ rotate: 2, scale: 1.05 }}
+        className="relative flex-shrink-0 mb-3"
+      >
         <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
+          className="absolute -right-6 -bottom-4 w-40 h-40 md:w-56 md:h-56 rounded-full z-0"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          style={{
+            background: "radial-gradient(circle at 50% 50%, #555 0%, #111 40%, #333 60%, #111 100%)",
+          }}
         >
-          <img
-            src="/assets/letras-horizontal.svg"
-            alt="Cualquier Verdura"
-            className="h-20 md:h-32 mx-auto"
-          />
-        </motion.div>
-
-        {/* Album Cover - THE PROTAGONIST flanked by real characters */}
-        <div className="flex items-center justify-center gap-6 md:gap-12">
-          {/* Left: Tomate rockero */}
-          <motion.div
-            className="hidden md:block flex-shrink-0"
-            animate={{ rotate: [-8, 8, -8], y: [0, -12, 0] }}
-            transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <img
-              src={VEG_IMAGES.tomate}
-              alt="Tomate rockero"
-              className="w-40 h-40 object-contain"
-            />
-          </motion.div>
-
-          {/* Album cover center */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-            animate={{ opacity: 1, scale: 1, rotate: -2 }}
-            transition={{ duration: 0.8, delay: 0.3, type: "spring" }}
-            whileHover={{ rotate: 2, scale: 1.05 }}
-            className="relative flex-shrink-0"
-          >
-            {/* Vinyl record behind */}
-            <motion.div
-              className="absolute -right-8 -bottom-6 w-52 h-52 md:w-64 md:h-64 rounded-full z-0"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              style={{
-                background: "radial-gradient(circle at 50% 50%, #555 0%, #111 40%, #333 60%, #111 100%)",
-              }}
-            >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full bg-white/20" />
-              </div>
-            </motion.div>
-
-            {/* Album cover */}
-            <img
-              src={ALBUM.cover}
-              alt={ALBUM.title}
-              className="relative z-10 w-52 h-52 md:w-64 md:h-64 rounded-2xl object-cover"
-              style={{ border: "4px solid #1a1a1a", boxShadow: "8px 8px 0 #1a1a1a" }}
-            />
-          </motion.div>
-
-          {/* Right: Zanahoria */}
-          <motion.div
-            className="hidden md:block flex-shrink-0"
-            animate={{ rotate: [8, -8, 8], y: [0, -8, 0] }}
-            transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-          >
-            <img
-              src={VEG_IMAGES.zanahoria}
-              alt="Zanahoria rockera"
-              className="w-36 h-36 object-contain"
-            />
-          </motion.div>
-        </div>
-
-        {/* Album title */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-8"
-        >
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bangers text-cv-dark leading-tight tracking-wide">
-            La Niñez Es Una Vez
-          </h1>
-          <p className="mt-3 text-xl md:text-2xl font-fredoka text-gray-500">
-            El nuevo disco de{" "}
-            <span
-              className="font-bangers text-cv-green text-2xl md:text-3xl"
-              style={{ letterSpacing: "0.04em" }}
-            >
-              Cualquier Verdura
-            </span>
-          </p>
-        </motion.div>
-
-        {/* CTA Buttons */}
-        <motion.div
-          className="mt-8 flex flex-col sm:flex-row gap-4 justify-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.9 }}
-        >
-          <Link to="/canciones" className="btn-cv-primary text-xl px-10 py-5">
-            Escuchá Todo
-          </Link>
-          <Link to="/karaoke" className="btn-cv-secondary text-xl px-10 py-5">
-            Cantá Nuestras Canciones
-          </Link>
-        </motion.div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          className="mt-16 flex flex-col items-center gap-2"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <span className="text-sm font-fredoka text-gray-400">Scrolleá para explorar</span>
-          <div className="w-6 h-10 rounded-full border-2 border-gray-300 flex items-start justify-center p-1">
-            <motion.div
-              className="w-1.5 h-3 rounded-full bg-cv-green"
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-white/20" />
           </div>
         </motion.div>
-      </div>
+        <img
+          src={ALBUM.cover}
+          alt={ALBUM.title}
+          className="relative z-10 w-40 h-40 md:w-56 md:h-56 rounded-2xl object-cover"
+          style={{ border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #1a1a1a" }}
+        />
+      </motion.div>
+
+      {/* Título disco */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+        className="text-center mb-3"
+      >
+        <h1 className="text-4xl md:text-7xl font-bangers text-cv-dark leading-tight tracking-wide">
+          La Niñez Es Una Vez
+        </h1>
+        <p className="mt-1 text-base md:text-xl font-fredoka text-gray-500">
+          El nuevo disco de{" "}
+          <span className="font-bangers text-cv-green text-lg md:text-2xl" style={{ letterSpacing: "0.04em" }}>
+            Cualquier Verdura
+          </span>
+        </p>
+      </motion.div>
+
+      {/* Botones CTA */}
+      <motion.div
+        className="flex flex-col sm:flex-row gap-3 w-full max-w-md justify-center mb-4"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
+      >
+        <Link to="/canciones" className="btn-cv-primary text-lg px-8 py-4 text-center">
+          Escuchá Todo
+        </Link>
+        <Link to="/karaoke" className="btn-cv-secondary text-lg px-8 py-4 text-center">
+          Cantá Nuestras Canciones
+        </Link>
+      </motion.div>
+
+      {/* Banner del show */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.9 }}
+        className="w-full max-w-md"
+      >
+        <div
+          className="rounded-2xl px-5 py-4 text-center"
+          style={{
+            background: "linear-gradient(135deg, #E6302B 0%, #92338A 100%)",
+            border: "3px solid #1a1a1a",
+            boxShadow: "5px 5px 0 #1a1a1a",
+          }}
+        >
+          <p className="font-bangers text-white text-xs tracking-widest uppercase mb-1">
+            🎸 Próximo show en vivo
+          </p>
+          <p className="font-bangers text-white text-2xl md:text-3xl tracking-wide leading-tight">
+            Presentación del Disco
+          </p>
+          <p className="font-bangers text-yellow-300 text-lg tracking-wide">
+            16 de agosto · Día del Niño
+          </p>
+          <p className="font-fredoka text-white/90 text-sm mt-1">
+            Teatro Cervantes · Coronel Suárez
+          </p>
+          <div
+            className="inline-block mt-2 px-4 py-1 rounded-full font-bangers text-sm tracking-wider"
+            style={{ background: "#FFED00", color: "#1a1a1a", border: "2px solid #1a1a1a" }}
+          >
+            🎟 Entrada Libre y Gratuita
+          </div>
+        </div>
+      </motion.div>
+
     </section>
   );
 }
