@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -20,11 +20,34 @@ const NAV_ITEMS = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
   const location = useLocation();
+
+  // Mostrar navbar solo cuando el usuario scrollea hacia abajo
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 60);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // Resetear al cambiar de página
+    setVisible(false);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [location.pathname]);
+
+  // En páginas que no son home, mostrar siempre
+  const isHome = location.pathname === "/";
+  const shouldShow = !isHome || visible;
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm" style={{ borderBottom: "3px solid #1a1a1a" }}>
+      <motion.nav
+        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm"
+        style={{ borderBottom: "3px solid #1a1a1a" }}
+        initial={false}
+        animate={{
+          y: shouldShow ? 0 : -80,
+          opacity: shouldShow ? 1 : 0,
+        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
         <div className="max-w-[1700px] mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
@@ -67,7 +90,7 @@ export default function Navbar() {
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Mobile Menu */}
       <AnimatePresence>
