@@ -6,32 +6,36 @@ import SectionHeader from "@/components/cv/SectionHeader";
 // ---- Hero Section ----
 function HeroSection() {
   return (
-    <section className="relative flex flex-col items-center overflow-hidden bg-white pt-4 pb-2 px-4">
+    // Mobile: pt-6 arriba (navbar oculto = espacio libre desde arriba)
+    // Desktop: min-h-screen para que WelcomeSection empiece justo al borde del viewport
+    <section className="relative flex flex-col items-center overflow-hidden bg-white
+      pt-6 pb-4 px-4
+      md:min-h-screen md:justify-center md:pt-16 md:pb-8">
 
-      {/* Logo — más chico en mobile */}
+      {/* Logo */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-3"
+        className="mb-2 md:mb-4"
       >
         <img
           src="/assets/letras-horizontal.svg"
           alt="Cualquier Verdura"
-          className="h-12 md:h-24 mx-auto"
+          className="h-10 md:h-28 mx-auto"
         />
       </motion.div>
 
-      {/* Album Cover — más chico en mobile */}
+      {/* Album Cover */}
       <motion.div
         initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
         animate={{ opacity: 1, scale: 1, rotate: -2 }}
         transition={{ duration: 0.7, delay: 0.2, type: "spring" }}
         whileHover={{ rotate: 2, scale: 1.05 }}
-        className="relative flex-shrink-0 mb-3"
+        className="relative flex-shrink-0 mb-2 md:mb-4"
       >
         <motion.div
-          className="absolute -right-6 -bottom-4 w-40 h-40 md:w-56 md:h-56 rounded-full z-0"
+          className="absolute -right-6 -bottom-4 w-36 h-36 md:w-64 md:h-64 rounded-full z-0"
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           style={{
@@ -45,7 +49,7 @@ function HeroSection() {
         <img
           src={ALBUM.cover}
           alt={ALBUM.title}
-          className="relative z-10 w-40 h-40 md:w-56 md:h-56 rounded-2xl object-cover"
+          className="relative z-10 w-36 h-36 md:w-64 md:h-64 rounded-2xl object-cover"
           style={{ border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #1a1a1a" }}
         />
       </motion.div>
@@ -55,14 +59,14 @@ function HeroSection() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
-        className="text-center mb-3"
+        className="text-center mb-2 md:mb-4"
       >
-        <h1 className="text-4xl md:text-7xl font-bangers text-cv-dark leading-tight tracking-wide">
+        <h1 className="text-3xl md:text-7xl font-bangers text-cv-dark leading-tight tracking-wide">
           La Niñez Es Una Vez
         </h1>
-        <p className="mt-1 text-base md:text-xl font-fredoka text-gray-500">
+        <p className="mt-1 text-sm md:text-xl font-fredoka text-gray-500">
           El nuevo disco de{" "}
-          <span className="font-bangers text-cv-green text-lg md:text-2xl" style={{ letterSpacing: "0.04em" }}>
+          <span className="font-bangers text-cv-green text-base md:text-2xl" style={{ letterSpacing: "0.04em" }}>
             Cualquier Verdura
           </span>
         </p>
@@ -70,15 +74,15 @@ function HeroSection() {
 
       {/* Botones CTA */}
       <motion.div
-        className="flex flex-col sm:flex-row gap-3 w-full max-w-md justify-center mb-4"
+        className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full max-w-md justify-center mb-3 md:mb-5"
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.7 }}
       >
-        <Link to="/canciones" className="btn-cv-primary text-lg px-8 py-4 text-center">
+        <Link to="/canciones" className="btn-cv-primary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 text-center">
           Escuchá Todo
         </Link>
-        <Link to="/karaoke" className="btn-cv-secondary text-lg px-8 py-4 text-center">
+        <Link to="/karaoke" className="btn-cv-secondary text-base md:text-lg px-6 md:px-8 py-3 md:py-4 text-center">
           Cantá Nuestras Canciones
         </Link>
       </motion.div>
@@ -91,7 +95,7 @@ function HeroSection() {
         className="w-full max-w-md"
       >
         <div
-          className="rounded-2xl px-5 py-4 text-center"
+          className="rounded-2xl px-4 py-3 md:px-6 md:py-5 text-center"
           style={{
             background: "linear-gradient(135deg, #E6302B 0%, #92338A 100%)",
             border: "3px solid #1a1a1a",
@@ -101,10 +105,10 @@ function HeroSection() {
           <p className="font-bangers text-white text-xs tracking-widest uppercase mb-1">
             🎸 Próximo show en vivo
           </p>
-          <p className="font-bangers text-white text-2xl md:text-3xl tracking-wide leading-tight">
+          <p className="font-bangers text-white text-xl md:text-3xl tracking-wide leading-tight">
             Presentación del Disco
           </p>
-          <p className="font-bangers text-yellow-300 text-lg tracking-wide">
+          <p className="font-bangers text-yellow-300 text-base md:text-lg tracking-wide">
             16 de agosto · Día del Niño
           </p>
           <p className="font-fredoka text-white/90 text-sm mt-1">
@@ -119,24 +123,35 @@ function HeroSection() {
         </div>
       </motion.div>
 
+      {/* Desktop: flecha scroll */}
+      <motion.div
+        className="hidden md:flex flex-col items-center gap-2 mt-8 text-gray-400"
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      >
+        <span className="text-sm font-fredoka">Scrolleá para explorar</span>
+        <div className="w-6 h-10 rounded-full border-2 border-gray-300 flex items-start justify-center p-1">
+          <motion.div
+            className="w-1.5 h-3 rounded-full bg-cv-green"
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        </div>
+      </motion.div>
+
     </section>
   );
 }
 
-// ---- Welcome Section ---- (park image as background)
+// ---- Welcome Section ----
 function WelcomeSection() {
   return (
     <section className="relative py-24 px-4 overflow-hidden">
-      {/* Park as background */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(/assets/fondo-plaza.jpg)`,
-        }}
+        style={{ backgroundImage: `url(/assets/fondo-plaza.jpg)` }}
       />
       <div className="absolute inset-0 bg-white/80" />
-
-      {/* Peeping characters on the sides */}
       <motion.img
         src={KID_IMAGES.nio2}
         alt="Nene punk"
@@ -153,7 +168,6 @@ function WelcomeSection() {
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }}
       />
-
       <div className="max-w-3xl mx-auto text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -208,7 +222,6 @@ function CharactersPreview() {
           subtitle="Las verduras rockeras más famosas del jardín"
           color="#22c55e"
         />
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
           {VEGETABLES.map((veg, i) => (
             <motion.div
@@ -229,27 +242,18 @@ function CharactersPreview() {
                     animate={{ rotate: [-5, 5, -5] }}
                     transition={{ duration: 2 + i * 0.4, repeat: Infinity }}
                   >
-                    <img
-                      src={veg.image}
-                      alt={veg.name}
-                      className="w-24 h-24 object-contain"
-                    />
+                    <img src={veg.image} alt={veg.name} className="w-24 h-24 object-contain" />
                   </motion.div>
                   <h3 className="font-bangers text-cv-dark text-xl tracking-wider">{veg.name}</h3>
                   <p className="text-sm font-fredoka text-gray-500 mt-1">{veg.role}</p>
-                  <span className="mt-2 inline-block text-xs font-fredoka text-gray-400">
-                    {veg.instrument}
-                  </span>
+                  <span className="mt-2 inline-block text-xs font-fredoka text-gray-400">{veg.instrument}</span>
                 </motion.div>
               </Link>
             </motion.div>
           ))}
         </div>
-
         <div className="text-center">
-          <Link to="/verduras" className="btn-cv-primary">
-            Entrá a Conocer los Fans
-          </Link>
+          <Link to="/verduras" className="btn-cv-primary">Entrá a Conocer los Fans</Link>
         </div>
       </div>
     </section>
@@ -261,12 +265,7 @@ function AlbumPreview() {
   return (
     <section className="py-20 px-4">
       <div className="max-w-5xl mx-auto">
-        <SectionHeader
-          title="El Disco"
-          subtitle="La Niñez Es Una Vez"
-          color="#ef4444"
-        />
-
+        <SectionHeader title="El Disco" subtitle="La Niñez Es Una Vez" color="#ef4444" />
         <div className="flex flex-col items-center gap-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -282,7 +281,6 @@ function AlbumPreview() {
               transition={{ duration: 4, repeat: Infinity }}
             />
           </motion.div>
-
           <Link to="/canciones" className="btn-cv-primary text-xl px-12 py-5">
             Escuchalo Ahora
           </Link>
