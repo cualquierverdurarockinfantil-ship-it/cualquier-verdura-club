@@ -15,15 +15,11 @@ export default function Canciones() {
   const isCurrent = (song) => currentTrack?.id === song.id;
 
   const handlePlayAll = () => {
-    if (playableSongs.length > 0) {
-      playTrack(playableSongs[0], playableSongs);
-    }
+    if (playableSongs.length > 0) playTrack(playableSongs[0], playableSongs);
   };
 
   const handlePlaySong = (song) => {
-    if (hasAudio(song)) {
-      playTrack(song, playableSongs);
-    }
+    if (hasAudio(song)) playTrack(song, playableSongs);
   };
 
   return (
@@ -39,17 +35,10 @@ export default function Canciones() {
 
           {/* Controles */}
           <div className="flex gap-3 justify-center mb-8">
-            <button
-              onClick={handlePlayAll}
-              className="btn-cv-primary"
-              disabled={playableSongs.length === 0}
-            >
+            <button onClick={handlePlayAll} className="btn-cv-primary" disabled={playableSongs.length === 0}>
               <Play size={18} className="fill-white" /> Reproducir Todo
             </button>
-            <button
-              onClick={toggleShuffle}
-              className={`btn-cv-secondary ${shuffle ? "ring-2 ring-cv-green" : ""}`}
-            >
+            <button onClick={toggleShuffle} className={`btn-cv-secondary ${shuffle ? "ring-2 ring-cv-green" : ""}`}>
               <Shuffle size={18} /> Aleatorio
             </button>
           </div>
@@ -59,6 +48,9 @@ export default function Canciones() {
             {ALL_SONGS.map((song, i) => {
               const playable = hasAudio(song);
               const current = isCurrent(song);
+              const trackLabel = song.source === "pre-album"
+                ? "Single"
+                : `Track ${song.albumTrack} del disco`;
 
               return (
                 <motion.div
@@ -77,11 +69,10 @@ export default function Canciones() {
                     className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 disabled:opacity-30 transition-transform hover:scale-105"
                     style={{ background: playable ? "#22c55e" : "#e5e7eb", border: "2px solid #1a1a1a" }}
                   >
-                    {current && isPlaying ? (
-                      <Pause size={18} className="text-white" />
-                    ) : (
-                      <Play size={18} className="text-white ml-0.5 fill-white" />
-                    )}
+                    {current && isPlaying
+                      ? <Pause size={18} className="text-white" />
+                      : <Play size={18} className="text-white ml-0.5 fill-white" />
+                    }
                   </button>
 
                   {/* Cover */}
@@ -94,9 +85,14 @@ export default function Canciones() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-bangers text-cv-dark text-base sm:text-lg tracking-wider truncate">{song.title}</p>
-                    <p className="font-fredoka text-xs text-gray-500">
-                      {song.source === "pre-album" ? "Single" : `Disco · Track ${song.albumTrack}`}
+                    <p className="font-bangers text-cv-dark text-base sm:text-lg tracking-wider truncate">
+                      {song.title}
+                    </p>
+                    <p className="font-fredoka text-xs text-gray-500 truncate">
+                      {trackLabel}
+                      {song.composer && (
+                        <span className="text-gray-400"> · {song.composer}</span>
+                      )}
                     </p>
                   </div>
 
@@ -113,12 +109,16 @@ export default function Canciones() {
 
                   {/* Duration */}
                   {song.duration && (
-                    <span className="text-xs font-fredoka text-gray-400 hidden md:block flex-shrink-0">{song.duration}</span>
+                    <span className="text-xs font-fredoka text-gray-400 hidden md:block flex-shrink-0">
+                      {song.duration}
+                    </span>
                   )}
 
                   {/* Próximamente */}
                   {!playable && (
-                    <span className="text-xs font-fredoka text-gray-400 flex-shrink-0 hidden lg:block">Próximamente</span>
+                    <span className="text-xs font-fredoka text-gray-400 flex-shrink-0 hidden lg:block">
+                      Próximamente
+                    </span>
                   )}
                 </motion.div>
               );
