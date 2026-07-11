@@ -19,6 +19,17 @@ export default function Juegos() {
 
   const ActiveComponent = activeGame ? GAME_COMPONENTS[activeGame] : null;
 
+  const openGame = (id) => {
+    setActiveGame(id);
+    // Scroll al top para que el juego aparezca en pantalla
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const closeGame = () => {
+    setActiveGame(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <section className="py-20 px-4">
@@ -45,7 +56,7 @@ export default function Juegos() {
                     style={{ background: game.color + "15" }}
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setActiveGame(game.id)}
+                    onClick={() => openGame(game.id)}
                   >
                     <motion.div
                       className="text-6xl mb-4"
@@ -61,10 +72,7 @@ export default function Juegos() {
                     {game.available ? (
                       <div className="btn-cv-primary">¡Jugar! →</div>
                     ) : (
-                      <span
-                        className="badge-cv bg-gray-100"
-                        style={{ borderColor: "#e5e7eb" }}
-                      >
+                      <span className="badge-cv bg-gray-100" style={{ borderColor: "#e5e7eb" }}>
                         ⏳ Próximamente
                       </span>
                     )}
@@ -74,10 +82,7 @@ export default function Juegos() {
             </div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <button
-                onClick={() => setActiveGame(null)}
-                className="btn-cv-secondary mb-6 text-sm"
-              >
+              <button onClick={closeGame} className="btn-cv-secondary mb-6 text-sm">
                 ← Volver a Juegos
               </button>
               {ActiveComponent && <ActiveComponent />}

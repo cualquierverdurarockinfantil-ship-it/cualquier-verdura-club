@@ -1,14 +1,13 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Play, Pause, Shuffle } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { ALL_SONGS } from "@/lib/songsData";
-import { VEG_IMAGES } from "@/lib/clubData";
 import { useMusicPlayer } from "@/context/MusicPlayerContext";
 import SectionHeader from "@/components/cv/SectionHeader";
 import FloatingCharacters from "@/components/cv/FloatingCharacters";
 
 export default function Canciones() {
-  const { playTrack, currentTrack, isPlaying, toggleShuffle, shuffle } = useMusicPlayer();
+  const { playTrack, currentTrack, isPlaying } = useMusicPlayer();
 
   const playableSongs = ALL_SONGS.filter(s => s.audioOriginal || s.audioInstrumental);
   const hasAudio = (song) => song.audioOriginal || song.audioInstrumental;
@@ -33,13 +32,14 @@ export default function Canciones() {
             color="#22c55e"
           />
 
-          {/* Controles */}
+          {/* Solo el botón de reproducir todo, sin aleatorio */}
           <div className="flex gap-3 justify-center mb-8">
-            <button onClick={handlePlayAll} className="btn-cv-primary" disabled={playableSongs.length === 0}>
+            <button
+              onClick={handlePlayAll}
+              className="btn-cv-primary"
+              disabled={playableSongs.length === 0}
+            >
               <Play size={18} className="fill-white" /> Reproducir Todo
-            </button>
-            <button onClick={toggleShuffle} className={`btn-cv-secondary ${shuffle ? "ring-2 ring-cv-green" : ""}`}>
-              <Shuffle size={18} /> Aleatorio
             </button>
           </div>
 
@@ -48,9 +48,17 @@ export default function Canciones() {
             {ALL_SONGS.map((song, i) => {
               const playable = hasAudio(song);
               const current = isCurrent(song);
-              const trackLabel = song.source === "pre-album"
-                ? "Single"
-                : `Track ${song.albumTrack} del disco`;
+              const isAlbumTrack = song.source === "album";
+
+              // Nombre: para tracks del disco anteponer número
+              const displayTitle = isAlbumTrack
+                ? `${song.albumTrack}. ${song.title}`
+                : song.title;
+
+              // Subtítulo: singles igual que antes, tracks del disco solo compositor
+              const subLabel = isAlbumTrack
+                ? song.composer
+                : "Single";
 
               return (
                 <motion.div
@@ -86,13 +94,10 @@ export default function Canciones() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="font-bangers text-cv-dark text-base sm:text-lg tracking-wider truncate">
-                      {song.title}
+                      {displayTitle}
                     </p>
                     <p className="font-fredoka text-xs text-gray-500 truncate">
-                      {trackLabel}
-                      {song.composer && (
-                        <span className="text-gray-400"> · {song.composer}</span>
-                      )}
+                      {subLabel}
                     </p>
                   </div>
 
