@@ -23,24 +23,25 @@ export default function Navbar() {
   const [visible, setVisible] = useState(false);
   const location = useLocation();
 
-  // Mostrar navbar solo cuando el usuario scrollea hacia abajo
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
-    // Resetear al cambiar de página
     setVisible(false);
     return () => window.removeEventListener("scroll", onScroll);
   }, [location.pathname]);
 
-  // En páginas que no son home, mostrar siempre
   const isHome = location.pathname === "/";
   const shouldShow = !isHome || visible;
 
   return (
     <>
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm"
-        style={{ borderBottom: "3px solid #1a1a1a" }}
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md"
+        style={{
+          // Verde claro pastel transparentado
+          background: "rgba(187, 247, 208, 0.75)",
+          borderBottom: "2px solid rgba(134, 239, 172, 0.5)",
+        }}
         initial={false}
         animate={{
           y: shouldShow ? 0 : -80,
@@ -104,8 +105,12 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
             />
             <motion.div
-              className="fixed top-0 right-0 bottom-0 w-72 bg-white z-50 overflow-y-auto"
-              style={{ borderLeft: "3px solid #1a1a1a" }}
+              className="fixed top-0 right-0 bottom-0 w-72 z-50 overflow-y-auto"
+              style={{
+                background: "rgba(187, 247, 208, 0.97)",
+                backdropFilter: "blur(12px)",
+                borderLeft: "3px solid #1a1a1a",
+              }}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}

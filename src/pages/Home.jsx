@@ -6,27 +6,26 @@ import FloatingCharacters from "@/components/cv/FloatingCharacters";
 
 function HeroSection() {
   return (
-    // h-screen exacto + overflow hidden para que no se vea nada de abajo
-    <section className="relative flex flex-col overflow-hidden bg-white h-screen px-4">
-
+    <section
+      className="relative flex flex-col overflow-hidden bg-white px-4"
+      style={{ height: "100dvh" }}
+    >
       <FloatingCharacters />
 
-      {/* Contenido: ocupa toda la altura, distribuido de arriba a abajo */}
       <div
-        className="relative z-10 flex flex-col items-center justify-between w-full max-w-lg mx-auto h-full py-4 md:py-8 gap-3"
+        className="relative z-10 flex flex-col items-center justify-between w-full max-w-lg mx-auto h-full py-3 gap-2"
       >
-
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full flex justify-center"
+          className="w-full flex justify-center flex-shrink-0"
         >
           <img
             src="/assets/letras-horizontal.svg"
             alt="Cualquier Verdura"
-            className="h-10 md:h-16 w-auto"
+            className="h-9 md:h-16 w-auto"
           />
         </motion.div>
 
@@ -39,7 +38,7 @@ function HeroSection() {
           className="relative flex-shrink-0"
         >
           <motion.div
-            className="absolute -right-6 -bottom-4 w-36 h-36 md:w-52 md:h-52 rounded-full z-0"
+            className="absolute -right-5 -bottom-3 w-32 h-32 md:w-48 md:h-48 rounded-full z-0"
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             style={{
@@ -47,13 +46,13 @@ function HeroSection() {
             }}
           >
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-5 h-5 rounded-full bg-white/20" />
+              <div className="w-4 h-4 rounded-full bg-white/20" />
             </div>
           </motion.div>
           <img
             src={ALBUM.cover}
             alt={ALBUM.title}
-            className="relative z-10 w-36 h-36 md:w-52 md:h-52 rounded-2xl object-cover"
+            className="relative z-10 w-32 h-32 md:w-48 md:h-48 rounded-2xl object-cover"
             style={{ border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #1a1a1a" }}
           />
         </motion.div>
@@ -63,12 +62,12 @@ function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="text-center"
+          className="text-center flex-shrink-0"
         >
           <h1 className="text-3xl md:text-5xl font-bangers text-cv-dark leading-tight tracking-wide">
             La Niñez Es Una Vez
           </h1>
-          <p className="mt-0.5 text-sm md:text-base font-fredoka text-gray-500">
+          <p className="text-xs md:text-base font-fredoka text-gray-500">
             El nuevo disco de{" "}
             <span className="font-bangers text-cv-green text-sm md:text-lg" style={{ letterSpacing: "0.04em" }}>
               Cualquier Verdura
@@ -78,28 +77,28 @@ function HeroSection() {
 
         {/* Botones CTA */}
         <motion.div
-          className="flex flex-col sm:flex-row gap-2 w-full justify-center"
+          className="flex flex-col sm:flex-row gap-2 w-full justify-center flex-shrink-0"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.7 }}
         >
-          <Link to="/canciones" className="btn-cv-primary text-base md:text-lg px-6 py-3 text-center">
+          <Link to="/canciones" className="btn-cv-primary text-base px-6 py-2.5 text-center">
             Escuchá Todo
           </Link>
-          <Link to="/karaoke" className="btn-cv-secondary text-base md:text-lg px-6 py-3 text-center">
+          <Link to="/karaoke" className="btn-cv-secondary text-base px-6 py-2.5 text-center">
             Cantá Nuestras Canciones
           </Link>
         </motion.div>
 
-        {/* Banner del show — siempre al fondo, visible completo */}
+        {/* Banner del show */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.9 }}
-          className="w-full"
+          className="w-full flex-shrink-0"
         >
           <div
-            className="rounded-2xl px-4 py-3 md:px-6 md:py-4 text-center"
+            className="rounded-2xl px-4 py-3 text-center"
             style={{
               background: "linear-gradient(135deg, #E6302B 0%, #92338A 100%)",
               border: "3px solid #1a1a1a",
@@ -115,11 +114,11 @@ function HeroSection() {
             <p className="font-bangers text-yellow-300 text-base tracking-wide">
               16 de agosto · Día del Niño
             </p>
-            <p className="font-fredoka text-white/90 text-sm">
+            <p className="font-fredoka text-white/90 text-xs">
               Teatro Cervantes · Coronel Suárez
             </p>
             <div
-              className="inline-block mt-1.5 px-4 py-1 rounded-full font-bangers text-sm tracking-wider"
+              className="inline-block mt-1 px-3 py-0.5 rounded-full font-bangers text-xs tracking-wider"
               style={{ background: "#FFED00", color: "#1a1a1a", border: "2px solid #1a1a1a" }}
             >
               🎟 Entrada Libre y Gratuita
