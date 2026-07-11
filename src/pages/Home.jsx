@@ -12,24 +12,24 @@ function HeroSection() {
     >
       <FloatingCharacters />
 
-      <div
-        className="relative z-10 flex flex-col items-center justify-between w-full max-w-lg mx-auto h-full py-3 gap-2"
-      >
-        {/* Logo */}
+      {/* justify-between distribuye el espacio sobrante entre los 5 bloques */}
+      <div className="relative z-10 flex flex-col items-center justify-between w-full max-w-lg mx-auto py-2" style={{ height: "100%" }}>
+
+        {/* Logo — tamaño original */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full flex justify-center flex-shrink-0"
+          className="w-full flex justify-center"
         >
           <img
             src="/assets/letras-horizontal.svg"
             alt="Cualquier Verdura"
-            className="h-9 md:h-16 w-auto"
+            className="h-12 md:h-20 w-auto"
           />
         </motion.div>
 
-        {/* Album Cover */}
+        {/* Album Cover — tamaño original */}
         <motion.div
           initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
           animate={{ opacity: 1, scale: 1, rotate: -2 }}
@@ -38,7 +38,7 @@ function HeroSection() {
           className="relative flex-shrink-0"
         >
           <motion.div
-            className="absolute -right-5 -bottom-3 w-32 h-32 md:w-48 md:h-48 rounded-full z-0"
+            className="absolute -right-6 -bottom-4 w-40 h-40 md:w-56 md:h-56 rounded-full z-0"
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             style={{
@@ -46,46 +46,46 @@ function HeroSection() {
             }}
           >
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full bg-white/20" />
+              <div className="w-6 h-6 rounded-full bg-white/20" />
             </div>
           </motion.div>
           <img
             src={ALBUM.cover}
             alt={ALBUM.title}
-            className="relative z-10 w-32 h-32 md:w-48 md:h-48 rounded-2xl object-cover"
+            className="relative z-10 w-40 h-40 md:w-52 md:h-52 rounded-2xl object-cover"
             style={{ border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #1a1a1a" }}
           />
         </motion.div>
 
-        {/* Título disco */}
+        {/* Título disco — tamaño original */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="text-center flex-shrink-0"
+          className="text-center"
         >
-          <h1 className="text-3xl md:text-5xl font-bangers text-cv-dark leading-tight tracking-wide">
+          <h1 className="text-4xl md:text-6xl font-bangers text-cv-dark leading-tight tracking-wide">
             La Niñez Es Una Vez
           </h1>
-          <p className="text-xs md:text-base font-fredoka text-gray-500">
+          <p className="mt-0.5 text-sm md:text-lg font-fredoka text-gray-500">
             El nuevo disco de{" "}
-            <span className="font-bangers text-cv-green text-sm md:text-lg" style={{ letterSpacing: "0.04em" }}>
+            <span className="font-bangers text-cv-green text-base md:text-xl" style={{ letterSpacing: "0.04em" }}>
               Cualquier Verdura
             </span>
           </p>
         </motion.div>
 
-        {/* Botones CTA */}
+        {/* Botones CTA — tamaño original */}
         <motion.div
-          className="flex flex-col sm:flex-row gap-2 w-full justify-center flex-shrink-0"
+          className="flex flex-col sm:flex-row gap-2 w-full justify-center"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.7 }}
         >
-          <Link to="/canciones" className="btn-cv-primary text-base px-6 py-2.5 text-center">
+          <Link to="/canciones" className="btn-cv-primary text-lg px-8 py-3 text-center">
             Escuchá Todo
           </Link>
-          <Link to="/karaoke" className="btn-cv-secondary text-base px-6 py-2.5 text-center">
+          <Link to="/karaoke" className="btn-cv-secondary text-lg px-8 py-3 text-center">
             Cantá Nuestras Canciones
           </Link>
         </motion.div>
@@ -95,7 +95,7 @@ function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.9 }}
-          className="w-full flex-shrink-0"
+          className="w-full"
         >
           <div
             className="rounded-2xl px-4 py-3 text-center"
