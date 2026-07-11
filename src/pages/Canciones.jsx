@@ -32,7 +32,6 @@ export default function Canciones() {
             color="#22c55e"
           />
 
-          {/* Solo el botón de reproducir todo, sin aleatorio */}
           <div className="flex gap-3 justify-center mb-8">
             <button
               onClick={handlePlayAll}
@@ -43,22 +42,20 @@ export default function Canciones() {
             </button>
           </div>
 
-          {/* Lista de canciones */}
           <div className="space-y-3">
             {ALL_SONGS.map((song, i) => {
               const playable = hasAudio(song);
               const current = isCurrent(song);
               const isAlbumTrack = song.source === "album";
 
-              // Nombre: para tracks del disco anteponer número
               const displayTitle = isAlbumTrack
                 ? `${song.albumTrack}. ${song.title}`
                 : song.title;
 
-              // Subtítulo: singles igual que antes, tracks del disco solo compositor
+              // Singles y tracks del disco: siempre mostrar compositor
               const subLabel = isAlbumTrack
                 ? song.composer
-                : "Single";
+                : `Single · ${song.composer || "Cualquier Verdura"}`;
 
               return (
                 <motion.div
@@ -70,7 +67,6 @@ export default function Canciones() {
                   className={`p-3 rounded-2xl flex items-center gap-3 transition-all ${current ? "bg-cv-green/10" : "bg-white"}`}
                   style={{ border: current ? "3px solid #22c55e" : "3px solid #e5e7eb" }}
                 >
-                  {/* Play / Pause */}
                   <button
                     onClick={() => handlePlaySong(song)}
                     disabled={!playable}
@@ -83,7 +79,6 @@ export default function Canciones() {
                     }
                   </button>
 
-                  {/* Cover */}
                   <img
                     src={song.cover}
                     alt=""
@@ -91,7 +86,6 @@ export default function Canciones() {
                     style={{ border: "2px solid #1a1a1a" }}
                   />
 
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="font-bangers text-cv-dark text-base sm:text-lg tracking-wider truncate">
                       {displayTitle}
@@ -101,7 +95,6 @@ export default function Canciones() {
                     </p>
                   </div>
 
-                  {/* Karaoke */}
                   {song.hasKaraoke && (
                     <Link
                       to="/karaoke"
@@ -112,14 +105,12 @@ export default function Canciones() {
                     </Link>
                   )}
 
-                  {/* Duration */}
                   {song.duration && (
                     <span className="text-xs font-fredoka text-gray-400 hidden md:block flex-shrink-0">
                       {song.duration}
                     </span>
                   )}
 
-                  {/* Próximamente */}
                   {!playable && (
                     <span className="text-xs font-fredoka text-gray-400 flex-shrink-0 hidden lg:block">
                       Próximamente
