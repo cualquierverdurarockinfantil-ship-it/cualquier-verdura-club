@@ -11,8 +11,33 @@ const GRAN_MANADA = [
   { id: "gm5", src: "/assets/fotos/5.jpg", type: "image", label: "Producción y presentación La Gran Manada" },
 ];
 
-const GALERIA_GENERAL = [];
-
+const GALERIA_GENERAL = [
+  { id: "g1",  src: "/assets/fotos/Carnaval en Pasman 2025.jpg",         type: "image", label: "Carnaval en Pasman 2025" },
+  { id: "g2",  src: "/assets/fotos/Cumple!! (1).jpg",                    type: "image", label: "Cumpleaños" },
+  { id: "g3",  src: "/assets/fotos/Cumple!! (2).jpg",                    type: "image", label: "Cumpleaños" },
+  { id: "g4",  src: "/assets/fotos/Cumple!! (3).jpg",                    type: "image", label: "Cumpleaños" },
+  { id: "g5",  src: "/assets/fotos/Cumple!! (4).jpg",                    type: "image", label: "Cumpleaños" },
+  { id: "g6",  src: "/assets/fotos/Cumple!! (6).jpg",                    type: "image", label: "Cumpleaños" },
+  { id: "g7",  src: "/assets/fotos/Cumple!! (9).jpg",                    type: "image", label: "Cumpleaños" },
+  { id: "g8",  src: "/assets/fotos/Cumple!! (10).jpg",                   type: "image", label: "Cumpleaños" },
+  { id: "g9",  src: "/assets/fotos/Cumple!! (16).jpg",                   type: "image", label: "Cumpleaños" },
+  { id: "g10", src: "/assets/fotos/Cumple!! (21).jpg",                   type: "image", label: "Cumpleaños" },
+  { id: "g11", src: "/assets/fotos/Cumple!! (22).jpg",                   type: "image", label: "Cumpleaños" },
+  { id: "g12", src: "/assets/fotos/Día del niño Sanjo 2024.jpg",         type: "image", label: "Día del Niño Sanjo 2024" },
+  { id: "g13", src: "/assets/fotos/Día del niño Sanjo 2024 2.jpg",       type: "image", label: "Día del Niño Sanjo 2024" },
+  { id: "g14", src: "/assets/fotos/Dia del niño en el Nacio 2023.jpg",   type: "image", label: "Día del Niño en el Nacio 2023" },
+  { id: "g15", src: "/assets/fotos/Dia del niño en el Nacio 2023 2.jpg", type: "image", label: "Día del Niño en el Nacio 2023" },
+  { id: "g16", src: "/assets/fotos/Fecha con La Fanton Orchesta.jpg",    type: "image", label: "Fecha con La Fantón Orquesta" },
+  { id: "g17", src: "/assets/fotos/Fecha con La Fanton Orchesta 2.jpg",  type: "image", label: "Fecha con La Fantón Orquesta" },
+  { id: "g18", src: "/assets/fotos/Pehuajo dia del niño 2025.jpg",       type: "image", label: "Pehuajó Día del Niño 2025" },
+  { id: "g19", src: "/assets/fotos/Pehuajo dia del niño 2025  2.jpg",    type: "image", label: "Pehuajó Día del Niño 2025" },
+  { id: "g20", src: "/assets/fotos/Pehuajo dia del niño 2025 3.jpg",     type: "image", label: "Pehuajó Día del Niño 2025" },
+  { id: "g21", src: "/assets/fotos/Pehuajo dia del niño 2025 4.jpg",     type: "image", label: "Pehuajó Día del Niño 2025" },
+  { id: "g22", src: "/assets/fotos/Pehuajo dia del niño 2025 5.jpg",     type: "image", label: "Pehuajó Día del Niño 2025" },
+  { id: "g23", src: "/assets/fotos/Prueba de sonido 2023.jpg",           type: "image", label: "Prueba de sonido 2023" },
+  { id: "g24", src: "/assets/fotos/Show en Carhue.jpg",                  type: "image", label: "Show en Carhué" },
+  { id: "g25", src: "/assets/fotos/Show en Carhue, de paseo.jpg",        type: "image", label: "Show en Carhué, de paseo" },
+];
 const CARD_W = "min(340px, 85vw)";
 const CARD_H = "min(240px, 60vw)";
 
