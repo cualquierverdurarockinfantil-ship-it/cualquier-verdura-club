@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Play, ChevronDown } from "lucide-react";
 import SectionHeader from "@/components/cv/SectionHeader";
 
 const GRAN_MANADA = [
@@ -13,21 +13,35 @@ const GRAN_MANADA = [
 
 const GALERIA_GENERAL = [];
 
+const CARD_W = "min(340px, 85vw)";
+const CARD_H = "min(240px, 60vw)";
+
 const slotStyle = (offset) => {
   const abs = Math.abs(offset);
-  if (abs === 0) return { scale: 1,    opacity: 1,   zIndex: 10, x: "0%",    blur: 0 };
-  if (abs === 1) return { scale: 0.78, opacity: 0.6, zIndex: 5,  x: offset < 0 ? "-68%" : "68%", blur: 1 };
+  if (abs === 0) return { scale: 1,    opacity: 1,   zIndex: 10, x: "0%",     blur: 0 };
+  if (abs === 1) return { scale: 0.78, opacity: 0.6, zIndex: 5,  x: offset < 0 ? "-68%" : "68%",   blur: 1 };
   if (abs === 2) return { scale: 0.58, opacity: 0.3, zIndex: 1,  x: offset < 0 ? "-118%" : "118%", blur: 2 };
   return              { scale: 0,    opacity: 0,   zIndex: 0,  x: offset < 0 ? "-150%" : "150%", blur: 3 };
 };
 
 function Thumb({ item }) {
   if (item.type === "video") {
+    // #t=0.1 fuerza al navegador a mostrar el frame en 0.1s como thumbnail
+    const srcWithTime = item.src.includes("#") ? item.src : `${item.src}#t=0.1`;
     return (
-      <div className="relative w-full h-full">
-        <video src={item.src} className="w-full h-full object-cover" muted preload="metadata" playsInline />
+      <div className="relative w-full h-full bg-gray-900">
+        <video
+          src={srcWithTime}
+          className="w-full h-full object-cover"
+          muted
+          playsInline
+          preload="metadata"
+        />
         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <div className="w-14 h-14 rounded-full bg-cv-red/90 flex items-center justify-center shadow-xl" style={{ border: "3px solid white" }}>
+          <div
+            className="w-14 h-14 rounded-full bg-cv-red/90 flex items-center justify-center shadow-xl"
+            style={{ border: "3px solid white" }}
+          >
             <Play size={26} className="text-white ml-1 fill-white" />
           </div>
         </div>
@@ -78,35 +92,49 @@ function Coverflow({ items, sectionTitle }) {
   if (total === 0) return null;
 
   return (
-    <div className="mb-16">
+    <div>
       {sectionTitle && (
         <h2 className="font-bangers text-2xl md:text-3xl text-cv-dark tracking-wide text-center mb-6">
           {sectionTitle}
         </h2>
       )}
-      <div className="relative flex items-center justify-center" style={{ height: 280 }}>
-        {getVisible().map(({ offset, index }) => {
-          const s = slotStyle(offset);
-          return (
-            <motion.div
-              key={`${sectionTitle}-${index}`}
-              className="absolute cursor-pointer"
-              style={{ zIndex: s.zIndex }}
-              animate={{ x: s.x, scale: s.scale, opacity: s.opacity, filter: `blur(${s.blur}px)` }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              onClick={() => { if (offset === 0) setLightbox(index); else if (offset < 0) prev(); else next(); }}
-            >
-              <div className="overflow-hidden rounded-2xl" style={{ width: 340, height: 240, boxShadow: offset === 0 ? "0 20px 60px rgba(0,0,0,0.35)" : "0 8px 24px rgba(0,0,0,0.15)", border: "3px solid #1a1a1a" }}>
-                <Thumb item={items[index]} />
-              </div>
-            </motion.div>
-          );
-        })}
+
+      {/* overflow-hidden acá recorta las tarjetas laterales que salen del contenedor */}
+      <div className="relative overflow-hidden" style={{ height: "min(280px, 70vw)" }}>
+        <div className="relative flex items-center justify-center w-full h-full">
+          {getVisible().map(({ offset, index }) => {
+            const s = slotStyle(offset);
+            return (
+              <motion.div
+                key={`${sectionTitle}-${index}`}
+                className="absolute cursor-pointer"
+                style={{ zIndex: s.zIndex }}
+                animate={{ x: s.x, scale: s.scale, opacity: s.opacity, filter: `blur(${s.blur}px)` }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                onClick={() => { if (offset === 0) setLightbox(index); else if (offset < 0) prev(); else next(); }}
+              >
+                <div
+                  className="overflow-hidden rounded-2xl"
+                  style={{
+                    width: CARD_W,
+                    height: CARD_H,
+                    boxShadow: offset === 0 ? "0 20px 60px rgba(0,0,0,0.35)" : "0 8px 24px rgba(0,0,0,0.15)",
+                    border: "3px solid #1a1a1a",
+                  }}
+                >
+                  <Thumb item={items[index]} />
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
+
       <div className="text-center mt-4 mb-3">
         <p className="font-bangers text-cv-dark text-base tracking-wide">{items[current].label}</p>
         <p className="font-fredoka text-gray-400 text-sm">{current + 1} / {total}</p>
       </div>
+
       <div className="flex items-center justify-center gap-5">
         <button onClick={prev} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}><ChevronLeft size={20} /></button>
         <div className="flex gap-2">
@@ -116,6 +144,7 @@ function Coverflow({ items, sectionTitle }) {
         </div>
         <button onClick={next} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}><ChevronRight size={20} /></button>
       </div>
+
       <AnimatePresence>
         {lightbox !== null && (
           <Lightbox
@@ -131,6 +160,46 @@ function Coverflow({ items, sectionTitle }) {
   );
 }
 
+// Sección colapsable con botón
+function ColapsableSection({ title, items }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mb-6">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-6 py-4 rounded-2xl font-bangers text-xl tracking-wide transition-all"
+        style={{
+          background: open ? "#facc15" : "#fef9c310",
+          border: "3px solid #facc15",
+          boxShadow: open ? "4px 4px 0 #1a1a1a" : "none",
+          color: "#1a1a1a",
+        }}
+      >
+        <span>🎬 {title}</span>
+        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }}>
+          <ChevronDown size={22} />
+        </motion.div>
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="pt-6 pb-2">
+              <Coverflow items={items} sectionTitle={null} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function Fotos() {
   return (
     <div className="min-h-screen bg-white">
@@ -138,18 +207,21 @@ export default function Fotos() {
         <div className="max-w-4xl mx-auto">
           <SectionHeader emoji="📸" title="Galería" subtitle="Fotos y videos del mundo de Cualquier Verdura" color="#facc15" />
 
-          <div className="mb-16 p-6 rounded-3xl" style={{ background: "#fef9c310", border: "3px solid #facc15" }}>
-            <Coverflow items={GRAN_MANADA} sectionTitle="Producción y presentación La Gran Manada" />
+          {/* Sección especial colapsable */}
+          <ColapsableSection title="Producción y presentación La Gran Manada" items={GRAN_MANADA} />
+
+          {/* Galería general */}
+          <div className="mt-8">
+            {GALERIA_GENERAL.length > 0 ? (
+              <Coverflow items={GALERIA_GENERAL} sectionTitle={null} />
+            ) : (
+              <div className="text-center py-16 text-gray-400">
+                <div className="text-5xl mb-4">📸</div>
+                <p className="font-fredoka text-lg">Próximamente más fotos y videos</p>
+              </div>
+            )}
           </div>
 
-          {GALERIA_GENERAL.length > 0 ? (
-            <Coverflow items={GALERIA_GENERAL} sectionTitle={null} />
-          ) : (
-            <div className="text-center py-16 text-gray-400">
-              <div className="text-5xl mb-4">📸</div>
-              <p className="font-fredoka text-lg">Próximamente más fotos y videos</p>
-            </div>
-          )}
         </div>
       </section>
     </div>
