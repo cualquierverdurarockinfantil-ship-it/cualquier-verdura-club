@@ -1,14 +1,14 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, Play } from "lucide-react";
 import SectionHeader from "@/components/cv/SectionHeader";
 
 const GRAN_MANADA = [
-  { id: "gm1", src: "/assets/fotos/gran-manada/gran-manada-1.mp4", type: "video", label: "Producción y presentación La Gran Manada" },
-  { id: "gm2", src: "/assets/fotos/gran-manada/gran-manada-2.mp4", type: "video", label: "Producción y presentación La Gran Manada" },
-  { id: "gm3", src: "/assets/fotos/gran-manada/gran-manada-3.mp4", type: "video", label: "Producción y presentación La Gran Manada" },
-  { id: "gm4", src: "/assets/fotos/gran-manada/gran-manada-4.mp4", type: "video", label: "Producción y presentación La Gran Manada" },
-  { id: "gm5", src: "/assets/fotos/gran-manada/gran-manada-5.jpg", type: "image", label: "Producción y presentación La Gran Manada" },
+  { id: "gm1", src: "https://o0zuhp51mgqdspkx.public.blob.vercel-storage.com/1.mp4", type: "video", label: "Producción y presentación La Gran Manada" },
+  { id: "gm2", src: "https://o0zuhp51mgqdspkx.public.blob.vercel-storage.com/2.mp4", type: "video", label: "Producción y presentación La Gran Manada" },
+  { id: "gm3", src: "https://o0zuhp51mgqdspkx.public.blob.vercel-storage.com/3.mp4", type: "video", label: "Producción y presentación La Gran Manada" },
+  { id: "gm4", src: "https://o0zuhp51mgqdspkx.public.blob.vercel-storage.com/4.mp4", type: "video", label: "Producción y presentación La Gran Manada" },
+  { id: "gm5", src: "/assets/fotos/5.jpg", type: "image", label: "Producción y presentación La Gran Manada" },
 ];
 
 const GALERIA_GENERAL = [];
@@ -48,7 +48,12 @@ function Lightbox({ items, index, onClose, onPrev, onNext }) {
       <button className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-full z-10" onClick={onClose}><X size={28} /></button>
       <button className="absolute left-3 md:left-6 text-white p-2 hover:bg-white/10 rounded-full z-10" onClick={(e) => { e.stopPropagation(); onPrev(); }}><ChevronLeft size={32} /></button>
       <button className="absolute right-3 md:right-6 text-white p-2 hover:bg-white/10 rounded-full z-10" onClick={(e) => { e.stopPropagation(); onNext(); }}><ChevronRight size={32} /></button>
-      <motion.div key={item.id} className="w-full max-w-2xl" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()}>
+      <motion.div
+        key={item.id}
+        className="w-full max-w-2xl"
+        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {item.type === "video" ? (
           <video src={item.src} controls autoPlay playsInline className="w-full rounded-2xl max-h-[75vh]" style={{ border: "4px solid white" }} />
         ) : (
@@ -74,7 +79,11 @@ function Coverflow({ items, sectionTitle }) {
 
   return (
     <div className="mb-16">
-      {sectionTitle && <h2 className="font-bangers text-2xl md:text-3xl text-cv-dark tracking-wide text-center mb-6">{sectionTitle}</h2>}
+      {sectionTitle && (
+        <h2 className="font-bangers text-2xl md:text-3xl text-cv-dark tracking-wide text-center mb-6">
+          {sectionTitle}
+        </h2>
+      )}
       <div className="relative flex items-center justify-center" style={{ height: 280 }}>
         {getVisible().map(({ offset, index }) => {
           const s = slotStyle(offset);
@@ -109,7 +118,13 @@ function Coverflow({ items, sectionTitle }) {
       </div>
       <AnimatePresence>
         {lightbox !== null && (
-          <Lightbox items={items} index={lightbox} onClose={() => setLightbox(null)} onPrev={() => setLightbox(i => (i - 1 + total) % total)} onNext={() => setLightbox(i => (i + 1) % total)} />
+          <Lightbox
+            items={items}
+            index={lightbox}
+            onClose={() => setLightbox(null)}
+            onPrev={() => setLightbox(i => (i - 1 + total) % total)}
+            onNext={() => setLightbox(i => (i + 1) % total)}
+          />
         )}
       </AnimatePresence>
     </div>
@@ -122,9 +137,11 @@ export default function Fotos() {
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <SectionHeader emoji="📸" title="Galería" subtitle="Fotos y videos del mundo de Cualquier Verdura" color="#facc15" />
+
           <div className="mb-16 p-6 rounded-3xl" style={{ background: "#fef9c310", border: "3px solid #facc15" }}>
             <Coverflow items={GRAN_MANADA} sectionTitle="Producción y presentación La Gran Manada" />
           </div>
+
           {GALERIA_GENERAL.length > 0 ? (
             <Coverflow items={GALERIA_GENERAL} sectionTitle={null} />
           ) : (
