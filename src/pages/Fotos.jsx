@@ -155,21 +155,13 @@ function Lightbox({ items, index, onClose, onPrev, onNext }) {
         )}
       </motion.div>
 
-      <div className="text-center mt-4 mb-1">
-        <p className="font-bangers text-cv-dark text-base tracking-wide">{items[current].label}</p>
+      <div className="mt-4 text-center">
+        <p className="text-white font-bangers text-lg tracking-wide">{item.label}</p>
+        <p className="text-white/50 font-fredoka text-sm mt-0.5">{index + 1} / {items.length}</p>
       </div>
-
-      <div className="flex items-center justify-center gap-4">
-        <button onClick={prev} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}>
-          <ChevronLeft size={20} />
-        </button>
-        <span className="font-fredoka text-gray-500 text-base min-w-[60px] text-center">
-          {current + 1} / {total}
-        </span>
-        <button onClick={next} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}>
-          <ChevronRight size={20} />
-        </button>
-      </div>
+    </motion.div>
+  );
+}
 
 // ─── COVERFLOW ────────────────────────────────────────────────────────────────
 
@@ -209,19 +201,20 @@ function Coverflow({ items, sectionTitle }) {
         </div>
       </div>
 
-      <div className="text-center mt-4 mb-3">
+      <div className="text-center mt-4 mb-1">
         <p className="font-bangers text-cv-dark text-base tracking-wide">{items[current].label}</p>
-        <p className="font-fredoka text-gray-400 text-sm">{current + 1} / {total}</p>
       </div>
 
-      <div className="flex items-center justify-center gap-5">
-        <button onClick={prev} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}><ChevronLeft size={20} /></button>
-        <div className="flex gap-2">
-          {items.map((_, i) => (
-            <button key={i} onClick={() => setCurrent(i)} className={`rounded-full transition-all duration-200 ${i === current ? "w-6 h-2.5 bg-cv-red" : "w-2.5 h-2.5 bg-gray-300 hover:bg-gray-500"}`} />
-          ))}
-        </div>
-        <button onClick={next} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}><ChevronRight size={20} /></button>
+      <div className="flex items-center justify-center gap-4">
+        <button onClick={prev} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}>
+          <ChevronLeft size={20} />
+        </button>
+        <span className="font-fredoka text-gray-500 text-base min-w-[60px] text-center">
+          {current + 1} / {total}
+        </span>
+        <button onClick={next} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}>
+          <ChevronRight size={20} />
+        </button>
       </div>
 
       <AnimatePresence>
