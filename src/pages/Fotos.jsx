@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, ChevronDown } from "lucide-react";
 import SectionHeader from "@/components/cv/SectionHeader";
@@ -125,15 +125,27 @@ function Lightbox({ items, index, onClose, onPrev, onNext }) {
   const item = items[index];
   const ytId = item.type === "youtube" ? getYouTubeId(item.src) : null;
 
+  // Swipe touch para pasar entre items
+  const touchStartX = useRef(null);
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? onNext() : onPrev(); }
+    touchStartX.current = null;
+  };
+
   return (
     <motion.div
       className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={onClose}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
-      <button className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-full z-10" onClick={onClose}><X size={28} /></button>
-      <button className="absolute left-3 md:left-6 text-white p-2 hover:bg-white/10 rounded-full z-10" onClick={(e) => { e.stopPropagation(); onPrev(); }}><ChevronLeft size={32} /></button>
-      <button className="absolute right-3 md:right-6 text-white p-2 hover:bg-white/10 rounded-full z-10" onClick={(e) => { e.stopPropagation(); onNext(); }}><ChevronRight size={32} /></button>
+      <button className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-full z-10" onClick={onClose}>
+        <X size={28} />
+      </button>
 
       <motion.div
         key={item.id}
@@ -155,14 +167,24 @@ function Lightbox({ items, index, onClose, onPrev, onNext }) {
         )}
       </motion.div>
 
-      <div className="mt-4 text-center">
-        <p className="text-white font-bangers text-lg tracking-wide">{item.label}</p>
-        <p className="text-white/50 font-fredoka text-sm mt-0.5">{index + 1} / {items.length}</p>
+      {/* Nombre, contador y flechas — todo junto abajo */}
+      <div className="mt-4 text-center w-full" onClick={(e) => e.stopPropagation()}>
+        <p className="text-white font-bangers text-lg tracking-wide mb-1">{item.label}</p>
+        <div className="flex items-center justify-center gap-6">
+          <button className="text-white p-2 hover:bg-white/10 rounded-full transition-colors" onClick={(e) => { e.stopPropagation(); onPrev(); }}>
+            <ChevronLeft size={32} />
+          </button>
+          <span className="font-fredoka text-white/50 text-sm min-w-[60px] text-center">
+            {index + 1} / {items.length}
+          </span>
+          <button className="text-white p-2 hover:bg-white/10 rounded-full transition-colors" onClick={(e) => { e.stopPropagation(); onNext(); }}>
+            <ChevronRight size={32} />
+          </button>
+        </div>
       </div>
     </motion.div>
   );
 }
-
 // ─── COVERFLOW ────────────────────────────────────────────────────────────────
 
 function Coverflow({ items, sectionTitle }) {
@@ -172,6 +194,17 @@ function Coverflow({ items, sectionTitle }) {
   const prev = useCallback(() => setCurrent(i => (i - 1 + total) % total), [total]);
   const next = useCallback(() => setCurrent(i => (i + 1) % total), [total]);
   const getVisible = () => [-2, -1, 0, 1, 2].map(offset => ({ offset, index: (current + offset + total) % total }));
+
+  // Swipe touch
+  const touchStartX = useRef(null);
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? next() : prev(); }
+    touchStartX.current = null;
+  };
+
   if (total === 0) return null;
 
   return (
@@ -179,7 +212,12 @@ function Coverflow({ items, sectionTitle }) {
       {sectionTitle && (
         <h2 className="font-bangers text-2xl md:text-3xl text-cv-dark tracking-wide text-center mb-6">{sectionTitle}</h2>
       )}
-      <div className="relative overflow-hidden" style={{ height: "min(280px, 70vw)" }}>
+      <div
+        className="relative overflow-hidden"
+        style={{ height: "min(280px, 70vw)" }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className="relative flex items-center justify-center w-full h-full">
           {getVisible().map(({ offset, index }) => {
             const s = slotStyle(offset);
@@ -204,7 +242,6 @@ function Coverflow({ items, sectionTitle }) {
       <div className="text-center mt-4 mb-1">
         <p className="font-bangers text-cv-dark text-base tracking-wide">{items[current].label}</p>
       </div>
-
       <div className="flex items-center justify-center gap-4">
         <button onClick={prev} className="bg-white hover:bg-cv-red hover:text-white shadow-md rounded-full p-2.5 transition-all" style={{ border: "2px solid #1a1a1a" }}>
           <ChevronLeft size={20} />
@@ -225,7 +262,6 @@ function Coverflow({ items, sectionTitle }) {
     </div>
   );
 }
-
 // ─── SECCIÓN COLAPSABLE ───────────────────────────────────────────────────────
 
 function ColapsableSection({ title, items }) {
