@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ALBUM } from "@/lib/clubData";
 
 const SONGS = ALBUM.tracks.map((t) => ({
   id: t.id,
   title: t.title,
-  audioUrl: "", // TODO: Add fragment audio URL
+  audioUrl: t.audioOriginal || "",
 }));
+
+const FRAGMENT_RATIOS = [0.03, 0.22, 0.45, 0.68]; // Intro, Estrofa, Estribillo, Puente (aprox. sobre la duración total)
 
 const PLAYER_COLORS = ["#ef4444", "#a855f7", "#facc15", "#f97316", "#22c55e", "#06b6d4"];
 const PLAYER_EMOJIS = ["🍅", "🍆", "🌽", "🥕", "🥦", "🥒"];
@@ -194,6 +196,7 @@ export default function GuessSongGame() {
 
   const currentSong = currentSongIdx !== null ? SONGS[currentSongIdx] : null;
   const isLastRound = currentRound >= totalRounds;
+  const audioRef = useRef(null);
 
   function handleStart(playerList, rounds) {
     setPlayers(playerList);
@@ -209,9 +212,34 @@ export default function GuessSongGame() {
   }
 
   function handlePlay() {
-    setPlaying(true);
-    // TODO: Play actual audio fragment when audioUrl is set
-    setTimeout(() => setPlaying(false), 3000);
+    const song = currentSong;
+    if (!song || !song.audioUrl) {
+      setPlaying(true);
+      setTimeout(() => setPlaying(false), 3000);
+      return;
+    }
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    }
+    const audio = audioRef.current;
+    audio.pause();
+    audio.src = song.audioUrl;
+    const ratio = FRAGMENT_RATIOS[currentFragment % FRAGMENT_RATIOS.length];
+    const startPlayback = () => {
+      const offset = (audio.duration || 180) * ratio;
+      audio.currentTime = offset;
+      audio.play().catch(() => {});
+      setPlaying(true);
+      setTimeout(() => {
+        audio.pause();
+        setPlaying(false);
+      }, 3500);
+    };
+    if (audio.readyState >= 1) {
+      startPlayback();
+    } else {
+      audio.addEventListener("loadedmetadata", startPlayback, { once: true });
+    }
   }
 
   function handleYoLaSe() {

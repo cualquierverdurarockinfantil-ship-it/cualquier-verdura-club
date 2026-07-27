@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { KARAOKE_SONGS } from "@/lib/karaokeData";
+import { KARAOKE_SONGS, ALBUM_KARAOKE_SECTIONS } from "@/lib/karaokeData";
+import { ALBUM } from "@/lib/clubData";
 import SectionHeader from "@/components/cv/SectionHeader";
 import KaraokePlayer from "@/components/karaoke/KaraokePlayer";
 
@@ -9,6 +10,25 @@ const DIFFICULTY_STYLES = {
   medio: { bg: "#f9731620", border: "#f97316", color: "#f97316", label: "🔥 Medio" },
   difícil: { bg: "#ec489920", border: "#ec4899", color: "#ec4899", label: "⚡ Difícil" },
 };
+
+// Combina los 2 singles (con su karaoke ya armado) con las 9 canciones del disco
+// (audio + acordes viven en clubData.js; la parte de karaoke — secciones — vive en
+// ALBUM_KARAOKE_SECTIONS, cruzada acá por "slug").
+const albumKaraokeSongs = ALBUM.tracks
+  .map((track) => {
+    const sectionsData = ALBUM_KARAOKE_SECTIONS.find((s) => s.id === track.slug);
+    if (!sectionsData || !track.audioInstrumental) return null;
+    return {
+      ...sectionsData,
+      title: track.title,
+      audioOriginal: track.audioOriginal,
+      audioInstrumental: track.audioInstrumental,
+      character: track.character,
+    };
+  })
+  .filter(Boolean);
+
+const ALL_KARAOKE_SONGS = [...KARAOKE_SONGS, ...albumKaraokeSongs];
 
 function KaraokeSongCard({ song, index, onClick }) {
   const diff = DIFFICULTY_STYLES[song.difficulty] || DIFFICULTY_STYLES.fácil;
@@ -66,9 +86,9 @@ export default function Karaoke() {
           />
 
           {/* Song grid */}
-          {KARAOKE_SONGS.length > 0 ? (
+          {ALL_KARAOKE_SONGS.length > 0 ? (
             <div className="flex flex-col gap-4 mt-8 max-w-3xl mx-auto">
-              {KARAOKE_SONGS.map((song, i) => (
+              {ALL_KARAOKE_SONGS.map((song, i) => (
                 <KaraokeSongCard
                   key={song.id}
                   song={song}

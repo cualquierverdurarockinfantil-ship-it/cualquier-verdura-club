@@ -199,6 +199,13 @@ export const KARAOKE_SONGS = [
       },
     ],
   },
+];
+
+// ============================================
+// Karaoke de las 9 canciones del disco (temporal, timing proporcional — a ajustar)
+// Se combinan con ALBUM.tracks en la pagina de Karaoke usando el campo "slug".
+// ============================================
+export const ALBUM_KARAOKE_SECTIONS = [
   {
     id: "asi-asa",
     title: "Así Asá",
