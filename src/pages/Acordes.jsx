@@ -4,8 +4,8 @@ import SectionHeader from "@/components/cv/SectionHeader";
 
 // Array de canciones con acordes — agregar pdfUrl cuando estén disponibles
 const EXTRA_SONGS = [
-  { id: 101, title: "Un Buen Plan", artist: "Cualquier Verdura", pdfUrl: null },
-  { id: 102, title: "La Gran Manada", artist: "Cualquier Verdura", pdfUrl: null },
+  { id: 101, title: "Un Buen Plan", artist: "Cualquier Verdura", pdfUrl: "/assets/acordes/un-buen-plan.pdf" },
+  { id: 102, title: "La Gran Manada", artist: "Cualquier Verdura", pdfUrl: "/assets/acordes/la-gran-manada.pdf" },
 ];
 
 const SONGS_WITH_CHORDS = [
