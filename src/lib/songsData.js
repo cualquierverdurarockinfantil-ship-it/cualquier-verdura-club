@@ -28,4 +28,4 @@ const albumSongs = ALBUM.tracks.map((track, i) => ({
   durationSecs: null,
 }));
 
-export const ALL_SONGS = [...preAlbumSongs, ...albumSongs];
+export const ALL_SONGS = [...albumSongs, ...preAlbumSongs];
