@@ -18,7 +18,7 @@ export default function Canciones() {
   };
 
   const handlePlaySong = (song) => {
-    if (hasAudio(song)) playTrack(song, playableSongs);
+    if (hasAudio(song)) playTrack(song, [song]);
   };
 
   return (
