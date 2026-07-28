@@ -7,7 +7,7 @@ import SectionHeader from "@/components/cv/SectionHeader";
 import FloatingCharacters from "@/components/cv/FloatingCharacters";
 
 export default function Canciones() {
-  const { playTrack, currentTrack, isPlaying } = useMusicPlayer();
+  const { playTrack, requestPlay, currentTrack, isPlaying } = useMusicPlayer();
 
   const playableSongs = ALL_SONGS.filter(s => s.audioOriginal || s.audioInstrumental);
   const hasAudio = (song) => song.audioOriginal || song.audioInstrumental;
@@ -18,7 +18,7 @@ export default function Canciones() {
   };
 
   const handlePlaySong = (song) => {
-    if (hasAudio(song)) playTrack(song, [song]);
+    if (hasAudio(song)) requestPlay(song);
   };
 
   return (

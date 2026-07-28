@@ -10,13 +10,17 @@ export function MusicPlayerProvider({ children }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [shuffle, setShuffle] = useState(false);
+  const [repeat, setRepeat] = useState(true);
   const [volume, setVolumeState] = useState(1);
   const [muted, setMuted] = useState(false);
+  const [pendingTrack, setPendingTrack] = useState(null);
 
   // Refs para evitar closures obsoletos en los event listeners
   const shuffleRef = useRef(false);
+  const repeatRef = useRef(true);
   const playlistLenRef = useRef(0);
   shuffleRef.current = shuffle;
+  repeatRef.current = repeat;
   playlistLenRef.current = playlist.length;
 
   // Crear el elemento audio una sola vez (persiste durante toda la navegación)
@@ -34,7 +38,15 @@ export function MusicPlayerProvider({ children }) {
           return next;
         });
       } else {
-        setCurrentIndex(prev => (prev < playlistLenRef.current - 1 ? prev + 1 : 0));
+        setCurrentIndex(prev => {
+          const isLast = prev >= playlistLenRef.current - 1;
+          if (isLast) {
+            if (repeatRef.current) return 0;
+            audio.pause();
+            return prev;
+          }
+          return prev + 1;
+        });
       }
     };
     const onPlay = () => {
@@ -59,13 +71,16 @@ export function MusicPlayerProvider({ children }) {
     };
   }, []);
 
-  // Cargar y reproducir cuando cambia el índice
+  // Cargar y reproducir cuando cambia el índice (solo si la pista realmente cambió)
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || currentIndex < 0 || !playlist[currentIndex]) return;
     const track = playlist[currentIndex];
     const url = track.audioOriginal || track.audioInstrumental;
     if (!url) return;
+    let resolved;
+    try { resolved = new URL(url, window.location.href).href; } catch { resolved = url; }
+    if (audio.src === resolved) return; // misma pista (p.ej. reordenamos otras) — no reiniciar
     audio.src = url;
     audio.play().catch(() => {});
   }, [currentIndex, playlist]);
@@ -108,6 +123,65 @@ export function MusicPlayerProvider({ children }) {
     setCurrentIndex(index >= 0 ? index : 0);
   }, [currentTrack, isPlaying]);
 
+  // Punto de entrada para tocar una cancion desde cualquier lista de la web.
+  // Si no hay nada sonando todavia, arranca directo. Si ya hay una playlist
+  // activa, pide confirmacion (reproducir ahora / agregar a la cola).
+  const requestPlay = useCallback((track) => {
+    if (!track || !(track.audioOriginal || track.audioInstrumental)) return;
+    if (playlist.length === 0) {
+      playTrack(track, [track]);
+      return;
+    }
+    if (currentTrack?.id === track.id) {
+      playTrack(track, playlist);
+      return;
+    }
+    setPendingTrack(track);
+  }, [playlist, currentTrack, playTrack]);
+
+  const confirmPlayNow = useCallback(() => {
+    if (pendingTrack) playTrack(pendingTrack, [pendingTrack]);
+    setPendingTrack(null);
+  }, [pendingTrack, playTrack]);
+
+  const confirmAddToQueue = useCallback(() => {
+    if (pendingTrack) {
+      setPlaylist(prev => (prev.some(t => t.id === pendingTrack.id) ? prev : [...prev, pendingTrack]));
+    }
+    setPendingTrack(null);
+  }, [pendingTrack]);
+
+  const cancelPending = useCallback(() => setPendingTrack(null), []);
+
+  const reorderQueue = useCallback((fromIndex, toIndex) => {
+    if (fromIndex === toIndex) return;
+    setPlaylist(prev => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+    setCurrentIndex(prev => {
+      if (fromIndex === prev) return toIndex;
+      if (fromIndex < prev && toIndex >= prev) return prev - 1;
+      if (fromIndex > prev && toIndex <= prev) return prev + 1;
+      return prev;
+    });
+  }, []);
+
+  const removeFromQueue = useCallback((index) => {
+    setPlaylist(prev => prev.filter((_, i) => i !== index));
+    setCurrentIndex(prev => {
+      if (index < prev) return prev - 1;
+      return prev;
+    });
+  }, []);
+
+  const clearQueue = useCallback(() => {
+    setPlaylist(prev => (currentIndex >= 0 && prev[currentIndex] ? [prev[currentIndex]] : []));
+    setCurrentIndex(prev => (prev >= 0 ? 0 : -1));
+  }, [currentIndex]);
+
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -122,7 +196,9 @@ export function MusicPlayerProvider({ children }) {
         do { next = Math.floor(Math.random() * playlistLenRef.current); } while (next === prev);
         return next;
       }
-      return prev < playlistLenRef.current - 1 ? prev + 1 : 0;
+      const isLast = prev >= playlistLenRef.current - 1;
+      if (isLast) return repeatRef.current ? 0 : prev;
+      return prev + 1;
     });
   }, []);
 
@@ -144,6 +220,7 @@ export function MusicPlayerProvider({ children }) {
   }, []);
 
   const toggleShuffle = useCallback(() => setShuffle(s => !s), []);
+  const toggleRepeat = useCallback(() => setRepeat(r => !r), []);
 
   const setVolume = useCallback((v) => {
     setVolumeState(v);
@@ -164,9 +241,11 @@ export function MusicPlayerProvider({ children }) {
 
   return (
     <MusicPlayerContext.Provider value={{
-      currentTrack, isPlaying, currentTime, duration, shuffle,
-      playlist, currentIndex,
-      playTrack, togglePlay, goNext, goPrev, seek, toggleShuffle, stop,
+      currentTrack, isPlaying, currentTime, duration, shuffle, repeat,
+      playlist, currentIndex, pendingTrack,
+      playTrack, requestPlay, confirmPlayNow, confirmAddToQueue, cancelPending,
+      reorderQueue, removeFromQueue, clearQueue,
+      togglePlay, goNext, goPrev, seek, toggleShuffle, toggleRepeat, stop,
       volume, muted, setVolume, toggleMute,
     }}>
       {children}

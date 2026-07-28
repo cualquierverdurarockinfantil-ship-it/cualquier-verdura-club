@@ -1,6 +1,7 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import PlayerBar, { PlayerSpacer } from "./PlayerBar";
+import PlayChoiceModal from "./PlayChoiceModal";
 import { Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MusicPlayerProvider } from "@/context/MusicPlayerContext";
@@ -22,6 +23,7 @@ export default function Layout() {
         <Footer />
         <PlayerSpacer />
         <PlayerBar />
+        <PlayChoiceModal />
       </div>
     </MusicPlayerProvider>
   );

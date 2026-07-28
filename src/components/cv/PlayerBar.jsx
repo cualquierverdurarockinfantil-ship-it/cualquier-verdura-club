@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, SkipBack, SkipForward, Shuffle, X, Volume2, VolumeX, ListMusic } from "lucide-react";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, X, Volume2, VolumeX, ListMusic, Trash2, GripVertical } from "lucide-react";
 import { useMusicPlayer } from "@/context/MusicPlayerContext";
 
 function formatTime(secs) {
@@ -16,7 +16,7 @@ export function PlayerSpacer() {
 }
 
 export default function PlayerBar() {
-  const { currentTrack, isPlaying, togglePlay, goNext, goPrev, currentTime, duration, seek, shuffle, toggleShuffle, stop, volume, muted, setVolume, toggleMute, playlist, currentIndex, playTrack } = useMusicPlayer();
+  const { currentTrack, isPlaying, togglePlay, goNext, goPrev, currentTime, duration, seek, shuffle, toggleShuffle, repeat, toggleRepeat, stop, volume, muted, setVolume, toggleMute, playlist, currentIndex, playTrack, reorderQueue, removeFromQueue, clearQueue } = useMusicPlayer();
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [showVolume, setShowVolume] = useState(false);
   const volumeRef = useRef(null);
@@ -58,30 +58,66 @@ export default function PlayerBar() {
                 <div className="max-w-5xl mx-auto p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-bangers text-lg tracking-wider">Lista de Reproducción</h4>
-                    <button onClick={() => setShowPlaylist(false)} className="p-1.5 rounded-full hover:bg-white/10">
-                      <X size={18} />
-                    </button>
-                  </div>
-                  <div className="space-y-1">
-                    {playlist.map((song, i) => (
-                      <button
-                        key={song.id}
-                        onClick={() => {
-                          playTrack(song, playlist);
-                          setShowPlaylist(false);
-                        }}
-                        className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left ${i === currentIndex ? "bg-cv-green/20" : "hover:bg-white/10"}`}
-                      >
-                        <span className="text-xs font-fredoka text-white/40 w-5 text-center flex-shrink-0">{i + 1}</span>
-                        <img src={song.cover} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className={`font-bangers text-sm tracking-wider truncate ${i === currentIndex ? "text-cv-green" : ""}`}>{song.title}</p>
-                          <p className="font-fredoka text-xs text-white/50 truncate">{song.artist}</p>
-                        </div>
-                        {i === currentIndex && isPlaying && <span className="text-cv-green text-sm flex-shrink-0">♪</span>}
+                    <div className="flex items-center gap-1">
+                      {playlist.length > 1 && (
+                        <button
+                          onClick={clearQueue}
+                          className="flex items-center gap-1 text-xs font-fredoka text-white/50 hover:text-white px-2 py-1 rounded-full hover:bg-white/10"
+                          title="Vaciar playlist"
+                        >
+                          <X size={13} /> Vaciar playlist
+                        </button>
+                      )}
+                      <button onClick={() => setShowPlaylist(false)} className="p-1.5 rounded-full hover:bg-white/10">
+                        <X size={18} />
                       </button>
-                    ))}
+                    </div>
                   </div>
+                  <Reorder.Group
+                    axis="y"
+                    values={playlist}
+                    onReorder={(newOrder) => {
+                      const moved = newOrder.find((s, i) => playlist[i]?.id !== s.id);
+                      if (!moved) return;
+                      const from = playlist.findIndex(s => s.id === moved.id);
+                      const to = newOrder.findIndex(s => s.id === moved.id);
+                      reorderQueue(from, to);
+                    }}
+                    className="space-y-1"
+                  >
+                    {playlist.map((song, i) => (
+                      <Reorder.Item
+                        key={song.id}
+                        value={song}
+                        className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${i === currentIndex ? "bg-cv-green/20" : "hover:bg-white/10"}`}
+                        whileDrag={{ scale: 1.02, boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}
+                      >
+                        <GripVertical size={16} className="text-white/30 flex-shrink-0 cursor-grab active:cursor-grabbing" />
+                        <button
+                          onClick={() => {
+                            playTrack(song, playlist);
+                            setShowPlaylist(false);
+                          }}
+                          className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                        >
+                          <span className="text-xs font-fredoka text-white/40 w-5 text-center flex-shrink-0">{i + 1}</span>
+                          <img src={song.cover} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-bangers text-sm tracking-wider truncate ${i === currentIndex ? "text-cv-green" : ""}`}>{song.title}</p>
+                            <p className="font-fredoka text-xs text-white/50 truncate">{song.artist}</p>
+                          </div>
+                          {i === currentIndex && isPlaying && <span className="text-cv-green text-sm flex-shrink-0">♪</span>}
+                        </button>
+                        <button
+                          onClick={() => removeFromQueue(i)}
+                          className="p-1.5 rounded-full hover:bg-white/10 text-white/40 hover:text-cv-red flex-shrink-0"
+                          title="Quitar de la playlist"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </Reorder.Item>
+                    ))}
+                  </Reorder.Group>
                 </div>
               </motion.div>
             )}
@@ -126,6 +162,9 @@ export default function PlayerBar() {
             <div className="flex items-center gap-0.5 flex-shrink-0">
               <button onClick={toggleShuffle} className={`p-1.5 rounded-full transition-colors ${shuffle ? "text-cv-green" : "text-white/50"}`}>
                 <Shuffle size={16} />
+              </button>
+              <button onClick={toggleRepeat} className={`p-1.5 rounded-full transition-colors ${repeat ? "text-cv-green" : "text-white/50"}`} title={repeat ? "Repetir playlist: activado" : "Repetir playlist: desactivado"}>
+                <Repeat size={16} />
               </button>
               <button onClick={goPrev} className="p-1.5 rounded-full hover:bg-white/10">
                 <SkipBack size={18} className="text-white fill-white" />
