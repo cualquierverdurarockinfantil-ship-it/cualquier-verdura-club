@@ -34,6 +34,13 @@ const MYSTERY_VEGGIES = [
 
 const POINTS = [5, 4, 3, 2, 1];
 const PLAYER_COLORS = ["#22c55e", "#ec4899", "#06b6d4", "#f97316", "#a855f7", "#facc15"];
+const NUM_OPTIONS = 10;
+
+function getVeggieOptions(correctVeggie) {
+  const others = MYSTERY_VEGGIES.filter((v) => v.name !== correctVeggie.name);
+  const distractors = shuffle(others).slice(0, NUM_OPTIONS - 1).map((v) => v.name);
+  return shuffle([correctVeggie.name, ...distractors]);
+}
 
 function normalize(str) {
   return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -170,7 +177,7 @@ function SetupScreen({ onStart }) {
   );
 }
 
-function TurnScreen({ player, veggie, clueIndex, showGuess, guess, onGuessChange, onMoreClue, onArriesgar, onSubmitGuess, onCancelGuess }) {
+function TurnScreen({ player, veggie, clueIndex, showGuess, veggieOptions, onMoreClue, onArriesgar, onSelectVeggie, onCancelGuess }) {
   return (
     <div className="max-w-lg mx-auto">
       <motion.div className="text-center mb-4" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
@@ -209,22 +216,23 @@ function TurnScreen({ player, veggie, clueIndex, showGuess, guess, onGuessChange
       <AnimatePresence mode="wait">
         {showGuess ? (
           <motion.div key="guess" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3">
-            <input
-              type="text"
-              placeholder="Escribí tu respuesta..."
-              value={guess}
-              onChange={(e) => onGuessChange(e.target.value)}
-              autoFocus
-              className="w-full px-4 py-3 rounded-xl border-2 border-cv-green font-fredoka text-lg focus:outline-none"
-            />
-            <div className="flex gap-3">
-              <button onClick={onCancelGuess} className="btn-cv-secondary flex-1 justify-center text-sm">
-                ← Volver
-              </button>
-              <button onClick={onSubmitGuess} className="btn-cv-primary flex-1 justify-center text-sm">
-                🎯 Confirmar
-              </button>
+            <p className="font-fredoka text-gray-500 text-sm text-center">Elegí la verdura correcta</p>
+            <div className="grid grid-cols-2 gap-2">
+              {veggieOptions.map((name) => (
+                <motion.button
+                  key={name}
+                  onClick={() => onSelectVeggie(name)}
+                  className="card-cv p-3 font-fredoka font-bold text-cv-dark text-sm"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {name}
+                </motion.button>
+              ))}
             </div>
+            <button onClick={onCancelGuess} className="btn-cv-secondary w-full justify-center text-sm">
+              ← Volver
+            </button>
           </motion.div>
         ) : (
           <motion.div key="actions" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex gap-3">
@@ -338,7 +346,7 @@ export default function MysteryVeggie() {
   const [veggieQueue, setVeggieQueue] = useState([]);
   const [clueIndex, setClueIndex] = useState(0);
   const [showGuess, setShowGuess] = useState(false);
-  const [guess, setGuess] = useState("");
+  const [veggieOptions, setVeggieOptions] = useState([]);
   const [result, setResult] = useState(null);
 
   const turnIndex = (currentRound - 1) * players.length + currentPlayerIndex;
@@ -354,7 +362,7 @@ export default function MysteryVeggie() {
     setVeggieQueue(generateQueue(rounds, playerList.length));
     setClueIndex(0);
     setShowGuess(false);
-    setGuess("");
+    setVeggieOptions([]);
     setResult(null);
     setScreen("turn");
   }
@@ -363,10 +371,13 @@ export default function MysteryVeggie() {
     if (clueIndex < 4) setClueIndex(clueIndex + 1);
   }
 
-  function handleSubmitGuess() {
-    const ng = normalize(guess);
-    const na = normalize(currentVeggie.name);
-    const isCorrect = ng === na || (ng.length > 2 && na.includes(ng)) || (ng.length > 2 && ng.includes(na));
+  function handleArriesgar() {
+    setVeggieOptions(getVeggieOptions(currentVeggie));
+    setShowGuess(true);
+  }
+
+  function handleSelectVeggie(selectedName) {
+    const isCorrect = normalize(selectedName) === normalize(currentVeggie.name);
 
     const points = isCorrect ? POINTS[clueIndex] : 0;
     const newResult = { correct: isCorrect, answer: currentVeggie.name, points, cluesUsed: clueIndex + 1 };
@@ -391,7 +402,7 @@ export default function MysteryVeggie() {
         setCurrentPlayerIndex(0);
         setClueIndex(0);
         setShowGuess(false);
-        setGuess("");
+        setVeggieOptions([]);
         setResult(null);
         setScreen("turn");
       }
@@ -399,7 +410,7 @@ export default function MysteryVeggie() {
       setCurrentPlayerIndex(currentPlayerIndex + 1);
       setClueIndex(0);
       setShowGuess(false);
-      setGuess("");
+      setVeggieOptions([]);
       setResult(null);
       setScreen("turn");
     }
@@ -413,7 +424,7 @@ export default function MysteryVeggie() {
     setCurrentPlayerIndex(0);
     setClueIndex(0);
     setShowGuess(false);
-    setGuess("");
+    setVeggieOptions([]);
     setResult(null);
   }
 
@@ -436,11 +447,10 @@ export default function MysteryVeggie() {
               veggie={currentVeggie}
               clueIndex={clueIndex}
               showGuess={showGuess}
-              guess={guess}
-              onGuessChange={setGuess}
+              veggieOptions={veggieOptions}
               onMoreClue={handleMoreClue}
-              onArriesgar={() => setShowGuess(true)}
-              onSubmitGuess={handleSubmitGuess}
+              onArriesgar={handleArriesgar}
+              onSelectVeggie={handleSelectVeggie}
               onCancelGuess={() => setShowGuess(false)}
             />
           </motion.div>

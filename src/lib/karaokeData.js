@@ -22,7 +22,7 @@ export const KARAOKE_SONGS = [
     duration: "2:44",
     durationSecs: 164,
     cover: "/assets/karaoke/cover-un-buen-plan.jpg",
-    audioOriginal: "/assets/karaoke/un-buen-plan-original.wav",
+    audioOriginal: "/assets/karaoke/un-buen-plan-original.mp3",
     audioInstrumental: "/assets/karaoke/un-buen-plan-instrumental.mp3",
     videoUrl: "https://youtu.be/_CIjJpfptaA",
     character: "tomate",
