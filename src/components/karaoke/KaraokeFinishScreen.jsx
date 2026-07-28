@@ -3,14 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { VEG_IMAGES } from "@/lib/clubData";
 
 // Pantalla amigable de finalización. Sin puntajes ni rankings.
-// 3 botones: cantar de nuevo, escuchar (Disco), ver videoclip (Videos).
+// 2 botones: cantar de nuevo, escuchar (Disco).
 export default function KaraokeFinishScreen({ song, onRestart }) {
   const navigate = useNavigate();
 
   const buttons = [
     { icon: "🎤", label: "Cantar de nuevo", color: "#ec4899", action: onRestart },
     { icon: "🎧", label: "Escuchar canción", color: "#22c55e", action: () => navigate("/disco") },
-    { icon: "🎬", label: "Ver videoclip", color: "#06b6d4", action: () => navigate("/videos") },
   ];
 
   return (
