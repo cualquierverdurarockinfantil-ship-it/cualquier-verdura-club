@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import GameRulesButton from "./GameRulesButton";
 
 // ============================================
 // BASE DE DATOS DE VERDURAS
@@ -145,6 +146,20 @@ function SetupScreen({ onStart }) {
               {r}
             </button>
           ))}
+        </div>
+
+        <div className="flex justify-center mb-4">
+          <GameRulesButton
+            title="Verdura Misteriosa"
+            accentColor="#ec4899"
+            rules={[
+              "En cada ronda va apareciendo una pista sobre una verdura misteriosa.",
+              "Podés pedir \"Otra pista\" si querés más información antes de responder.",
+              "Cuando creas que ya sabés cuál es, tocá \"Arriesgar\" y escribí tu respuesta.",
+              "Cuantas menos pistas uses, más puntos ganás: 5 con la 1ª pista, 4 con la 2ª, 3 con la 3ª, 2 con la 4ª y 1 con la 5ª.",
+              "Si te equivocás, no sumás puntos esa ronda. Se van turnando los jugadores hasta completar todas las rondas.",
+            ]}
+          />
         </div>
 
         <button onClick={handleStart} className="btn-cv-primary w-full justify-center">

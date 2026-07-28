@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ALBUM } from "@/lib/clubData";
+import GameRulesButton from "./GameRulesButton";
 
 const SONGS = ALBUM.tracks.map((t) => ({
   id: t.id,
@@ -100,6 +101,20 @@ function SetupScreen({ onStart }) {
               {r}
             </button>
           ))}
+        </div>
+
+        <div className="flex justify-center mb-4">
+          <GameRulesButton
+            title="Adiviná la Canción"
+            accentColor="#ec4899"
+            rules={[
+              "En cada ronda suena un fragmento corto de una canción de Cualquier Verdura.",
+              "El que crea saberla grita \"¡Yo la sé!\" y elige quién de los jugadores va a responder.",
+              "Ese jugador elige la canción correcta entre varias opciones en pantalla.",
+              "Si acierta, suma 1 punto; si se equivoca, resta 1 punto.",
+              "Si nadie se anima, pueden \"Pasar\" la ronda sin arriesgar puntos. Gana quien más puntos tenga al final.",
+            ]}
+          />
         </div>
 
         <button onClick={handleStart} className="btn-cv-primary w-full justify-center">

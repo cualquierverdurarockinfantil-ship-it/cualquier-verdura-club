@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import GameRulesButton from "./GameRulesButton";
 
 // 50 desafíos — fácil de ampliar agregando más al array
 const CHALLENGES = [
@@ -89,6 +90,18 @@ export default function ChallengeCards() {
           <p className="font-fredoka text-gray-500 mb-6 max-w-md mx-auto">
             Sacá una tarjeta al azar y cumplí el desafío. ¡Rápido, divertido y para toda la familia!
           </p>
+          <div className="flex justify-center">
+            <GameRulesButton
+              title="Desafíos Verdura"
+              accentColor="#a855f7"
+              rules={[
+                "Tocá \"Sacar una tarjeta\" para que aparezca un desafío al azar.",
+                "Leé el desafío en voz alta y cumplilo entre todos.",
+                "Cuando termines, sacá otra tarjeta y seguí jugando.",
+                "No hay perdedores: la idea es reírse y pasarla bien en familia.",
+              ]}
+            />
+          </div>
           <button onClick={drawCard} className="btn-cv-primary">
             🎴 Sacar una tarjeta
           </button>

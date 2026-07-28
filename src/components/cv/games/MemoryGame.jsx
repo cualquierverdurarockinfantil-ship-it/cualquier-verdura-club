@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import GameRulesButton from "./GameRulesButton";
 
 const CARD_ITEMS = [
   { id: "tomate", emoji: "🍅", label: "Tomate" },
@@ -111,6 +112,20 @@ function SetupScreen({ onStart }) {
               {p}
             </button>
           ))}
+        </div>
+
+        <div className="flex justify-center mb-4">
+          <GameRulesButton
+            title="Memoria Verdura"
+            accentColor="#06b6d4"
+            rules={[
+              "Todas las tarjetas empiezan boca abajo, mezcladas.",
+              "En tu turno, dás vuelta dos tarjetas para ver qué hay.",
+              "Si forman una pareja, sumás 1 punto y seguís jugando (no pasa el turno).",
+              "Si no coinciden, se vuelven a tapar y pasa el turno al siguiente jugador.",
+              "Gana quien más parejas junte cuando no queden tarjetas boca abajo.",
+            ]}
+          />
         </div>
 
         <button onClick={handleStart} className="btn-cv-primary w-full justify-center">
