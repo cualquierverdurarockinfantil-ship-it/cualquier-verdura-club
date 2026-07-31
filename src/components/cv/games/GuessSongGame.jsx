@@ -280,6 +280,11 @@ export default function GuessSongGame() {
     setPhase("result");
   }
 
+  function handlePasar() {
+    setResult({ skipped: true, song: currentSong.title });
+    setPhase("skipped");
+  }
+
   function advanceRound() {
     if (isLastRound) {
       setScreen("finished");
@@ -369,7 +374,7 @@ export default function GuessSongGame() {
                 <button onClick={handleYoLaSe} className="btn-cv-primary flex-1 justify-center text-sm">
                   🙋 ¡Yo la sé!
                 </button>
-                <button onClick={advanceRound} className="btn-cv-secondary flex-1 justify-center text-sm">
+                <button onClick={handlePasar} className="btn-cv-secondary flex-1 justify-center text-sm">
                   ⏭ Pasar
                 </button>
               </div>
@@ -424,6 +429,22 @@ export default function GuessSongGame() {
                   </motion.button>
                 ))}
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {phase === "skipped" && result && (
+          <motion.div key="skipped" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+            <div className="card-cv p-8 text-center">
+              <div className="text-6xl mb-3">🤷</div>
+              <h3 className="font-bangers text-3xl tracking-wider mb-2 text-cv-dark">
+                ¡Nadie la sabe!
+              </h3>
+              <p className="font-fredoka text-gray-500 text-lg mb-1">La canción era:</p>
+              <p className="font-bangers text-cv-dark text-2xl tracking-wider mb-6">🎵 {result.song}</p>
+              <button onClick={advanceRound} className="btn-cv-primary justify-center">
+                {isLastRound ? "🏆 Ver Resultados" : "🎲 Dale, vamos con otra →"}
+              </button>
             </div>
           </motion.div>
         )}
