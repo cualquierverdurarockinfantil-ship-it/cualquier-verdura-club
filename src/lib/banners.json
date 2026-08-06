@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "banner-1786048202224",
+    "title": "nhsdf",
+    "description": "",
+    "imageUrl": "",
+    "buttonLabel": "prueba",
+    "buttonLink": "",
+    "startDate": "2026-08-06",
+    "endDate": "2026-08-06",
+    "priority": 0,
+    "active": true
+  }
+]
