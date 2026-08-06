@@ -2,6 +2,7 @@
 // CLUB VERDURA - CENTRAL DATA STORE
 // Edit this file to update all content
 // ============================================
+import trackList from "./tracks.json";
 
 export const ALBUM = {
   title: "La Niñez Es Una Vez",
@@ -14,17 +15,7 @@ export const ALBUM = {
     youtube: "https://youtube.com/",
     appleMusic: "https://music.apple.com/",
   },
-  tracks: [
-    { id: 1, slug: "rock-and-colors",  title: "Rock & Colors",          composer: "Cualquier Verdura",                duration: "", character: "zanahoria", lyrics: "", description: "", chordsPdfUrl: null, audioOriginal: "/assets/audio/album/rock-and-colors-voz.mp3", audioInstrumental: "/assets/audio/album/rock-and-colors-instrumental.mp3" },
-    { id: 2, slug: "dulces",  title: "Dulces",                 composer: "Village People / adaptación",      duration: "", character: "berenjena", lyrics: "", description: "", chordsPdfUrl: null, audioOriginal: "/assets/audio/album/dulces-voz.mp3", audioInstrumental: "/assets/audio/album/dulces-instrumental.mp3" },
-    { id: 3, slug: "super-poder",  title: "Súper Poder",            composer: "Cualquier Verdura",                duration: "", character: "tomate",    lyrics: "", description: "", chordsPdfUrl: "/assets/acordes/super-poder.pdf", audioOriginal: "/assets/audio/album/super-poder-voz.mp3", audioInstrumental: "/assets/audio/album/super-poder-instrumental.mp3" },
-    { id: 4, slug: "asi-asa",  title: "Así Asá",               composer: "Cualquier Verdura",                duration: "", character: "choclo",    lyrics: "", description: "", chordsPdfUrl: "/assets/acordes/asi-asa.pdf", audioOriginal: "/assets/audio/album/asi-asa-voz.mp3", audioInstrumental: "/assets/audio/album/asi-asa-instrumental.mp3" },
-    { id: 5, slug: "el-baile-de-los-piojos",  title: "El Baile de los Piojos", composer: "Arte popular / adaptación",        duration: "", character: "cebolla",   lyrics: "", description: "", chordsPdfUrl: null, audioOriginal: "/assets/audio/album/el-baile-de-los-piojos-voz.mp3", audioInstrumental: "/assets/audio/album/el-baile-de-los-piojos-instrumental.mp3" },
-    { id: 6, slug: "se-hace-tarde",  title: "Se Hace Tarde",          composer: "Cualquier Verdura",                duration: "", character: "brocoli",   lyrics: "", description: "", chordsPdfUrl: null, audioOriginal: "/assets/audio/album/se-hace-tarde-voz.mp3", audioInstrumental: "/assets/audio/album/se-hace-tarde-instrumental.mp3" },
-    { id: 7, slug: "caballo-regalado",  title: "Caballo Regalado",       composer: "Cualquier Verdura",                duration: "", character: "calabaza",  lyrics: "", description: "", chordsPdfUrl: "/assets/acordes/caballo-regalado.pdf", audioOriginal: "/assets/audio/album/caballo-regalado-voz.mp3", audioInstrumental: "/assets/audio/album/caballo-regalado-instrumental.mp3" },
-    { id: 8, slug: "pajaros-volando",  title: "Pájaros Volando",        composer: "Cualquier Verdura",                duration: "", character: "rabanito",  lyrics: "", description: "", chordsPdfUrl: null, audioOriginal: "/assets/audio/album/pajaros-volando-voz.mp3", audioInstrumental: "/assets/audio/album/pajaros-volando-instrumental.mp3" },
-    { id: 9, slug: "el-reino-del-reves",  title: "El Reino del Revés",     composer: "María Elena Walsh / versión",      duration: "", character: "tomate",    lyrics: "", description: "", chordsPdfUrl: "/assets/acordes/el-reino-del-reves.pdf", audioOriginal: "/assets/audio/album/el-reino-del-reves-voz.mp3", audioInstrumental: "/assets/audio/album/el-reino-del-reves-instrumental.mp3" },
-  ],
+  tracks: trackList,
 };
 
 // Character image URLs (comic-style illustrations provided by the brand)
