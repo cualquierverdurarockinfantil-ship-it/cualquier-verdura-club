@@ -1,18 +1,5 @@
 [
   {
-    "id": 1,
-    "slug": "rock-and-colors",
-    "title": "Rock & Colors",
-    "composer": "Cualquier Verdura",
-    "duration": "",
-    "character": "zanahoria",
-    "lyrics": "",
-    "description": "",
-    "chordsPdfUrl": null,
-    "audioOriginal": "/assets/audio/album/rock-and-colors-voz.mp3",
-    "audioInstrumental": "/assets/audio/album/rock-and-colors-instrumental.mp3"
-  },
-  {
     "id": 2,
     "slug": "dulces",
     "title": "Dulces",
@@ -24,6 +11,19 @@
     "chordsPdfUrl": null,
     "audioOriginal": "/assets/audio/album/dulces-voz.mp3",
     "audioInstrumental": "/assets/audio/album/dulces-instrumental.mp3"
+  },
+  {
+    "id": 1,
+    "slug": "rock-and-colors",
+    "title": "Rock & Colors",
+    "composer": "Cualquier Verdura",
+    "duration": "",
+    "character": "zanahoria",
+    "lyrics": "",
+    "description": "",
+    "chordsPdfUrl": null,
+    "audioOriginal": "/assets/audio/album/rock-and-colors-voz.mp3",
+    "audioInstrumental": "/assets/audio/album/rock-and-colors-instrumental.mp3"
   },
   {
     "id": 3,
