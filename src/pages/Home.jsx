@@ -90,42 +90,6 @@ function HeroSection() {
           </Link>
         </motion.div>
 
-        {/* Banner del show */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.9 }}
-          className="w-full"
-        >
-          <div
-            className="rounded-2xl px-4 py-3 text-center"
-            style={{
-              background: "linear-gradient(135deg, #E6302B 0%, #92338A 100%)",
-              border: "3px solid #1a1a1a",
-              boxShadow: "5px 5px 0 #1a1a1a",
-            }}
-          >
-            <p className="font-bangers text-white text-xs tracking-widest uppercase mb-0.5">
-              🎸 Próximo show en vivo
-            </p>
-            <p className="font-bangers text-white text-xl md:text-2xl tracking-wide leading-tight">
-              Presentación del Disco
-            </p>
-            <p className="font-bangers text-yellow-300 text-base tracking-wide">
-              16 de agosto · Día del Niño
-            </p>
-            <p className="font-fredoka text-white/90 text-xs">
-              Teatro Cervantes · Coronel Suárez
-            </p>
-            <div
-              className="inline-block mt-1 px-3 py-0.5 rounded-full font-bangers text-xs tracking-wider"
-              style={{ background: "#FFED00", color: "#1a1a1a", border: "2px solid #1a1a1a" }}
-            >
-              🎟 Entrada Libre y Gratuita
-            </div>
-          </div>
-        </motion.div>
-
       </div>
     </section>
   );
