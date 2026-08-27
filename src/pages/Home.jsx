@@ -12,8 +12,8 @@ function HeroSection() {
     >
       <FloatingCharacters />
 
-      {/* justify-between distribuye el espacio sobrante entre los 5 bloques */}
-      <div className="relative z-10 flex flex-col items-center justify-between w-full max-w-lg mx-auto py-2" style={{ height: "100%" }}>
+      {/* gap fijo entre los 4 bloques, ya no se reparte el sobrante con justify-between */}
+      <div className="relative z-10 flex flex-col items-center justify-center gap-6 md:gap-8 w-full max-w-lg mx-auto py-2" style={{ height: "100%" }}>
 
         {/* Logo — tamaño original */}
         <motion.div
