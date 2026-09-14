@@ -215,6 +215,23 @@ export const VIDEOS = [
   },
 ];
 
+// Playlists de videos: se muestran como una sola tarjeta en Cine Verdura,
+// con selector para pasar de un video a otro sin salir de la tarjeta.
+export const VIDEO_PLAYLISTS = [
+  {
+    id: "dia-del-nino",
+    title: "Día del Niño 🎉",
+    description: "Presentación en vivo del disco — Teatro Español, Coronel Suárez",
+    videos: [
+      { id: "dia-nino-1", title: "Ahora Sí", youtubeUrl: "https://youtu.be/GbF4rYlhi6Q" },
+      { id: "dia-nino-2", title: "El Baile de los Piojos", youtubeUrl: "https://youtu.be/DB2N0E1e9lQ" },
+      { id: "dia-nino-3", title: "Pájaros Volando", youtubeUrl: "https://youtu.be/sMdFnsTcv9o" },
+      { id: "dia-nino-4", title: "Ricardito", youtubeUrl: "https://youtu.be/z-RIdk0K6jc" },
+      { id: "dia-nino-5", title: "Súper Poder", youtubeUrl: "https://youtu.be/sKmsqsOHfjw" },
+    ],
+  },
+];
+
 export const KARAOKE_SONGS = [
   {
     id: 1,
