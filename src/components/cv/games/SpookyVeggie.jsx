@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import GameRulesButton from "./GameRulesButton";
 import { HALLOWEEN_DRAWINGS, HALLOWEEN_VEG, HALLOWEEN_VEG_INFO } from "@/lib/halloween";
@@ -12,39 +12,120 @@ import { HALLOWEEN_DRAWINGS, HALLOWEEN_VEG, HALLOWEEN_VEG_INFO } from "@/lib/hal
 const VEGS = HALLOWEEN_DRAWINGS.map((d) => ({ id: d.id, title: d.title, image: HALLOWEEN_VEG[d.id] }));
 // La verdura está tapada por una sábana fantasma: cuanto más ayuda pedís, más transparente se pone.
 const STAGES = [
-  { sheet: 0.97, points: 3, label: "Sábana gruesa" },
+  { sheet: 0.98, points: 3, label: "Sábana gruesa" },
   { sheet: 0.66, points: 2, label: "Sábana fina" },
   { sheet: 0.34, points: 1, label: "Sábana casi transparente" },
 ];
-const OUTLINE =
-  "drop-shadow(3px 0 0 #1a1a1a) drop-shadow(-3px 0 0 #1a1a1a) drop-shadow(0 3px 0 #1a1a1a) drop-shadow(0 -3px 0 #1a1a1a)";
-// pliegues de la sábana: franjas de borde duro (nada de degradés suaves)
-const FOLDS =
-  "repeating-linear-gradient(100deg, #f5f1ff 0 26px, #ddd3f2 26px 32px, #f5f1ff 32px 58px, #cfc3ea 58px 62px)";
 
-/** Verdura tapada por una sábana que copia su silueta (un poco más gorda, como tela encima) */
+/**
+ * Sábana colgando: toma la forma de la verdura solo ARRIBA (donde apoya) y de ahí cae derecha
+ * hasta abajo, con el borde ondulado. Se calcula una vez por imagen leyendo su transparencia.
+ */
+const sheetCache = {};
+function buildSheet(img) {
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  const W = (iw / ih) * 100, H = 100;
+  const cw = 160, ch = Math.max(20, Math.round((cw * ih) / iw));
+  const cv = document.createElement("canvas");
+  cv.width = cw; cv.height = ch;
+  const ctx = cv.getContext("2d");
+  ctx.drawImage(img, 0, 0, cw, ch);
+  const data = ctx.getImageData(0, 0, cw, ch).data;
+  const top = new Array(cw).fill(null);
+  for (let x = 0; x < cw; x++) {
+    for (let y = 0; y < ch; y++) {
+      if (data[(y * cw + x) * 4 + 3] > 40) { top[x] = y; break; }
+    }
+  }
+  const xs = top.map((v, i) => (v === null ? -1 : i)).filter((i) => i >= 0);
+  const minC = xs[0], maxC = xs[xs.length - 1];
+  // huecos entre hojas: la tela pasa por arriba (cierre morfológico)
+  const r = Math.round(cw * 0.14);
+  let env = [];
+  for (let x = minC; x <= maxC; x++) {
+    let m = Infinity;
+    for (let k = Math.max(minC, x - r); k <= Math.min(maxC, x + r); k++) if (top[k] !== null && top[k] < m) m = top[k];
+    env.push(m === Infinity ? ch * 0.5 : m);
+  }
+  for (let pass = 0; pass < 5; pass++) {
+    env = env.map((_, i) => {
+      let sum = 0, n = 0;
+      for (let k = Math.max(0, i - 8); k <= Math.min(env.length - 1, i + 8); k++) { sum += env[k]; n++; }
+      return sum / n;
+    });
+  }
+  const toX = (c) => (c / cw) * W;
+  const toY = (row) => (row / ch) * H - 3.5; // un poco más arriba: el grosor de la tela
+  const x0 = toX(minC) - 2.5, x1 = toX(maxC + 1) + 2.5, flare = 5;
+  const pts = env.map((v, i) => [toX(minC + i), toY(v)]);
+  let d = `M ${x0 - flare} 98 C ${x0 - 1} 80, ${x0} ${pts[0][1] + 18}, ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 2; i < pts.length; i += 2) d += ` L ${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)}`;
+  const last = pts[pts.length - 1];
+  d += ` L ${last[0].toFixed(1)} ${last[1].toFixed(1)} C ${x1} ${last[1] + 18}, ${x1 + 1} 80, ${x1 + flare} 98`;
+  // borde ondulado abajo (de derecha a izquierda)
+  const n = 5, left = x0 - flare, right = x1 + flare, step = (right - left) / n;
+  for (let i = 0; i < n; i++) {
+    const xr = right - i * step;
+    d += ` Q ${(xr - step / 2).toFixed(1)} 106.5, ${(xr - step).toFixed(1)} 98`;
+  }
+  d += " Z";
+  // pliegues: salen del punto más alto y bajan abriéndose
+  let peak = 0;
+  pts.forEach((p, i) => { if (p[1] < pts[peak][1]) peak = i; });
+  const [px, py] = pts[peak];
+  const folds = [-0.9, -0.45, 0.05, 0.5, 0.95].map((t) => {
+    const ex = px + t * ((right - left) / 2) * 0.95;
+    return `M ${px.toFixed(1)} ${(py + 2).toFixed(1)} Q ${((px + ex) / 2 + t * 4).toFixed(1)} ${(py + 45).toFixed(1)}, ${ex.toFixed(1)} 99`;
+  });
+  return { d, folds, W };
+}
+
+function useSheet(src) {
+  const [sheet, setSheet] = useState(sheetCache[src] || null);
+  useEffect(() => {
+    if (sheetCache[src]) { setSheet(sheetCache[src]); return undefined; }
+    let alive = true;
+    const img = new Image();
+    img.onload = () => {
+      try {
+        sheetCache[src] = buildSheet(img);
+        if (alive) setSheet(sheetCache[src]);
+      } catch {
+        /* sin canvas: queda la sábana genérica */
+      }
+    };
+    img.src = src;
+    return () => { alive = false; };
+  }, [src]);
+  return sheet;
+}
+
+const GENERIC = { d: "M 8 98 C 6 60, 20 12, 60 10 C 100 12, 114 60, 112 98 Q 99 106 86 98 Q 73 106 60 98 Q 47 106 34 98 Q 21 106 8 98 Z", folds: ["M 60 14 Q 50 55 38 99", "M 60 14 Q 60 55 60 99", "M 60 14 Q 70 55 82 99"], W: 120 };
+
+/** Verdura tapada por una sábana que cuelga sobre ella */
 function GhostSheet({ src, alt, level, revealed }) {
-  const mask = {
-    WebkitMaskImage: `url(${src})`,
-    maskImage: `url(${src})`,
-    WebkitMaskRepeat: "no-repeat",
-    maskRepeat: "no-repeat",
-    WebkitMaskSize: "100% 100%",
-    maskSize: "100% 100%",
-  };
+  const sheet = useSheet(src) || GENERIC;
+  const clipId = "sheet-clip-" + src.replace(/[^a-z]/gi, "");
   return (
     <div className="relative inline-block">
-      <img src={src} alt={revealed ? alt : "Verdura misteriosa"} className="h-52 w-auto object-contain block" />
-      <motion.div
+      <img src={src} alt={revealed ? alt : "Verdura misteriosa"} className="h-44 w-auto object-contain block" />
+      <motion.svg
         aria-hidden="true"
-        className="absolute inset-0 pointer-events-none"
-        style={{ filter: OUTLINE }}
+        viewBox={`0 0 ${sheet.W} 100`}
+        preserveAspectRatio="none"
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ overflow: "visible" }}
         initial={false}
-        animate={{ opacity: revealed ? 0 : level, y: revealed ? -36 : [0, -4, 0], scale: revealed ? 1.15 : 1.07 }}
-        transition={revealed ? { duration: 0.5 } : { opacity: { duration: 0.6 }, y: { duration: 3, repeat: Infinity, ease: "easeInOut" }, scale: { duration: 0.4 } }}
+        animate={{ opacity: revealed ? 0 : level, y: revealed ? -40 : [0, -3, 0] }}
+        transition={revealed ? { duration: 0.5 } : { opacity: { duration: 0.6 }, y: { duration: 3.2, repeat: Infinity, ease: "easeInOut" } }}
       >
-        <div className="absolute inset-0" style={{ ...mask, background: FOLDS }} />
-      </motion.div>
+        <defs><clipPath id={clipId}><path d={sheet.d} /></clipPath></defs>
+        <path d={sheet.d} fill="#f5f1ff" />
+        <g clipPath={`url(#${clipId})`} fill="none" stroke="#cfc3ea" strokeWidth="2.4" strokeLinecap="round">
+          {sheet.folds.map((f, i) => <path key={i} d={f} />)}
+        </g>
+        <path d={sheet.d} fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      </motion.svg>
     </div>
   );
 }
@@ -99,7 +180,7 @@ function Setup({ onStart }) {
             title="Verdura Disfrazada"
             accentColor="#f97316"
             rules={[
-              "En cada ronda una verdura monstruo aparece tapada por una sábana fantasma: se le nota la forma, pero no los detalles.",
+              "En cada ronda una verdura monstruo aparece tapada por una sábana fantasma: apenas se le adivina el contorno de arriba.",
               "Elegí quién creés que es entre las 8 verduras.",
               "Si querés ayuda, tocá \"Mostrar más\": la sábana se va haciendo transparente, pero ganás menos puntos.",
               "Acertar con la sábana gruesa vale 3 puntos, con la sábana fina 2 y con la casi transparente 1.",
