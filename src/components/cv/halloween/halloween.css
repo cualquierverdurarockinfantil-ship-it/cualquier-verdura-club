@@ -37,11 +37,37 @@
 .theme-halloween .hw-nav button:hover {
   color: #fdba74;
 }
-/* botones con fondo claro dentro de la navbar mantienen texto oscuro */
+/* Botones de la navbar: naranja con letras violeta oscuro (sticker) */
+.theme-halloween .hw-nav a:not(:has(img)),
+.theme-halloween .hw-nav button {
+  background: #f97316 !important;
+  color: #2e1065 !important;
+  border: 2px solid #1a1a1a !important;
+  box-shadow: 2px 2px 0 #1a1a1a !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+}
+.theme-halloween .hw-nav a:not(:has(img)) *,
+.theme-halloween .hw-nav button * {
+  color: #2e1065 !important;
+}
+.theme-halloween .hw-nav a:not(:has(img)):hover,
+.theme-halloween .hw-nav button:hover {
+  background: #fdba74 !important;
+  color: #2e1065 !important;
+}
+/* la página actual (antes verde / amarillo) se marca en amarillo */
+.theme-halloween .hw-nav [class*="bg-cv-green"],
 .theme-halloween .hw-nav [class*="bg-cv-yellow"],
-.theme-halloween .hw-nav [class*="btn-cv-secondary"],
-.theme-halloween .hw-nav [class*="bg-yellow"] {
-  color: #1a1a1a;
+.theme-halloween .hw-nav [class*="bg-green"],
+.theme-halloween .hw-nav [class*="bg-yellow"],
+.theme-halloween .hw-nav [aria-current="page"],
+.theme-halloween .hw-nav a.active {
+  background: #facc15 !important;
+}
+/* el logo (letras negras) pasa a blanco fantasma para leerse sobre la noche */
+.theme-halloween .hw-nav img {
+  filter: brightness(0) invert(0.92) drop-shadow(0 0 6px rgba(216, 200, 240, 0.8));
 }
 
 /* ---------- Toques sutiles globales ---------- */
@@ -61,10 +87,10 @@
   background: var(--hw-night);
   color: #fff7ed;
 }
-.hw-home .hw-header * {
+.theme-halloween .hw-header * {
   color: #fff7ed;
 }
-.hw-home .hw-header p {
+.theme-halloween .hw-header p {
   color: #d8c8f0;
 }
 
@@ -191,6 +217,16 @@
   100% { opacity: 0; }
 }
 
+/* Logo fantasma de la Home: blanco-grisáceo, brillo lila y flotando despacio */
+.hw-ghost-logo {
+  filter: brightness(0) invert(0.88) drop-shadow(0 0 10px rgba(216, 200, 240, 0.85)) drop-shadow(3px 3px 0 #7e22ce);
+  animation: hw-ghost-logo 5.5s ease-in-out infinite;
+}
+@keyframes hw-ghost-logo {
+  0%, 100% { opacity: 0.84; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-5px); }
+}
+
 /* Estrellas y fantasma de la Home */
 .hw-twinkle { animation: hw-twinkle 3s ease-in-out infinite; }
 @keyframes hw-twinkle {
@@ -215,7 +251,8 @@
   .hw-tail,
   .hw-blink,
   .hw-twinkle,
-  .hw-drift {
+  .hw-drift,
+  .hw-ghost-logo {
     animation: none !important;
   }
   /* sin rayos y sin murciélagos cruzando: los murciélagos quedan quietos en un rincón */

@@ -27,7 +27,7 @@ function HeroSection({ h }) {
           <img
             src="/assets/letras-horizontal.svg"
             alt="Cualquier Verdura"
-            className="h-12 md:h-20 w-auto"
+            className={`h-12 md:h-20 w-auto ${h ? "hw-ghost-logo" : ""}`}
           />
         </motion.div>
 
@@ -147,7 +147,7 @@ function CharactersPreview({ h }) {
           {VEGETABLES.map((veg, i) => (
             <motion.div key={veg.id} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}>
               <Link to="/verduras">
-                <motion.div className="card-cv p-4 text-center" whileHover={{ scale: 1.05 }} style={{ background: veg.color + "15" }}>
+                <motion.div className="card-cv p-4 text-center" whileHover={{ scale: 1.05 }} style={{ background: h ? "#fff7ed" : veg.color + "15" }}>
                   <motion.div className="flex justify-center mb-3" animate={{ rotate: [-5, 5, -5] }} transition={{ duration: 2 + i * 0.4, repeat: Infinity }}>
                     <img src={vegImage(veg.id, veg.image, h)} alt={veg.name} className="w-24 h-24 object-contain" />
                   </motion.div>

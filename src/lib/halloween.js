@@ -84,3 +84,79 @@ export const HALLOWEEN_VEG = {
 export function vegImage(id, original, active) {
   return active && HALLOWEEN_VEG[id] ? HALLOWEEN_VEG[id] : original;
 }
+
+// Textos de las verduras en versión terror (página Verduras)
+export const HALLOWEEN_VEG_INFO = {
+  tomate: {
+    role: "El líder de la noche",
+    personality:
+      "Salió de la huerta a medianoche y desde entonces nadie lo para. Grita más fuerte que un trueno y siempre es el primero en subir al escenario embrujado.",
+    curiosity: "Sus cuernitos son antenas: capta el rock desde tres cementerios de distancia.",
+  },
+  berenjena: {
+    role: "Rebelde de ultratumba",
+    personality:
+      "Misteriosa y con colmillos de vampira. Nunca sigue las reglas... ni siquiera las del más allá.",
+    curiosity: "Sus pulseras con pinches espantan a los fantasmas aburridos.",
+  },
+  zanahoria: {
+    role: "La momia explosiva",
+    personality:
+      "Vendada de pies a cabeza pero con una energía que no frena ni una maldición. Canta tan fuerte que despierta a las momias del barrio.",
+    curiosity: "Dicen que bajo las vendas guarda el mejor solo de voz del Antiguo Egipto.",
+  },
+  brocoli: {
+    role: "El monstruo tranquilo",
+    personality:
+      "Un Frankenbrócoli de tornillos y costuras que se toma todo con paciencia. Pero cuando agarra los palillos, tiembla hasta el cementerio.",
+    curiosity: "Los tornillos de su cuello sirven para afinar la batería.",
+  },
+  cebolla: {
+    role: "La dulce que da miedito",
+    personality:
+      "Con sus costuras y sus dientes filosos parece de terror, pero es pura ternura. Sus melodías hechizan hasta a las brujas.",
+    curiosity: "Si llorás al verla, es que el hechizo funcionó.",
+  },
+  choclo: {
+    role: "El conde punk",
+    personality:
+      "Cresta punk, capa de vampiro y cero ganas de dormir de día. Siempre listo para el mosh de medianoche.",
+    curiosity: "Dicen que cada granito de su cabeza es un diente que se salvó del ajo.",
+  },
+  calabaza: {
+    role: "La reina de la Noche de Brujas",
+    personality:
+      "Con los brazos en alto y una sonrisa llena de dientes, enciende la fiesta como una linterna. El público grita cuando ella se ilumina.",
+    curiosity: "Sus manos en alto llaman a los espíritus del rock, y siempre contestan.",
+  },
+  rabanito: {
+    role: "El monstruito sorpresa",
+    personality:
+      "Peludo, con la lengua larga y pulseras de pinches. Chiquito, pero con la mala onda más simpática del jardín.",
+    curiosity: "Es el favorito de los más chiquitos: lo único que da miedo es lo mucho que dan ganas de abrazarlo.",
+  },
+};
+
+/** Devuelve la verdura con imagen y textos terror si el tema está activo */
+export function spookyVeg(veg, active) {
+  if (!active) return veg;
+  const info = HALLOWEEN_VEG_INFO[veg.id];
+  return { ...veg, image: HALLOWEEN_VEG[veg.id] || veg.image, ...(info || {}) };
+}
+
+// Dibujos para colorear de Halloween (solo se muestran mientras dura el tema)
+export const HALLOWEEN_DRAWINGS = [
+  { id: "tomate", title: "Tomate Cornudo" },
+  { id: "berenjena", title: "Berenjena Vampira" },
+  { id: "zanahoria", title: "Zanahoria Momia" },
+  { id: "brocoli", title: "Brócoli Frankenstein" },
+  { id: "cebolla", title: "Cebolla Dientuda" },
+  { id: "choclo", title: "Choclo Drácula" },
+  { id: "calabaza", title: "Calabaza Embrujada" },
+  { id: "rabanito", title: "Rabanito Monstruo" },
+].map((d) => ({
+  ...d,
+  thumbnail: HALLOWEEN_VEG[d.id],
+  pdfUrl: `/assets/dibujos/halloween-${d.id}.pdf`,
+}));
+export const HALLOWEEN_PACK_URL = "/assets/dibujos/halloween-pack.pdf";

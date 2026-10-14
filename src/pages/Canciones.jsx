@@ -5,9 +5,12 @@ import { ALL_SONGS } from "@/lib/songsData";
 import { useMusicPlayer } from "@/context/MusicPlayerContext";
 import SectionHeader from "@/components/cv/SectionHeader";
 import FloatingCharacters from "@/components/cv/FloatingCharacters";
+import { HalloweenFloaters } from "@/components/cv/halloween/HalloweenSky";
+import { useHalloween } from "@/lib/halloween";
 
 export default function Canciones() {
   const { playTrack, requestPlay, currentTrack, isPlaying } = useMusicPlayer();
+  const h = useHalloween();
 
   const playableSongs = ALL_SONGS.filter(s => s.audioOriginal || s.audioInstrumental);
   const hasAudio = (song) => song.audioOriginal || song.audioInstrumental;
@@ -22,15 +25,17 @@ export default function Canciones() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <section className="relative py-20 px-4 overflow-hidden bg-cv-green/5">
-        <FloatingCharacters />
+    <div className={`min-h-screen ${h ? "" : "bg-white"}`} style={h ? { background: "#1a0a2e" } : undefined}>
+      <section className={`relative py-20 px-4 overflow-hidden ${h ? "" : "bg-cv-green/5"}`} style={h ? { background: "#1a0a2e" } : undefined}>
+        {h ? <HalloweenFloaters opacity={0.55} /> : <FloatingCharacters />}
         <div className="max-w-4xl mx-auto relative z-10">
-          <SectionHeader
-            title="Escuchá Todo"
-            subtitle="Toda la música de Cualquier Verdura en un lugar"
-            color="#22c55e"
-          />
+          <div className={h ? "hw-header" : ""}>
+            <SectionHeader
+              title="Escuchá Todo"
+              subtitle={h ? "Toda la música de Cualquier Verdura… ¡hasta de noche de brujas!" : "Toda la música de Cualquier Verdura en un lugar"}
+              color={h ? "#f97316" : "#22c55e"}
+            />
+          </div>
 
           <div className="flex gap-3 justify-center mb-8">
             <button
@@ -65,7 +70,7 @@ export default function Canciones() {
                   viewport={{ once: true }}
                   transition={{ delay: Math.min(i * 0.04, 0.4) }}
                   className={`p-3 rounded-2xl flex items-center gap-3 transition-all ${current ? "bg-cv-green/10" : "bg-white"}`}
-                  style={{ border: current ? "3px solid #22c55e" : "3px solid #e5e7eb" }}
+                  style={{ border: current ? `3px solid ${h ? "#f97316" : "#22c55e"}` : h ? "3px solid #5b21b6" : "3px solid #e5e7eb" }}
                 >
                   <button
                     onClick={() => handlePlaySong(song)}

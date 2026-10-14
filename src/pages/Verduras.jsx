@@ -2,8 +2,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VEGETABLES, KIDS_CHARACTERS } from "@/lib/clubData";
 import SectionHeader from "@/components/cv/SectionHeader";
+import { useHalloween, spookyVeg } from "@/lib/halloween";
 
-function VegetableCard({ veg, onClick }) {
+function VegetableCard({ veg, onClick, h }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
@@ -13,7 +14,7 @@ function VegetableCard({ veg, onClick }) {
       whileTap={{ scale: 0.95 }}
       onClick={() => onClick(veg)}
       className="card-cv p-6 text-center cursor-pointer"
-      style={{ background: veg.color + "10" }}
+      style={{ background: h ? "#fff7ed" : veg.color + "10" }}
     >
       <motion.div
         className="flex justify-center mb-4"
@@ -100,14 +101,14 @@ function VegetableModal({ veg, onClose }) {
   );
 }
 
-function KidCard({ kid }) {
+function KidCard({ kid, h }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className="card-cv p-6 text-center"
-      style={{ background: kid.color + "10" }}
+      style={{ background: h ? "#fff7ed" : kid.color + "10" }}
       whileHover={{ scale: 1.03 }}
     >
       <motion.div
@@ -135,60 +136,75 @@ function KidCard({ kid }) {
 
 export default function Verduras() {
   const [selectedVeg, setSelectedVeg] = useState(null);
+  const h = useHalloween();
+  // en Halloween: imágenes y textos terror (se apaga solo el 1/11)
+  const vegs = VEGETABLES.map((v) => spookyVeg(v, h));
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen ${h ? "" : "bg-white"}`} style={h ? { background: "#1a0a2e" } : undefined}>
       {/* Hero */}
-      <section className="py-20 px-4 bg-cv-green/5 relative overflow-hidden">
+      <section className={`py-20 px-4 relative overflow-hidden ${h ? "" : "bg-cv-green/5"}`} style={h ? { background: "#241040" } : undefined}>
         {/* Decorative characters peeking */}
         <motion.img
-          src={VEGETABLES[0].image}
+          src={vegs[0].image}
           alt="Tomate"
-          className="absolute -left-6 bottom-0 w-40 object-contain pointer-events-none opacity-30"
+          className={`absolute -left-6 bottom-0 w-40 object-contain pointer-events-none ${h ? "opacity-80" : "opacity-30"}`}
           animate={{ y: [0, -12, 0] }}
           transition={{ duration: 3, repeat: Infinity }}
         />
         <motion.img
-          src={VEGETABLES[2].image}
+          src={vegs[2].image}
           alt="Zanahoria"
-          className="absolute -right-4 bottom-0 w-36 object-contain pointer-events-none opacity-30"
+          className={`absolute -right-4 bottom-0 w-36 object-contain pointer-events-none ${h ? "opacity-80" : "opacity-30"}`}
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 2.8, repeat: Infinity, delay: 0.5 }}
         />
         <div className="max-w-6xl mx-auto relative z-10">
-          <SectionHeader
-            title="Los Personajes"
-            subtitle="La banda de verduras más rockera del mundo"
-            color="#22c55e"
-          />
+          <div className={h ? "hw-header" : ""}>
+            <SectionHeader
+              title={h ? "Los Monstruos del Jardín" : "Los Personajes"}
+              subtitle={h ? "La banda de verduras más espeluznante y rockera del mundo" : "La banda de verduras más rockera del mundo"}
+              color={h ? "#f97316" : "#22c55e"}
+            />
+          </div>
         </div>
       </section>
 
       {/* Vegetables Grid */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bangers text-cv-dark mb-8 text-center tracking-wider">
-            La Banda — Las Verduras
+          <h2
+            className={`text-4xl font-bangers mb-8 text-center tracking-wider ${h ? "text-white" : "text-cv-dark"}`}
+            style={h ? { textShadow: "3px 3px 0 #f97316" } : undefined}
+          >
+            {h ? "La Banda — Las Verduras Embrujadas" : "La Banda — Las Verduras"}
           </h2>
+          {h && (
+            <p className="text-center font-fredoka text-violet-200 max-w-xl mx-auto -mt-4 mb-8">
+              Cuando cae la noche del 31, las verduras se disfrazan de monstruos y tocan hasta que sale el sol. ¡Tocá a cada una para conocer su secreto!
+            </p>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {VEGETABLES.map((veg) => (
-              <VegetableCard key={veg.id} veg={veg} onClick={setSelectedVeg} />
+            {vegs.map((veg) => (
+              <VegetableCard key={veg.id} veg={veg} onClick={setSelectedVeg} h={h} />
             ))}
           </div>
         </div>
       </section>
 
       {/* Kids Section */}
-      <section className="py-16 px-4 bg-cv-fuchsia/5">
+      <section className={`py-16 px-4 ${h ? "" : "bg-cv-fuchsia/5"}`} style={h ? { background: "#2e1650" } : undefined}>
         <div className="max-w-6xl mx-auto">
-          <SectionHeader
-            title="Conocé También a los Fans"
-            subtitle="Los nenes y nenas del Club Verdura"
-            color="#ec4899"
-          />
+          <div className={h ? "hw-header" : ""}>
+            <SectionHeader
+              title={h ? "Los Fans Más Valientes" : "Conocé También a los Fans"}
+              subtitle={h ? "Los nenes y nenas que no le tienen miedo a nada" : "Los nenes y nenas del Club Verdura"}
+              color={h ? "#f97316" : "#ec4899"}
+            />
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {KIDS_CHARACTERS.map((kid) => (
-              <KidCard key={kid.id} kid={kid} />
+              <KidCard key={kid.id} kid={kid} h={h} />
             ))}
           </div>
         </div>

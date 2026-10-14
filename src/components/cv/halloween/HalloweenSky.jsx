@@ -51,16 +51,25 @@ export default function HalloweenSky() {
       <Cat className="absolute" style={{ left: "6%", bottom: "calc(clamp(120px, 22vh, 190px) * 0.34)", width: "clamp(48px, 12vw, 72px)", height: "auto" }} />
 
       {/* cerca: verduras terror */}
+      <HalloweenFloaters />
+    </div>
+  );
+}
+
+/** Verduras terror flotando de fondo (también se usan en Escuchá Todo) */
+export function HalloweenFloaters({ opacity = 0.92 }) {
+  return (
+    <>
       {FLOATERS.map((f) => (
         <motion.img
           key={f.id}
           src={HALLOWEEN_VEG[f.id]}
           alt=""
           className="absolute select-none pointer-events-none object-contain"
-          style={{ left: `${f.x}%`, top: `${f.y}%`, width: `clamp(${Math.round(f.size * 0.62)}px, ${f.size / 4}vw, ${f.size}px)`, opacity: 0.92, zIndex: 1 }}
+          style={{ left: `${f.x}%`, top: `${f.y}%`, width: `clamp(${Math.round(f.size * 0.62)}px, ${f.size / 4}vw, ${f.size}px)`, opacity, zIndex: 0 }}
           animate={VARIANTS[f.anim](f.delay)}
         />
       ))}
-    </div>
+    </>
   );
 }

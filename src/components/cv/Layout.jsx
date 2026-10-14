@@ -5,7 +5,7 @@ import PlayChoiceModal from "./PlayChoiceModal";
 import CampaignBanner from "./CampaignBanner";
 import HalloweenLayer from "./halloween/HalloweenLayer";
 import { Cat } from "./halloween/HalloweenArt";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MusicPlayerProvider } from "@/context/MusicPlayerContext";
 import { useHalloween } from "@/lib/halloween";
@@ -13,6 +13,8 @@ import { useHalloween } from "@/lib/halloween";
 export default function Layout() {
   // true solo del 19/10 al 31/10 (ver src/lib/halloween.js)
   const halloween = useHalloween();
+  // en la Home el hero va pegado a la navbar; en el resto damos aire para la guirnalda
+  const isHome = useLocation().pathname === "/";
 
   return (
     <MusicPlayerProvider>
@@ -22,7 +24,7 @@ export default function Layout() {
         <div className="hw-nav contents">
           <Navbar />
         </div>
-        <main className={`flex-1 ${halloween ? "pt-[6.5rem]" : "pt-16"}`}>
+        <main className={`flex-1 ${halloween && !isHome ? "pt-[6.5rem]" : "pt-16"}`}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
