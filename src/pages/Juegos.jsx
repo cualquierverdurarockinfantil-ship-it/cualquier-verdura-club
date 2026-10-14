@@ -9,15 +9,15 @@ import MysteryVeggie from "@/components/cv/games/MysteryVeggie";
 import CatchPumpkins from "@/components/cv/games/CatchPumpkins";
 import SpookyVeggie from "@/components/cv/games/SpookyVeggie";
 import HauntedMemory from "@/components/cv/games/HauntedMemory";
-import { useHalloween, HALLOWEEN_GAMES } from "@/lib/halloween";
+import { useHalloween, HALLOWEEN_GAMES, CATCH_GAME } from "@/lib/halloween";
 
 const GAME_COMPONENTS = {
   memoria: MemoryGame,
   "adivina-cancion": GuessSongGame,
   desafios: ChallengeCards,
   "verdura-misteriosa": MysteryVeggie,
-  // Especiales de Halloween (solo se listan del 19/10 al 31/10)
-  "h-calabazas": CatchPumpkins,
+  // Atrapá la Calabaza: fijo todo el año. Los otros dos son especiales de Halloween (19/10 al 31/10)
+  "atrapa-calabaza": CatchPumpkins,
   "h-misteriosa": SpookyVeggie,
   "h-memoria": HauntedMemory,
 };
@@ -96,13 +96,13 @@ export default function Juegos() {
                       🎃 Especiales de Halloween
                     </h2>
                   </div>
-                  {HALLOWEEN_GAMES.map((game, i) => renderCard(game, i))}
+                  {[CATCH_GAME, ...HALLOWEEN_GAMES].map((game, i) => renderCard(game, i))}
                   <div className="md:col-span-2 text-center mt-4">
                     <h2 className="font-bangers text-2xl tracking-wider text-cv-dark">Los juegos de siempre</h2>
                   </div>
                 </>
               )}
-              {GAMES.map((game, i) => renderCard(game, i))}
+              {(h ? GAMES : [...GAMES, CATCH_GAME]).map((game, i) => renderCard(game, i))}
             </div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

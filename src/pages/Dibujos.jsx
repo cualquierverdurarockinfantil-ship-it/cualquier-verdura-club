@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { DRAWINGS } from "@/lib/clubData";
 import SectionHeader from "@/components/cv/SectionHeader";
 import { useHalloween, HALLOWEEN_DRAWINGS, HALLOWEEN_PACK_URL } from "@/lib/halloween";
@@ -79,22 +80,46 @@ function PackCard() {
   );
 }
 
-/* Subsección "Halloween Verdura": solo aparece mientras el tema está activo (19/10 al 31/10) */
-function HalloweenDrawings() {
+/* Subsección "Halloween Verdura": queda siempre dentro de la sección, detrás de un botón que la abre.
+   Durante el tema (19/10 al 31/10) arranca abierta; el resto del año, cerrada. */
+function HalloweenDrawings({ open, onToggle }) {
   return (
-    <section className="py-12 px-4" style={{ background: "#1a0a2e" }}>
+    <section className="px-4 pt-10">
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-8">
-          <h2
-            className="font-bangers text-white text-4xl md:text-5xl tracking-wider"
-            style={{ textShadow: "3px 3px 0 #f97316" }}
+        <button
+          onClick={onToggle}
+          aria-expanded={open}
+          className="w-full flex items-center justify-between gap-3 px-6 py-4 rounded-3xl font-bangers text-2xl md:text-3xl tracking-wider text-left"
+          style={{ background: "#1a0a2e", color: "#fff", border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #f97316" }}
+        >
+          <span>🎃 Halloween Verdura <span className="font-fredoka text-base text-violet-200 normal-case tracking-normal block md:inline md:ml-2">dibujos de las verduras monstruo para colorear</span></span>
+          <span className="text-3xl transition-transform" style={{ transform: open ? "rotate(180deg)" : "none", color: "#f97316" }}>▾</span>
+        </button>
+      </div>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            style={{ overflow: "hidden" }}
           >
-            🎃 Halloween Verdura
-          </h2>
-          <p className="font-fredoka text-violet-200 mt-2 max-w-xl mx-auto">
-            Las verduras monstruo para imprimir y pintar. ¡Descargá una por una o llevate el pack en una sola hoja!
-          </p>
-        </div>
+            <HalloweenDrawingsBody />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
+
+function HalloweenDrawingsBody() {
+  return (
+    <div className="py-8">
+      <div className="max-w-5xl mx-auto rounded-3xl p-5 md:p-8" style={{ background: "#1a0a2e" }}>
+        <p className="font-fredoka text-violet-200 text-center mb-6 max-w-xl mx-auto">
+          Las verduras monstruo para imprimir y pintar. ¡Descargá una por una o llevate el pack en una sola hoja!
+        </p>
 
         <motion.div
           className="overflow-hidden flex flex-col md:flex-row items-center gap-6 p-6 md:p-8 rounded-3xl bg-[#fff7ed] mb-8"
@@ -153,12 +178,13 @@ function HalloweenDrawings() {
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
 export default function Dibujos() {
   const h = useHalloween();
+  const [halloweenOpen, setHalloweenOpen] = useState(h);
   return (
     <div className="min-h-screen bg-white">
       <section className="py-20 px-4 bg-cv-yellow/10 relative overflow-hidden">
@@ -207,11 +233,11 @@ export default function Dibujos() {
         </div>
       </section>
 
-      {h && <HalloweenDrawings />}
+      <HalloweenDrawings open={halloweenOpen} onToggle={() => setHalloweenOpen((o) => !o)} />
 
       <section className="py-16 px-4">
         <div className="max-w-5xl mx-auto">
-          {h && (
+          {halloweenOpen && (
             <h2 className="font-bangers text-cv-dark text-3xl text-center tracking-wider mb-8">Los dibujos de siempre</h2>
           )}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

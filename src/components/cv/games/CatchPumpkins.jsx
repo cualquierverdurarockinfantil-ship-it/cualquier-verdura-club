@@ -4,9 +4,11 @@ import GameRulesButton from "./GameRulesButton";
 import { Bat, Ghost, Moon, Pumpkin } from "../halloween/HalloweenArt";
 
 /**
- * ATRAPÁ LA CALABAZA (juego especial de Halloween)
+ * ATRAPÁ LA CALABAZA
  * Caen calabazas, fantasmas y murciélagos. Tocá las calabazas y esquivá lo demás.
- * 3 vidas. Cada 10 puntos sube el nivel (más rápido y más seguido).
+ * 3 vidas. Cada 8 puntos sube el nivel (más rápido, más seguido y con trampas nuevas):
+ *   nivel 2: aparecen calabazas verdes (malditas)  ·  nivel 3: las calabazas van en zigzag
+ *   nivel 4: los fantasmas titilan y a veces caen ráfagas  ·  combo x2 con 5 calabazas seguidas
  */
 
 const BEST_KEY = "cv-halloween-catch-best";
@@ -34,17 +36,37 @@ function reducedMotion() {
   }
 }
 
-function pickType() {
-  const r = Math.random();
-  if (r < 0.06) return "golden";
-  if (r < 0.64) return "pumpkin";
-  if (r < 0.86) return "ghost";
-  return "bat";
+function pickType(level) {
+  // [tipo, peso]: la calabaza común es la más frecuente; las malditas aparecen desde el nivel 2
+  const table = [
+    ["pumpkin", 52],
+    ["golden", 5],
+    ["ghost", 17],
+    ["bat", level >= 2 ? 13 : 8],
+    ["cursed", level >= 2 ? 14 : 0],
+  ];
+  const total = table.reduce((n, [, w]) => n + w, 0);
+  let r = Math.random() * total;
+  for (const [type, w] of table) {
+    r -= w;
+    if (r < 0) return type;
+  }
+  return "pumpkin";
 }
 
 function ItemArt({ type }) {
   if (type === "ghost") return <Ghost style={{ width: SIZES.ghost, height: "auto" }} />;
   if (type === "bat") return <Bat style={{ width: SIZES.bat, height: "auto" }} />;
+  if (type === "cursed")
+    return (
+      <Pumpkin
+        style={{
+          width: SIZES.pumpkin,
+          height: "auto",
+          filter: "hue-rotate(95deg) saturate(1.1) brightness(0.8) drop-shadow(0 0 8px #22c55e)",
+        }}
+      />
+    );
   if (type === "golden")
     return (
       <Pumpkin
@@ -61,7 +83,8 @@ function ItemArt({ type }) {
 export default function CatchPumpkins() {
   const [phase, setPhase] = useState("intro"); // intro | playing | over
   const [, setTick] = useState(0);
-  const [hud, setHud] = useState({ score: 0, lives: 3, level: 1 });
+  const [hud, setHud] = useState({ score: 0, lives: 3, level: 1, combo: 0 });
+  const [banner, setBanner] = useState(null);
   const [best, setBest] = useState(readBest);
   const [hurt, setHurt] = useState(false);
   const area = useRef(null);
@@ -69,8 +92,9 @@ export default function CatchPumpkins() {
   const raf = useRef(0);
 
   const start = () => {
-    g.current = { items: [], pops: [], score: 0, lives: 3, level: 1, spawn: 0.4, id: 1, t: 0 };
-    setHud({ score: 0, lives: 3, level: 1 });
+    g.current = { items: [], pops: [], score: 0, lives: 3, level: 1, spawn: 0.4, id: 1, t: 0, combo: 0 };
+    setHud({ score: 0, lives: 3, level: 1, combo: 0 });
+    setBanner(null);
     setPhase("playing");
   };
 
@@ -88,18 +112,27 @@ export default function CatchPumpkins() {
     const s = g.current;
     if (!s.items.find((i) => i.id === item.id)) return;
     s.items = s.items.filter((i) => i.id !== item.id);
-    const gain = item.type === "golden" ? 5 : item.type === "pumpkin" ? 1 : 0;
-    if (gain) {
+    const base = item.type === "golden" ? 5 : item.type === "pumpkin" ? 1 : 0;
+    if (base) {
+      s.combo += 1;
+      const mult = s.combo >= 5 ? 2 : 1;
+      const gain = base * mult;
       s.score += gain;
-      s.level = 1 + Math.floor(s.score / 10);
-      s.pops.push({ id: item.id, x: item.x, y: item.y, text: `+${gain}`, color: "#fde047", until: s.t + 0.6 });
+      const newLevel = 1 + Math.floor(s.score / 8);
+      if (newLevel > s.level) {
+        s.level = newLevel;
+        setBanner(`¡Nivel ${newLevel}!`);
+        setTimeout(() => setBanner(null), 1100);
+      }
+      s.pops.push({ id: item.id, x: item.x, y: item.y, text: `+${gain}`, color: mult > 1 ? "#fb923c" : "#fde047", until: s.t + 0.6 });
     } else {
       s.lives -= 1;
-      s.pops.push({ id: item.id, x: item.x, y: item.y, text: "¡Uy!", color: "#f87171", until: s.t + 0.7 });
+      s.combo = 0;
+      s.pops.push({ id: item.id, x: item.x, y: item.y, text: item.type === "cursed" ? "¡Maldita!" : "¡Uy!", color: "#f87171", until: s.t + 0.7 });
       setHurt(true);
       setTimeout(() => setHurt(false), 250);
     }
-    setHud({ score: s.score, lives: s.lives, level: s.level });
+    setHud({ score: s.score, lives: s.lives, level: s.level, combo: s.combo });
     if (s.lives <= 0) endGame();
     setTick((t) => t + 1);
   };
@@ -116,22 +149,32 @@ export default function CatchPumpkins() {
       s.t += dt;
       s.spawn -= dt;
       if (s.spawn <= 0) {
-        const type = pickType();
-        s.items.push({
-          id: s.id++,
-          type,
-          x: 6 + Math.random() * 82,
-          x0: 6 + Math.random() * 82,
-          y: -90,
-          vy: (120 + s.level * 20 + Math.random() * 50) * calm * (type === "bat" ? 1.15 : 1),
-          phase: Math.random() * 6,
-        });
-        s.spawn = Math.max(0.32, 1.05 - s.level * 0.07) + Math.random() * 0.25;
+        const burst = s.level >= 4 && Math.random() < 0.2 ? 3 : 1; // ráfaga
+        for (let k = 0; k < burst; k++) {
+          const type = pickType(s.level);
+          const x0 = 8 + Math.random() * 80;
+          s.items.push({
+            id: s.id++,
+            type,
+            x: x0,
+            x0,
+            y: -90 - k * 70,
+            vy: (200 + s.level * 34 + Math.random() * 70) * calm * (type === "bat" ? 1.15 : 1),
+            phase: Math.random() * 6,
+          });
+        }
+        s.spawn = Math.max(0.2, 0.78 - s.level * 0.065) + Math.random() * 0.18;
       }
       s.items.forEach((i) => {
         i.y += i.vy * dt;
         if (i.type === "bat") i.x = Math.min(90, Math.max(4, i.x0 + Math.sin(s.t * 2.6 + i.phase) * 9));
+        else if (s.level >= 3 && (i.type === "pumpkin" || i.type === "cursed")) i.x = Math.min(90, Math.max(4, i.x0 + Math.sin(s.t * 2.2 + i.phase) * 7));
       });
+      // una calabaza que se escapa corta el combo
+      if (s.items.some((i) => i.y >= H + 20 && (i.type === "pumpkin" || i.type === "golden")) && s.combo > 0) {
+        s.combo = 0;
+        setHud((h0) => ({ ...h0, combo: 0 }));
+      }
       s.items = s.items.filter((i) => i.y < H + 20);
       s.pops = s.pops.filter((p) => p.until > s.t);
       setTick((t) => t + 1);
@@ -158,6 +201,7 @@ export default function CatchPumpkins() {
           <div className="flex justify-center gap-5 items-end mb-5">
             <div className="text-center"><Pumpkin style={{ width: 54 }} /><p className="font-bangers text-sm">+1</p></div>
             <div className="text-center"><Pumpkin style={{ width: 58, filter: "hue-rotate(38deg) saturate(1.7) brightness(1.25)" }} /><p className="font-bangers text-sm">+5</p></div>
+            <div className="text-center"><Pumpkin style={{ width: 54, filter: "hue-rotate(95deg) saturate(1.1) brightness(0.8)" }} /><p className="font-bangers text-sm text-red-500">¡NO!</p></div>
             <div className="text-center"><Ghost style={{ width: 40 }} /><p className="font-bangers text-sm text-red-500">¡NO!</p></div>
             <div className="text-center"><Bat style={{ width: 54 }} /><p className="font-bangers text-sm text-red-500">¡NO!</p></div>
           </div>
@@ -170,8 +214,10 @@ export default function CatchPumpkins() {
                 "Caen calabazas, fantasmas y murciélagos. Tocá las calabazas para atraparlas.",
                 "Una calabaza común vale 1 punto. La calabaza dorada, que aparece pocas veces, vale 5.",
                 "Si tocás un fantasma o un murciélago perdés una vida. Tenés 3 vidas.",
-                "Si una calabaza se te escapa no pasa nada, ¡pero es un punto que no sumás!",
-                "Cada 10 puntos subís de nivel y todo cae más rápido. El juego termina cuando perdés las 3 vidas.",
+                "Cuidado: desde el nivel 2 caen calabazas verdes (malditas). ¡Esas también te sacan una vida!",
+                "Si atrapás 5 calabazas seguidas, ¡combo x2! El combo se corta si tocás algo malo o se te escapa una calabaza.",
+                "Cada 8 puntos subís de nivel y todo cae más rápido. Desde el nivel 3 las calabazas se mueven en zigzag y desde el 4 los fantasmas titilan y caen ráfagas.",
+                "El juego termina cuando perdés las 3 vidas.",
               ]}
             />
           </div>
@@ -185,7 +231,7 @@ export default function CatchPumpkins() {
         <>
           <div className="flex items-center justify-between mb-2 font-bangers text-lg tracking-wide">
             <span className="badge-cv">🎃 {hud.score}</span>
-            <span className="badge-cv">Nivel {hud.level}</span>
+            <span className="badge-cv">Nivel {hud.level}{hud.combo >= 5 ? " · 🔥 x2" : hud.combo > 0 ? ` · ${hud.combo}/5` : ""}</span>
             <span className="badge-cv">{"❤️".repeat(Math.max(0, hud.lives)) || "💀"}</span>
           </div>
 
@@ -213,6 +259,7 @@ export default function CatchPumpkins() {
                   left: `${i.x}%`,
                   top: 0,
                   transform: `translate(-50%, ${i.y}px) rotate(${Math.sin(i.y / 60 + i.phase) * 12}deg)`,
+                  opacity: i.type === "ghost" && s.level >= 4 ? 0.2 + 0.8 * Math.abs(Math.sin(s.t * 3 + i.phase)) : 1,
                   background: "transparent",
                   border: 0,
                   padding: 14,
@@ -233,6 +280,12 @@ export default function CatchPumpkins() {
                 {p.text}
               </span>
             ))}
+
+            {banner && phase === "playing" && (
+              <div className="absolute inset-x-0 top-1/3 text-center font-bangers text-4xl pointer-events-none" style={{ color: "#fde047", textShadow: "3px 3px 0 #1a1a1a" }}>
+                {banner}
+              </div>
+            )}
 
             {phase === "over" && (
               <motion.div

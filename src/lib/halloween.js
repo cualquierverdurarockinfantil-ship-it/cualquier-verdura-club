@@ -177,16 +177,18 @@ export function kidImage(src, active) {
   return (m && HALLOWEEN_KIDS["nio" + m[1]]) || src;
 }
 
-// Juegos especiales de Halloween (aparecen en /juegos solo mientras dura el tema)
+// Atrapá la Calabaza: queda FIJO en Juegos junto a los 4 originales (también después del 1/11)
+export const CATCH_GAME = {
+  id: "atrapa-calabaza",
+  title: "Atrapá la Calabaza",
+  description: "Caen calabazas del cielo: atrapalas, esquivá fantasmas y murciélagos, ¡y no te dejes engañar por las verdes!",
+  icon: "🎃",
+  color: "#f97316",
+  available: true,
+};
+
+// Especiales que SOLO aparecen en /juegos mientras dura el tema (19/10 al 31/10)
 export const HALLOWEEN_GAMES = [
-  {
-    id: "h-calabazas",
-    title: "Atrapá la Calabaza",
-    description: "Caen calabazas del cielo: atrapalas y esquivá fantasmas y murciélagos.",
-    icon: "🎃",
-    color: "#f97316",
-    available: true,
-  },
   {
     id: "h-misteriosa",
     title: "Verdura Disfrazada",

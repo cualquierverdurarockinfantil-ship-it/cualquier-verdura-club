@@ -56,6 +56,19 @@
   background: #fdba74 !important;
   color: #2e1065 !important;
 }
+/* Menú de la hamburguesa (celular): panel que se abre sobre la pantalla -> noche violeta */
+.theme-halloween .hw-nav [class*="fixed"]:not(nav):not(header),
+.theme-halloween .hw-nav [class*="absolute"]:not(nav):not(header),
+.theme-halloween .hw-nav [style*="background"]:not(a):not(button):not(img):not(nav):not(header) {
+  background: #1a0a2e !important;
+  border-color: #f97316 !important;
+}
+.theme-halloween .hw-nav [class*="fixed"]:not(nav):not(header) a:not(:has(img)),
+.theme-halloween .hw-nav [class*="fixed"]:not(nav):not(header) button {
+  font-size: 1.15em;
+  padding: 0.55rem 1.6rem !important;
+}
+
 /* la página actual (antes verde / amarillo) se marca en amarillo */
 .theme-halloween .hw-nav [class*="bg-cv-green"],
 .theme-halloween .hw-nav [class*="bg-cv-yellow"],
