@@ -67,8 +67,7 @@ function HeroSection({ h }) {
           className="text-center"
         >
           <h1
-            className={`text-4xl md:text-6xl font-bangers leading-tight tracking-wide ${h ? "text-white" : "text-cv-dark"}`}
-            style={h ? { textShadow: "3px 3px 0 #f97316, 5px 5px 0 #1a1a1a" } : undefined}
+            className={`text-4xl md:text-6xl font-bangers leading-tight tracking-wide ${h ? "hw-ghost-text" : "text-cv-dark"}`}
           >
             La Niñez Es Una Vez
           </h1>
@@ -109,7 +108,7 @@ function WelcomeSection({ h }) {
       <motion.img src={kidImage(KID_IMAGES.nio1, h)} alt="" className="absolute right-0 bottom-0 w-28 md:w-40 object-contain pointer-events-none" style={{ zIndex: 2 }} animate={{ y: [0, -8, 0] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }} />
       <div className="max-w-3xl mx-auto text-center relative z-10">
         <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-          <h2 className={`text-5xl md:text-6xl font-bangers mb-6 tracking-wide ${h ? "text-white" : "text-cv-dark"}`}>
+          <h2 className={`text-5xl md:text-6xl font-bangers mb-6 tracking-wide ${h ? "hw-ghost-text" : "text-cv-dark"}`}>
             Bienvenidos al<br />
             <span className={h ? "text-cv-orange" : "text-cv-fuchsia"}>Club Verdura</span>
           </h2>
@@ -193,8 +192,7 @@ function KidsBanner({ h }) {
           ))}
         </div>
         <motion.p
-          className={`text-center font-bangers text-3xl md:text-4xl mt-6 tracking-wider ${h ? "text-white" : "text-cv-dark"}`}
-          style={h ? { textShadow: "3px 3px 0 #f97316" } : undefined}
+          className={`text-center font-bangers text-3xl md:text-4xl mt-6 tracking-wider ${h ? "hw-ghost-text" : "text-cv-dark"}`}
           initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
         >
           {h ? "¡Noche de Halloween en el Club!" : "¡El club ya está abierto!"}

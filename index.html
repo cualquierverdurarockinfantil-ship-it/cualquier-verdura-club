@@ -2,10 +2,37 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/assets/veg/tomate.svg" />
+    <link id="cv-icon" rel="icon" type="image/png" sizes="48x48" href="/icons/cv-48.png" />
+    <link id="cv-icon-svg" rel="icon" type="image/svg+xml" href="/assets/veg/tomate.svg" />
+    <link id="cv-apple" rel="apple-touch-icon" href="/icons/cv-180.png" />
+    <link id="cv-manifest" rel="manifest" href="/manifest.webmanifest" />
+    <meta id="cv-theme" name="theme-color" content="#22c55e" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Club Verdura — El lugar secreto de Cualquier Verdura Rock Infantil" />
     <title>Club Verdura</title>
+    <script>
+      // Ícono / manifest de Halloween por fecha (mismas fechas que src/lib/halloween.js).
+      // Para otro tema: copiar este bloque y cambiar fechas y prefijo "hw-".
+      (function () {
+        try {
+          var on = false;
+          var d = new Date();
+          var t = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+          on = t >= "2026-10-19" && t < "2026-11-01";
+          var q = new URLSearchParams(location.search).get("halloween");
+          var p = q === "1" || q === "0" ? q : sessionStorage.getItem("cv-halloween-preview");
+          if (p === "1") on = true;
+          if (p === "0") on = false;
+          if (!on) return;
+          document.getElementById("cv-icon").href = "/icons/hw-48.png";
+          document.getElementById("cv-icon-svg").remove();
+          document.getElementById("cv-apple").href = "/icons/hw-180.png";
+          document.getElementById("cv-manifest").href = "/manifest-halloween.webmanifest";
+          document.getElementById("cv-theme").content = "#1a0a2e";
+          document.documentElement.style.background = "#1a0a2e";
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

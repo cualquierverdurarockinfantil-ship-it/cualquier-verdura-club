@@ -100,11 +100,21 @@
   background: var(--hw-night);
   color: #fff7ed;
 }
-.theme-halloween .hw-header * {
-  color: #fff7ed;
+.theme-halloween .hw-header h1,
+.theme-halloween .hw-header h2,
+.theme-halloween .hw-header h3,
+.theme-halloween .hw-ghost-text {
+  color: #e4def0 !important;
+  -webkit-text-fill-color: #e4def0 !important;
+  text-shadow: 0 0 12px rgba(216, 200, 240, 0.75), 3px 3px 0 #7e22ce !important;
+  animation: hw-ghost-text 5.5s ease-in-out infinite;
 }
 .theme-halloween .hw-header p {
-  color: #d8c8f0;
+  color: #d8c8f0 !important;
+}
+@keyframes hw-ghost-text {
+  0%, 100% { opacity: 0.88; }
+  50% { opacity: 1; }
 }
 
 /* ---------- Capa de efectos (fija, no se puede tocar) ---------- */
@@ -265,7 +275,8 @@
   .hw-blink,
   .hw-twinkle,
   .hw-drift,
-  .hw-ghost-logo {
+  .hw-ghost-logo,
+  .hw-header h1, .hw-header h2, .hw-header h3, .hw-ghost-text {
     animation: none !important;
   }
   /* sin rayos y sin murciélagos cruzando: los murciélagos quedan quietos en un rincón */
