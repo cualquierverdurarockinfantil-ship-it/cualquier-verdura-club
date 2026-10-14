@@ -3,6 +3,7 @@ import Footer from "./Footer";
 import PlayerBar, { PlayerSpacer } from "./PlayerBar";
 import PlayChoiceModal from "./PlayChoiceModal";
 import CampaignBanner from "./CampaignBanner";
+import ShowBanner from "./ShowBanner";
 import HalloweenLayer from "./halloween/HalloweenLayer";
 import { Cat } from "./halloween/HalloweenArt";
 import { Outlet, useLocation } from "react-router-dom";
@@ -30,6 +31,8 @@ export default function Layout() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
+            {/* aviso del próximo show: va dentro del contenido para que no lo tape la navbar fija */}
+            <ShowBanner />
             <Outlet />
           </motion.div>
         </main>
