@@ -192,7 +192,7 @@ export const HALLOWEEN_GAMES = [
   {
     id: "h-misteriosa",
     title: "Verdura Disfrazada",
-    description: "Mirá la silueta y adiviná qué verdura monstruo se esconde.",
+    description: "Una verdura monstruo se esconde bajo una sábana fantasma: adiviná cuál es antes de que se vuelva transparente.",
     icon: "🦇",
     color: "#a855f7",
     available: true,

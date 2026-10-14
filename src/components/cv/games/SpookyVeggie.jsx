@@ -1,20 +1,53 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import GameRulesButton from "./GameRulesButton";
 import { HALLOWEEN_DRAWINGS, HALLOWEEN_VEG, HALLOWEEN_VEG_INFO } from "@/lib/halloween";
 
 /**
  * VERDURA DISFRAZADA (variante Halloween de Verdura Misteriosa)
- * Aparece la silueta negra de una verdura monstruo. Podés pedir que se revele un poco más
+ * Una verdura monstruo tapada por una sábana fantasma. Podés pedir que se vuelva más transparente
  * (menos puntos) y elegís quién es entre las 8.
  */
 
 const VEGS = HALLOWEEN_DRAWINGS.map((d) => ({ id: d.id, title: d.title, image: HALLOWEEN_VEG[d.id] }));
+// La verdura está tapada por una sábana fantasma: cuanto más ayuda pedís, más transparente se pone.
 const STAGES = [
-  { filter: "brightness(0)", points: 3, label: "Silueta" },
-  { filter: "brightness(0.18) saturate(0) blur(0px)", points: 2, label: "Sombra" },
-  { filter: "blur(7px) saturate(0.9)", points: 1, label: "Borrosa" },
+  { sheet: 0.97, points: 3, label: "Sábana gruesa" },
+  { sheet: 0.66, points: 2, label: "Sábana fina" },
+  { sheet: 0.34, points: 1, label: "Sábana casi transparente" },
 ];
+const OUTLINE =
+  "drop-shadow(3px 0 0 #1a1a1a) drop-shadow(-3px 0 0 #1a1a1a) drop-shadow(0 3px 0 #1a1a1a) drop-shadow(0 -3px 0 #1a1a1a)";
+// pliegues de la sábana: franjas de borde duro (nada de degradés suaves)
+const FOLDS =
+  "repeating-linear-gradient(100deg, #f5f1ff 0 26px, #ddd3f2 26px 32px, #f5f1ff 32px 58px, #cfc3ea 58px 62px)";
+
+/** Verdura tapada por una sábana que copia su silueta (un poco más gorda, como tela encima) */
+function GhostSheet({ src, alt, level, revealed }) {
+  const mask = {
+    WebkitMaskImage: `url(${src})`,
+    maskImage: `url(${src})`,
+    WebkitMaskRepeat: "no-repeat",
+    maskRepeat: "no-repeat",
+    WebkitMaskSize: "100% 100%",
+    maskSize: "100% 100%",
+  };
+  return (
+    <div className="relative inline-block">
+      <img src={src} alt={revealed ? alt : "Verdura misteriosa"} className="h-52 w-auto object-contain block" />
+      <motion.div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{ filter: OUTLINE }}
+        initial={false}
+        animate={{ opacity: revealed ? 0 : level, y: revealed ? -36 : [0, -4, 0], scale: revealed ? 1.15 : 1.07 }}
+        transition={revealed ? { duration: 0.5 } : { opacity: { duration: 0.6 }, y: { duration: 3, repeat: Infinity, ease: "easeInOut" }, scale: { duration: 0.4 } }}
+      >
+        <div className="absolute inset-0" style={{ ...mask, background: FOLDS }} />
+      </motion.div>
+    </div>
+  );
+}
 const COLORS = ["#f97316", "#a855f7", "#22c55e", "#06b6d4", "#ec4899", "#facc15"];
 
 const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
@@ -66,10 +99,10 @@ function Setup({ onStart }) {
             title="Verdura Disfrazada"
             accentColor="#f97316"
             rules={[
-              "En cada ronda aparece la silueta negra de una verdura monstruo.",
+              "En cada ronda una verdura monstruo aparece tapada por una sábana fantasma: se le nota la forma, pero no los detalles.",
               "Elegí quién creés que es entre las 8 verduras.",
-              "Si querés ayuda, tocá \"Mostrar más\": la imagen se va revelando, pero ganás menos puntos.",
-              "Acertar con la silueta vale 3 puntos, con la sombra 2 y con la imagen borrosa 1.",
+              "Si querés ayuda, tocá \"Mostrar más\": la sábana se va haciendo transparente, pero ganás menos puntos.",
+              "Acertar con la sábana gruesa vale 3 puntos, con la sábana fina 2 y con la casi transparente 1.",
               "Si te equivocás, no sumás puntos y pasa el turno. Gana quien más puntos junte al terminar todas las rondas.",
             ]}
           />
@@ -173,19 +206,9 @@ export default function SpookyVeggie() {
         className="rounded-3xl flex items-center justify-center mb-4 overflow-hidden"
         style={{ background: "#1a0a2e", border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #f97316", height: 230 }}
       >
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={revealed ? "full" : stage}
-            src={current.image}
-            alt={revealed ? current.title : "Verdura misteriosa"}
-            className="h-52 w-auto object-contain"
-            style={{ filter: revealed ? "none" : STAGES[stage].filter, background: stage === 1 && !revealed ? "transparent" : undefined }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          />
-        </AnimatePresence>
+        <motion.div key={current.id + "-" + round} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
+          <GhostSheet src={current.image} alt={current.title} level={STAGES[stage].sheet} revealed={revealed} />
+        </motion.div>
       </div>
 
       {!revealed ? (
@@ -193,7 +216,7 @@ export default function SpookyVeggie() {
           <div className="flex items-center justify-between mb-3">
             <span className="badge-cv">Vale {STAGES[stage].points} pts · {STAGES[stage].label}</span>
             {stage < STAGES.length - 1 && (
-              <button onClick={() => setStage((s) => s + 1)} className="btn-cv-secondary text-sm">🔦 Mostrar más</button>
+              <button onClick={() => setStage((s) => s + 1)} className="btn-cv-secondary text-sm">👻 Mostrar más</button>
             )}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
