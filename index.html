@@ -10,6 +10,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Club Verdura — El lugar secreto de Cualquier Verdura Rock Infantil" />
     <title>Club Verdura</title>
+    <meta property="og:title" content="Club Verdura" />
+    <meta property="og:description" content="El lugar secreto de Cualquier Verdura Rock Infantil" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://club.cualquierverdurarock.com/icons/og-cv.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <style>
+      #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff}
+      html.cv-hw #boot{background:#1a0a2e}
+      #boot img{width:min(84vw,400px);height:auto;animation:bootb 1.4s ease-in-out infinite}
+      @keyframes bootb{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+      @media (prefers-reduced-motion:reduce){#boot img{animation:none}}
+    </style>
     <script>
       // Ícono / manifest de Halloween por fecha (mismas fechas que src/lib/halloween.js).
       // Para otro tema: copiar este bloque y cambiar fechas y prefijo "hw-".
@@ -30,12 +44,14 @@
           document.getElementById("cv-manifest").href = "/manifest-halloween.webmanifest";
           document.getElementById("cv-theme").content = "#1a0a2e";
           document.documentElement.style.background = "#1a0a2e";
+          document.documentElement.className += " cv-hw";
         } catch (e) {}
       })();
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div id="boot"><img src="/icons/cv-512.png" alt="Club Verdura" /></div></div>
+    <script>if(document.documentElement.className.indexOf("cv-hw")>-1){document.querySelector("#boot img").src="/icons/hw-512.png"}</script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
