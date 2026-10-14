@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VEGETABLES, KIDS_CHARACTERS } from "@/lib/clubData";
 import SectionHeader from "@/components/cv/SectionHeader";
-import { useHalloween, spookyVeg } from "@/lib/halloween";
+import { useHalloween, spookyVeg, kidImage } from "@/lib/halloween";
 
 function VegetableCard({ veg, onClick, h }) {
   return (
@@ -117,7 +117,7 @@ function KidCard({ kid, h }) {
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       >
         <img
-          src={kid.image}
+          src={kidImage(kid.image, h)}
           alt={kid.name}
           className="w-28 h-28 object-contain"
         />

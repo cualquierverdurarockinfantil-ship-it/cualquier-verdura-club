@@ -6,16 +6,25 @@ import MemoryGame from "@/components/cv/games/MemoryGame";
 import GuessSongGame from "@/components/cv/games/GuessSongGame";
 import ChallengeCards from "@/components/cv/games/ChallengeCards";
 import MysteryVeggie from "@/components/cv/games/MysteryVeggie";
+import CatchPumpkins from "@/components/cv/games/CatchPumpkins";
+import SpookyVeggie from "@/components/cv/games/SpookyVeggie";
+import HauntedMemory from "@/components/cv/games/HauntedMemory";
+import { useHalloween, HALLOWEEN_GAMES } from "@/lib/halloween";
 
 const GAME_COMPONENTS = {
   memoria: MemoryGame,
   "adivina-cancion": GuessSongGame,
   desafios: ChallengeCards,
   "verdura-misteriosa": MysteryVeggie,
+  // Especiales de Halloween (solo se listan del 19/10 al 31/10)
+  "h-calabazas": CatchPumpkins,
+  "h-misteriosa": SpookyVeggie,
+  "h-memoria": HauntedMemory,
 };
 
 export default function Juegos() {
   const [activeGame, setActiveGame] = useState(null);
+  const h = useHalloween();
 
   const ActiveComponent = activeGame ? GAME_COMPONENTS[activeGame] : null;
 
@@ -30,20 +39,7 @@ export default function Juegos() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  return (
-    <div className="min-h-screen bg-white">
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <SectionHeader
-            emoji="🎮"
-            title="Juegos"
-            subtitle="¡A jugar con las verduras!"
-            color="#06b6d4"
-          />
-
-          {!activeGame ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              {GAMES.map((game, i) => (
+  const renderCard = (game, i) => (
                 <motion.div
                   key={game.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -78,7 +74,35 @@ export default function Juegos() {
                     )}
                   </motion.div>
                 </motion.div>
-              ))}
+  );
+
+  return (
+    <div className="min-h-screen bg-white">
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <SectionHeader
+            emoji="🎮"
+            title="Juegos"
+            subtitle="¡A jugar con las verduras!"
+            color="#06b6d4"
+          />
+
+          {!activeGame ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+              {h && (
+                <>
+                  <div className="md:col-span-2 text-center">
+                    <h2 className="font-bangers text-3xl tracking-wider text-cv-dark" style={{ textShadow: "2px 2px 0 #f97316" }}>
+                      🎃 Especiales de Halloween
+                    </h2>
+                  </div>
+                  {HALLOWEEN_GAMES.map((game, i) => renderCard(game, i))}
+                  <div className="md:col-span-2 text-center mt-4">
+                    <h2 className="font-bangers text-2xl tracking-wider text-cv-dark">Los juegos de siempre</h2>
+                  </div>
+                </>
+              )}
+              {GAMES.map((game, i) => renderCard(game, i))}
             </div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

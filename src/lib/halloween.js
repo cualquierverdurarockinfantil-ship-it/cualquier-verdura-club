@@ -160,3 +160,47 @@ export const HALLOWEEN_DRAWINGS = [
   pdfUrl: `/assets/dibujos/halloween-${d.id}.pdf`,
 }));
 export const HALLOWEEN_PACK_URL = "/assets/dibujos/halloween-pack.pdf";
+
+// Chicos disfrazados (public/assets/halloween/nios/nio1..5.webp)
+export const HALLOWEEN_KIDS = {
+  nio1: "/assets/halloween/nios/nio1.webp", // bruja
+  nio2: "/assets/halloween/nios/nio2.webp", // diablito
+  nio3: "/assets/halloween/nios/nio3.webp", // gatita negra
+  nio4: "/assets/halloween/nios/nio4.webp", // sombrero calabaza
+  nio5: "/assets/halloween/nios/nio5.webp", // murciélago
+};
+
+/** Recibe la ruta original (/assets/nios/nio3.png) y devuelve la disfrazada si el tema está activo */
+export function kidImage(src, active) {
+  if (!active || !src) return src;
+  const m = /nio(\d)/.exec(src);
+  return (m && HALLOWEEN_KIDS["nio" + m[1]]) || src;
+}
+
+// Juegos especiales de Halloween (aparecen en /juegos solo mientras dura el tema)
+export const HALLOWEEN_GAMES = [
+  {
+    id: "h-calabazas",
+    title: "Atrapá la Calabaza",
+    description: "Caen calabazas del cielo: atrapalas y esquivá fantasmas y murciélagos.",
+    icon: "🎃",
+    color: "#f97316",
+    available: true,
+  },
+  {
+    id: "h-misteriosa",
+    title: "Verdura Disfrazada",
+    description: "Mirá la silueta y adiviná qué verdura monstruo se esconde.",
+    icon: "🦇",
+    color: "#a855f7",
+    available: true,
+  },
+  {
+    id: "h-memoria",
+    title: "Casa Embrujada",
+    description: "Memoria en equipo: encontrá las parejas antes de que salga la luna.",
+    icon: "🏚️",
+    color: "#22c55e",
+    available: true,
+  },
+];
