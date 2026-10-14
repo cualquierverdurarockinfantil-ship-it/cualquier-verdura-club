@@ -5,17 +5,20 @@ import { HALLOWEEN_DRAWINGS, HALLOWEEN_VEG, HALLOWEEN_VEG_INFO } from "@/lib/hal
 
 /**
  * VERDURA DISFRAZADA (variante Halloween de Verdura Misteriosa)
- * Una verdura monstruo tapada por una sábana fantasma. Podés pedir que se vuelva más transparente
+ * Una verdura monstruo tapada por una sábana fantasma. Una mano la levanta de a poco si pedís ayuda
  * (menos puntos) y elegís quién es entre las 8.
  */
 
 const VEGS = HALLOWEEN_DRAWINGS.map((d) => ({ id: d.id, title: d.title, image: HALLOWEEN_VEG[d.id] }));
-// La verdura está tapada por una sábana fantasma: cuanto más ayuda pedís, más transparente se pone.
+// La verdura está tapada por una sábana fantasma que una mano va levantando de a poco:
+// cada ayuda deja ver un tramo más del dibujo, de abajo hacia arriba.
 const STAGES = [
-  { sheet: 0.98, points: 3, label: "Sábana gruesa" },
-  { sheet: 0.66, points: 2, label: "Sábana fina" },
-  { sheet: 0.34, points: 1, label: "Sábana casi transparente" },
+  { lift: 0, points: 4, label: "Tapada del todo" },
+  { lift: 0.2, points: 3, label: "Se asoma la base" },
+  { lift: 0.4, points: 2, label: "A mitad de camino" },
+  { lift: 0.6, points: 1, label: "Casi sin sábana" },
 ];
+const IMG_H = 176; // alto del dibujo en px (h-44)
 
 /**
  * Sábana colgando: toma la forma de la verdura solo ARRIBA (donde apoya) y de ahí cae derecha
@@ -77,7 +80,7 @@ function buildSheet(img) {
     const ex = px + t * ((right - left) / 2) * 0.95;
     return `M ${px.toFixed(1)} ${(py + 2).toFixed(1)} Q ${((px + ex) / 2 + t * 4).toFixed(1)} ${(py + 45).toFixed(1)}, ${ex.toFixed(1)} 99`;
   });
-  return { d, folds, W };
+  return { d, folds, W, px, py };
 }
 
 function useSheet(src) {
@@ -100,35 +103,64 @@ function useSheet(src) {
   return sheet;
 }
 
-const GENERIC = { d: "M 8 98 C 6 60, 20 12, 60 10 C 100 12, 114 60, 112 98 Q 99 106 86 98 Q 73 106 60 98 Q 47 106 34 98 Q 21 106 8 98 Z", folds: ["M 60 14 Q 50 55 38 99", "M 60 14 Q 60 55 60 99", "M 60 14 Q 70 55 82 99"], W: 120 };
+const GENERIC = { d: "M 8 98 C 6 60, 20 12, 60 10 C 100 12, 114 60, 112 98 Q 99 106 86 98 Q 73 106 60 98 Q 47 106 34 98 Q 21 106 8 98 Z", folds: ["M 60 14 Q 50 55 38 99", "M 60 14 Q 60 55 60 99", "M 60 14 Q 70 55 82 99"], W: 120, px: 60, py: 10 };
 
-/** Verdura tapada por una sábana que cuelga sobre ella */
-function GhostSheet({ src, alt, level, revealed }) {
+/** Mano monstruo que agarra la sábana desde arriba (sale del borde superior) */
+function Grabber({ x, y }) {
+  const skin = "#86efac";
+  const ink = { stroke: "#1a1a1a", strokeLinejoin: "round", strokeLinecap: "round" };
+  return (
+    <g>
+      {/* brazo con manga */}
+      <rect x={x - 6} y={y - 90} width="12" height="74" rx="3" fill="#6d28d9" {...ink} strokeWidth="2.4" />
+      <rect x={x - 6.5} y={y - 24} width="13" height="7" rx="2" fill="#f97316" {...ink} strokeWidth="2.2" />
+      {/* dedos que pellizcan la punta de la tela */}
+      <path d={`M ${x - 5} ${y - 14} Q ${x - 9} ${y - 4}, ${x - 1.5} ${y + 3}`} fill="none" stroke="#1a1a1a" strokeWidth="7" {...ink} />
+      <path d={`M ${x + 5} ${y - 14} Q ${x + 9} ${y - 4}, ${x + 1.5} ${y + 3}`} fill="none" stroke="#1a1a1a" strokeWidth="7" {...ink} />
+      <path d={`M ${x - 5} ${y - 14} Q ${x - 9} ${y - 4}, ${x - 1.5} ${y + 3}`} fill="none" stroke={skin} strokeWidth="4" strokeLinecap="round" />
+      <path d={`M ${x + 5} ${y - 14} Q ${x + 9} ${y - 4}, ${x + 1.5} ${y + 3}`} fill="none" stroke={skin} strokeWidth="4" strokeLinecap="round" />
+      <ellipse cx={x} cy={y - 14} rx="8" ry="6.5" fill={skin} {...ink} strokeWidth="2.4" />
+      <circle cx={x - 3.2} cy={y + 3} r="1.2" fill="#1a1a1a" />
+      <circle cx={x + 3.2} cy={y + 3} r="1.2" fill="#1a1a1a" />
+    </g>
+  );
+}
+
+/** Verdura tapada por una sábana que cuelga sobre ella y una mano levanta de a poco */
+function GhostSheet({ src, alt, lift, revealed }) {
   const sheet = useSheet(src) || GENERIC;
   const clipId = "sheet-clip-" + src.replace(/[^a-z]/gi, "");
   return (
     <div className="relative inline-block">
       <img src={src} alt={revealed ? alt : "Verdura misteriosa"} className="h-44 w-auto object-contain block" />
-      <motion.svg
+      <motion.div
         aria-hidden="true"
-        viewBox={`0 0 ${sheet.W} 100`}
-        preserveAspectRatio="none"
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ overflow: "visible" }}
+        className="absolute inset-0 pointer-events-none"
         initial={false}
-        animate={{ opacity: revealed ? 0 : level, y: revealed ? -40 : [0, -3, 0] }}
-        transition={revealed ? { duration: 0.5 } : { opacity: { duration: 0.6 }, y: { duration: 3.2, repeat: Infinity, ease: "easeInOut" } }}
+        animate={{ y: revealed ? -360 : -lift * IMG_H * 0.98 }}
+        transition={{ duration: revealed ? 0.8 : 1.1, ease: "easeInOut" }}
       >
-        <defs><clipPath id={clipId}><path d={sheet.d} /></clipPath></defs>
-        <path d={sheet.d} fill="#f5f1ff" />
-        <g clipPath={`url(#${clipId})`} fill="none" stroke="#cfc3ea" strokeWidth="2.4" strokeLinecap="round">
-          {sheet.folds.map((f, i) => <path key={i} d={f} />)}
-        </g>
-        <path d={sheet.d} fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-      </motion.svg>
+        <motion.svg
+          viewBox={`0 0 ${sheet.W} 100`}
+          preserveAspectRatio="none"
+          className="absolute inset-0 w-full h-full"
+          style={{ overflow: "visible", transformOrigin: "50% 0%" }}
+          animate={{ rotate: [-1.4, 1.4, -1.4] }}
+          transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <defs><clipPath id={clipId}><path d={sheet.d} /></clipPath></defs>
+          <path d={sheet.d} fill="#f5f1ff" />
+          <g clipPath={`url(#${clipId})`} fill="none" stroke="#cfc3ea" strokeWidth="2.4" strokeLinecap="round">
+            {sheet.folds.map((f, i) => <path key={i} d={f} />)}
+          </g>
+          <path d={sheet.d} fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+          <Grabber x={sheet.px} y={sheet.py} />
+        </motion.svg>
+      </motion.div>
     </div>
   );
 }
+
 const COLORS = ["#f97316", "#a855f7", "#22c55e", "#06b6d4", "#ec4899", "#facc15"];
 
 const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
@@ -182,8 +214,8 @@ function Setup({ onStart }) {
             rules={[
               "En cada ronda una verdura monstruo aparece tapada por una sábana fantasma: apenas se le adivina el contorno de arriba.",
               "Elegí quién creés que es entre las 8 verduras.",
-              "Si querés ayuda, tocá \"Mostrar más\": la sábana se va haciendo transparente, pero ganás menos puntos.",
-              "Acertar con la sábana gruesa vale 3 puntos, con la sábana fina 2 y con la casi transparente 1.",
+              "Si querés ayuda, tocá \"Mostrar más\": una mano levanta la sábana de a poquito y se ve el dibujo de abajo hacia arriba, pero ganás menos puntos.",
+              "Acertar con la verdura tapada del todo vale 4 puntos, y cada vez que levantan la sábana baja un punto (3, 2 y 1).",
               "Si te equivocás, no sumás puntos y pasa el turno. Gana quien más puntos junte al terminar todas las rondas.",
             ]}
           />
@@ -285,10 +317,10 @@ export default function SpookyVeggie() {
 
       <div
         className="rounded-3xl flex items-center justify-center mb-4 overflow-hidden"
-        style={{ background: "#1a0a2e", border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #f97316", height: 230 }}
+        style={{ background: "#1a0a2e", border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #f97316", height: 270 }}
       >
         <motion.div key={current.id + "-" + round} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
-          <GhostSheet src={current.image} alt={current.title} level={STAGES[stage].sheet} revealed={revealed} />
+          <GhostSheet src={current.image} alt={current.title} lift={STAGES[stage].lift} revealed={revealed} />
         </motion.div>
       </div>
 

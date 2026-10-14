@@ -20,6 +20,9 @@
     <style>
       #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff}
       html.cv-hw #boot{background:#1a0a2e}
+      #boot .b-hw{display:none}
+      html.cv-hw #boot .b-cv{display:none}
+      html.cv-hw #boot .b-hw{display:block;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 12px rgba(216,200,240,.55))}
       #boot img{width:min(84vw,400px);height:auto;animation:bootb 1.4s ease-in-out infinite}
       @keyframes bootb{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
       @media (prefers-reduced-motion:reduce){#boot img{animation:none}}
@@ -50,8 +53,7 @@
     </script>
   </head>
   <body>
-    <div id="root"><div id="boot"><img src="/icons/cv-512.png" alt="Club Verdura" /></div></div>
-    <script>if(document.documentElement.className.indexOf("cv-hw")>-1){document.querySelector("#boot img").src="/icons/hw-512.png"}</script>
+    <div id="root"><div id="boot"><img class="b-cv" src="/icons/boot-cv.png" alt="Club Verdura" /><img class="b-hw" src="/icons/boot-hw.png" alt="" /></div></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
