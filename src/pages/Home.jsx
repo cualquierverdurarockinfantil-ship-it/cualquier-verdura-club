@@ -1,16 +1,18 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ALBUM, VEGETABLES, SHOWS, NEWS, VEG_IMAGES, KID_IMAGES } from "@/lib/clubData";
+import { ALBUM, VEGETABLES, SHOWS, NEWS, KID_IMAGES } from "@/lib/clubData";
 import SectionHeader from "@/components/cv/SectionHeader";
 import FloatingCharacters from "@/components/cv/FloatingCharacters";
+import HalloweenSky from "@/components/cv/halloween/HalloweenSky";
+import { useHalloween, vegImage } from "@/lib/halloween";
 
-function HeroSection() {
+function HeroSection({ h }) {
   return (
     <section
-      className="relative flex flex-col overflow-hidden bg-white px-4"
+      className={`relative flex flex-col overflow-hidden px-4 ${h ? "" : "bg-white"}`}
       style={{ height: "100dvh" }}
     >
-      <FloatingCharacters />
+      {h ? <HalloweenSky /> : <FloatingCharacters />}
 
       {/* gap fijo entre los 4 bloques, ya no se reparte el sobrante con justify-between */}
       <div className="relative z-10 flex flex-col items-center justify-center gap-6 md:gap-8 w-full max-w-lg mx-auto py-2" style={{ height: "100%" }}>
@@ -53,7 +55,7 @@ function HeroSection() {
             src={ALBUM.cover}
             alt={ALBUM.title}
             className="relative z-10 w-40 h-40 md:w-52 md:h-52 rounded-2xl object-cover"
-            style={{ border: "4px solid #1a1a1a", boxShadow: "6px 6px 0 #1a1a1a" }}
+            style={{ border: "4px solid #1a1a1a", boxShadow: h ? "6px 6px 0 #f97316" : "6px 6px 0 #1a1a1a" }}
           />
         </motion.div>
 
@@ -64,10 +66,13 @@ function HeroSection() {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="text-center"
         >
-          <h1 className="text-4xl md:text-6xl font-bangers text-cv-dark leading-tight tracking-wide">
+          <h1
+            className={`text-4xl md:text-6xl font-bangers leading-tight tracking-wide ${h ? "text-white" : "text-cv-dark"}`}
+            style={h ? { textShadow: "3px 3px 0 #f97316, 5px 5px 0 #1a1a1a" } : undefined}
+          >
             La Niñez Es Una Vez
           </h1>
-          <p className="mt-0.5 text-sm md:text-lg font-fredoka text-gray-500">
+          <p className={`mt-0.5 text-sm md:text-lg font-fredoka ${h ? "text-violet-200" : "text-gray-500"}`}>
             El nuevo disco de{" "}
             <span className="font-bangers text-cv-green text-base md:text-xl" style={{ letterSpacing: "0.04em" }}>
               Cualquier Verdura
@@ -95,17 +100,20 @@ function HeroSection() {
   );
 }
 
-function WelcomeSection() {
+function WelcomeSection({ h }) {
   return (
     <section className="relative py-24 px-4 overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/assets/fondo-plaza.jpg)` }} />
-      <div className="absolute inset-0 bg-white/80" />
+      <div className={`absolute inset-0 ${h ? "bg-[#1a0a2e]/90" : "bg-white/80"}`} />
       <motion.img src={KID_IMAGES.nio2} alt="" className="absolute left-0 bottom-0 w-28 md:w-40 object-contain pointer-events-none" style={{ zIndex: 2 }} animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} />
       <motion.img src={KID_IMAGES.nio1} alt="" className="absolute right-0 bottom-0 w-28 md:w-40 object-contain pointer-events-none" style={{ zIndex: 2 }} animate={{ y: [0, -8, 0] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }} />
       <div className="max-w-3xl mx-auto text-center relative z-10">
         <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-          <h2 className="text-5xl md:text-6xl font-bangers text-cv-dark mb-6 tracking-wide">Bienvenidos al<br /><span className="text-cv-fuchsia">Club Verdura</span></h2>
-          <p className="text-lg md:text-xl font-fredoka text-gray-700 leading-relaxed">Somos el fan club digital de <strong>Cualquier Verdura</strong>. Un lugar donde la música, los personajes y la diversión se juntan.</p>
+          <h2 className={`text-5xl md:text-6xl font-bangers mb-6 tracking-wide ${h ? "text-white" : "text-cv-dark"}`}>
+            Bienvenidos al<br />
+            <span className={h ? "text-cv-orange" : "text-cv-fuchsia"}>Club Verdura</span>
+          </h2>
+          <p className={`text-lg md:text-xl font-fredoka leading-relaxed ${h ? "text-violet-100" : "text-gray-700"}`}>Somos el fan club digital de <strong>Cualquier Verdura</strong>. Un lugar donde la música, los personajes y la diversión se juntan.</p>
           <div className="mt-8 flex flex-wrap gap-3 justify-center">
             {[
               { label: "Escuchá Todo", path: "/canciones" },
@@ -128,18 +136,20 @@ function WelcomeSection() {
   );
 }
 
-function CharactersPreview() {
+function CharactersPreview({ h }) {
   return (
-    <section className="py-20 px-4 bg-cv-green/5">
+    <section className={`py-20 px-4 ${h ? "" : "bg-cv-green/5"}`} style={h ? { background: "#1a0a2e" } : undefined}>
       <div className="max-w-6xl mx-auto">
-        <SectionHeader title="La Banda" subtitle="Las verduras rockeras más famosas del jardín" color="#22c55e" />
+        <div className={h ? "hw-header" : ""}>
+          <SectionHeader title="La Banda" subtitle="Las verduras rockeras más famosas del jardín" color={h ? "#f97316" : "#22c55e"} />
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
           {VEGETABLES.map((veg, i) => (
             <motion.div key={veg.id} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}>
               <Link to="/verduras">
                 <motion.div className="card-cv p-4 text-center" whileHover={{ scale: 1.05 }} style={{ background: veg.color + "15" }}>
                   <motion.div className="flex justify-center mb-3" animate={{ rotate: [-5, 5, -5] }} transition={{ duration: 2 + i * 0.4, repeat: Infinity }}>
-                    <img src={veg.image} alt={veg.name} className="w-24 h-24 object-contain" />
+                    <img src={vegImage(veg.id, veg.image, h)} alt={veg.name} className="w-24 h-24 object-contain" />
                   </motion.div>
                   <h3 className="font-bangers text-cv-dark text-xl tracking-wider">{veg.name}</h3>
                   <p className="text-sm font-fredoka text-gray-500 mt-1">{veg.role}</p>
@@ -155,14 +165,16 @@ function CharactersPreview() {
   );
 }
 
-function AlbumPreview() {
+function AlbumPreview({ h }) {
   return (
-    <section className="py-20 px-4">
+    <section className="py-20 px-4" style={h ? { background: "#241040" } : undefined}>
       <div className="max-w-5xl mx-auto">
-        <SectionHeader title="El Disco" subtitle="La Niñez Es Una Vez" color="#ef4444" />
+        <div className={h ? "hw-header" : ""}>
+          <SectionHeader title="El Disco" subtitle="La Niñez Es Una Vez" color={h ? "#f97316" : "#ef4444"} />
+        </div>
         <div className="flex flex-col items-center gap-8">
           <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-            <motion.img src={ALBUM.cover} alt={ALBUM.title} className="w-56 h-56 md:w-72 md:h-72 rounded-2xl object-cover" style={{ border: "4px solid #1a1a1a", boxShadow: "8px 8px 0 #1a1a1a" }} animate={{ rotate: [-1, 1, -1] }} transition={{ duration: 4, repeat: Infinity }} />
+            <motion.img src={ALBUM.cover} alt={ALBUM.title} className="w-56 h-56 md:w-72 md:h-72 rounded-2xl object-cover" style={{ border: "4px solid #1a1a1a", boxShadow: h ? "8px 8px 0 #f97316" : "8px 8px 0 #1a1a1a" }} animate={{ rotate: [-1, 1, -1] }} transition={{ duration: 4, repeat: Infinity }} />
           </motion.div>
           <Link to="/canciones" className="btn-cv-primary text-xl px-12 py-5">Escuchalo Ahora</Link>
         </div>
@@ -171,29 +183,36 @@ function AlbumPreview() {
   );
 }
 
-function KidsBanner() {
+function KidsBanner({ h }) {
   return (
-    <section className="py-16 px-4 overflow-hidden" style={{ background: "#facc1510" }}>
+    <section className="py-16 px-4 overflow-hidden" style={{ background: h ? "#2e1650" : "#facc1510" }}>
       <div className="max-w-5xl mx-auto">
         <div className="flex items-end justify-center gap-4 md:gap-8">
           {[KID_IMAGES.nio1, KID_IMAGES.nio2, KID_IMAGES.nio3, KID_IMAGES.nio4, KID_IMAGES.nio5].map((src, i) => (
             <motion.img key={i} src={src} alt={`Fan ${i + 1}`} className="object-contain" style={{ width: i === 2 ? 140 : 100, height: i === 2 ? 140 : 100 }} animate={{ y: [0, -(6 + i * 3), 0], rotate: [-3 + i, 3 - i, -3 + i] }} transition={{ duration: 2 + i * 0.3, repeat: Infinity, ease: "easeInOut" }} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} />
           ))}
         </div>
-        <motion.p className="text-center font-bangers text-3xl md:text-4xl text-cv-dark mt-6 tracking-wider" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>¡El club ya está abierto!</motion.p>
+        <motion.p
+          className={`text-center font-bangers text-3xl md:text-4xl mt-6 tracking-wider ${h ? "text-white" : "text-cv-dark"}`}
+          style={h ? { textShadow: "3px 3px 0 #f97316" } : undefined}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+        >
+          {h ? "¡Noche de Halloween en el Club!" : "¡El club ya está abierto!"}
+        </motion.p>
       </div>
     </section>
   );
 }
 
 export default function Home() {
+  const h = useHalloween();
   return (
-    <div>
-      <HeroSection />
-      <WelcomeSection />
-      <AlbumPreview />
-      <CharactersPreview />
-      <KidsBanner />
+    <div className={h ? "hw-home" : ""}>
+      <HeroSection h={h} />
+      <WelcomeSection h={h} />
+      <AlbumPreview h={h} />
+      <CharactersPreview h={h} />
+      <KidsBanner h={h} />
     </div>
   );
 }

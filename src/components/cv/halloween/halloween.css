@@ -1,0 +1,225 @@
+/* ============================================================
+   TEMA HALLOWEEN — Club Verdura
+   Todo lo global cuelga de <html class="theme-halloween"> (lo pone useHalloween)
+   ============================================================ */
+
+:root {
+  --hw-night: #1a0a2e;
+  --hw-night-2: #241040;
+  --hw-night-3: #2e1650;
+  --hw-parchment: #efe7fb;
+  --hw-orange: #f97316;
+}
+
+/* ---------- Fondo general (páginas de contenido: claro, con toque lila) ---------- */
+.hw-bg {
+  background-color: var(--hw-parchment);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><g fill='%237c3aed' fill-opacity='0.13'><path d='M30 28 l2.2 6.6 6.8 .4 -5.4 4.2 1.9 6.7 -5.5 -3.9 -5.7 3.9 2 -6.7 -5.4 -4.2 6.8 -.4z'/><path d='M126 110 c3 -6 9 -8 12 -3 c3 -5 9 -3 12 3 c-4 -2 -8 0 -9 3 c-1 -3 -5 -4 -7 -1 c-2 -3 -5 -2 -8 -2 z'/><circle cx='150' cy='38' r='3'/><circle cx='52' cy='132' r='2.4'/><circle cx='96' cy='70' r='2'/></g></svg>");
+  background-size: 180px 180px;
+}
+
+/* ---------- Navbar (envuelta en .hw-nav, que es display:contents) ---------- */
+.theme-halloween .hw-nav :is(nav, header),
+.theme-halloween .hw-nav [class*="bg-white"],
+.theme-halloween .hw-nav [class*="bg-background"] {
+  background: var(--hw-night) !important;
+  border-color: var(--hw-orange) !important;
+}
+.theme-halloween .hw-nav :is(nav, header) {
+  border-bottom: 4px solid var(--hw-orange) !important;
+  box-shadow: 0 4px 0 #7e22ce !important;
+}
+.theme-halloween .hw-nav,
+.theme-halloween .hw-nav * {
+  color: #fff7ed;
+}
+.theme-halloween .hw-nav a:hover,
+.theme-halloween .hw-nav button:hover {
+  color: #fdba74;
+}
+/* botones con fondo claro dentro de la navbar mantienen texto oscuro */
+.theme-halloween .hw-nav [class*="bg-cv-yellow"],
+.theme-halloween .hw-nav [class*="btn-cv-secondary"],
+.theme-halloween .hw-nav [class*="bg-yellow"] {
+  color: #1a1a1a;
+}
+
+/* ---------- Toques sutiles globales ---------- */
+.theme-halloween ::selection {
+  background: #f97316;
+  color: #1a1a1a;
+}
+.theme-halloween .card-cv {
+  box-shadow: 6px 6px 0 #5b21b6;
+}
+.theme-halloween .card-cv:hover {
+  box-shadow: 8px 8px 0 #5b21b6;
+}
+
+/* ---------- Home: sección con noche completa ---------- */
+.hw-home {
+  background: var(--hw-night);
+  color: #fff7ed;
+}
+.hw-home .hw-header * {
+  color: #fff7ed;
+}
+.hw-home .hw-header p {
+  color: #d8c8f0;
+}
+
+/* ---------- Capa de efectos (fija, no se puede tocar) ---------- */
+.hw-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 30;
+}
+.hw-top {
+  top: 64px; /* debajo de la navbar */
+}
+
+/* Arañas colgando */
+.hw-spider-thread {
+  position: absolute;
+  top: 0;
+  transform-origin: 50% 0;
+  animation: hw-swing 4.6s ease-in-out infinite;
+}
+.hw-spider-thread::before {
+  content: "";
+  display: block;
+  margin: 0 auto;
+  width: 2px;
+  height: var(--len, 70px);
+  background: #fff;
+  box-shadow: 0 0 0 1px #1a1a1a;
+  animation: hw-drop 7s ease-in-out infinite;
+  transform-origin: 50% 0;
+}
+.hw-spider-body {
+  display: block;
+  margin: -4px auto 0;
+  animation: hw-drop-body 7s ease-in-out infinite;
+}
+@keyframes hw-swing {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+}
+@keyframes hw-drop {
+  0%, 100% { transform: scaleY(0.78); }
+  50% { transform: scaleY(1); }
+}
+@keyframes hw-drop-body {
+  0%, 100% { transform: translateY(calc(var(--len, 70px) * -0.22)); }
+  50% { transform: translateY(0); }
+}
+
+/* Murciélagos cruzando */
+.hw-bat {
+  position: absolute;
+  left: 0;
+  animation: hw-bat-cross var(--dur, 30s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  transform: translateX(-20vw);
+}
+.hw-bat > svg {
+  display: block;
+  animation: hw-bat-bob 1.6s ease-in-out infinite;
+}
+@keyframes hw-bat-cross {
+  0% { transform: translateX(-20vw); }
+  100% { transform: translateX(115vw); }
+}
+@keyframes hw-bat-bob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-14px) rotate(4deg); }
+}
+.hw-wing-l { animation: hw-flap-l 0.5s ease-in-out infinite; }
+.hw-wing-r { animation: hw-flap-r 0.5s ease-in-out infinite; }
+@keyframes hw-flap-l {
+  0%, 100% { transform: rotate(10deg); }
+  50% { transform: rotate(-22deg); }
+}
+@keyframes hw-flap-r {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(22deg); }
+}
+
+/* Gato */
+.hw-tail { animation: hw-tail 3.4s ease-in-out infinite; }
+@keyframes hw-tail {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(10deg); }
+}
+.hw-blink { animation: hw-blink 6s infinite; }
+@keyframes hw-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.08); }
+}
+
+/* Rayo: destello suave, sube en ~0.4 s y baja despacio. Nada de cortes bruscos. */
+.hw-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at var(--fx, 50%) 0%, rgba(233, 213, 255, 0.95) 0%, rgba(196, 160, 255, 0.45) 38%, rgba(196, 160, 255, 0) 72%);
+  opacity: 0;
+  animation: hw-flash 3.4s ease-in-out forwards;
+}
+.hw-bolt {
+  position: absolute;
+  top: 0;
+  width: 44px;
+  opacity: 0;
+  animation: hw-bolt 3.4s ease-in-out forwards;
+}
+@keyframes hw-flash {
+  0% { opacity: 0; }
+  12% { opacity: 0.16; }
+  20% { opacity: 0.05; }
+  32% { opacity: 0.22; }
+  60% { opacity: 0.05; }
+  100% { opacity: 0; }
+}
+@keyframes hw-bolt {
+  0% { opacity: 0; }
+  12% { opacity: 0.35; }
+  22% { opacity: 0.1; }
+  32% { opacity: 0.45; }
+  62% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Estrellas y fantasma de la Home */
+.hw-twinkle { animation: hw-twinkle 3s ease-in-out infinite; }
+@keyframes hw-twinkle {
+  0%, 100% { transform: scale(0.7); opacity: 0.55; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+.hw-drift { animation: hw-drift 9s ease-in-out infinite; }
+@keyframes hw-drift {
+  0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+  50% { transform: translate(14px, -18px) rotate(5deg); }
+}
+
+/* ---------- Respetar "reducir movimiento" ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .hw-spider-thread,
+  .hw-spider-thread::before,
+  .hw-spider-body,
+  .hw-bat,
+  .hw-bat > svg,
+  .hw-wing-l,
+  .hw-wing-r,
+  .hw-tail,
+  .hw-blink,
+  .hw-twinkle,
+  .hw-drift {
+    animation: none !important;
+  }
+  /* sin rayos y sin murciélagos cruzando: los murciélagos quedan quietos en un rincón */
+  .hw-bat { transform: translateX(78vw); }
+  .hw-flash,
+  .hw-bolt { display: none !important; }
+}
