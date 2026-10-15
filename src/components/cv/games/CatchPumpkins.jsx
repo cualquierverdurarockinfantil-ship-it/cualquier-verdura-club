@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import GameRulesButton from "./GameRulesButton";
 import { Bat, Ghost, Moon, Pumpkin } from "../halloween/HalloweenArt";
@@ -11,6 +12,7 @@ import { Bat, Ghost, Moon, Pumpkin } from "../halloween/HalloweenArt";
  *   nivel 4: los fantasmas titilan y a veces caen ráfagas  ·  combo x2 con 5 calabazas seguidas
  */
 
+const HUD_BADGE = { background: "#fff7ed", color: "#1a1a1a", border: "2px solid #1a1a1a", padding: "2px 12px" };
 const BEST_KEY = "cv-halloween-catch-best";
 const SIZES = { pumpkin: 74, golden: 82, ghost: 58, bat: 70 };
 
@@ -90,6 +92,49 @@ export default function CatchPumpkins() {
   const area = useRef(null);
   const g = useRef({ items: [], pops: [], score: 0, lives: 3, level: 1, spawn: 0, id: 1, t: 0 });
   const raf = useRef(0);
+  const shell = useRef(null);
+
+  // Pantalla completa mientras se juega: se congela la página de atrás para que no se mueva sola
+  // (en el celular, un dedo que arrastra o rebota sobre el juego hacía scrollear toda la página).
+  const fullscreen = phase !== "intro";
+  useEffect(() => {
+    if (!fullscreen) return undefined;
+    const y = window.scrollY;
+    const b = document.body;
+    const prev = { position: b.style.position, top: b.style.top, width: b.style.width, overflow: b.style.overflow };
+    const htmlPrev = document.documentElement.style.overscrollBehavior;
+    b.style.position = "fixed";
+    b.style.top = `-${y}px`;
+    b.style.width = "100%";
+    b.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
+    return () => {
+      b.style.position = prev.position;
+      b.style.top = prev.top;
+      b.style.width = prev.width;
+      b.style.overflow = prev.overflow;
+      document.documentElement.style.overscrollBehavior = htmlPrev;
+      window.scrollTo(0, y);
+    };
+  }, [fullscreen]);
+
+  // touchmove no pasivo: ningún gesto sobre el juego mueve la página
+  useEffect(() => {
+    const el = shell.current;
+    if (!el) return undefined;
+    const stop = (e) => e.preventDefault();
+    el.addEventListener("touchmove", stop, { passive: false });
+    return () => el.removeEventListener("touchmove", stop);
+  }, [fullscreen]);
+
+  const exitGame = () => {
+    const sc = g.current.score;
+    if (sc > readBest()) {
+      saveBest(sc);
+      setBest(sc);
+    }
+    setPhase("intro");
+  };
 
   const start = () => {
     g.current = { items: [], pops: [], score: 0, lives: 3, level: 1, spawn: 0.4, id: 1, t: 0, combo: 0 };
@@ -227,23 +272,37 @@ export default function CatchPumpkins() {
         </motion.div>
       )}
 
-      {phase !== "intro" && (
-        <>
-          <div className="flex items-center justify-between mb-2 font-bangers text-lg tracking-wide">
-            <span className="badge-cv">🎃 {hud.score}</span>
-            <span className="badge-cv">Nivel {hud.level}{hud.combo >= 5 ? " · 🔥 x2" : hud.combo > 0 ? ` · ${hud.combo}/5` : ""}</span>
-            <span className="badge-cv">{"❤️".repeat(Math.max(0, hud.lives)) || "💀"}</span>
+      {phase !== "intro" && createPortal(
+        <div
+          ref={shell}
+          className="fixed inset-0 flex flex-col"
+          style={{
+            zIndex: 100,
+            height: "100dvh",
+            background: "#0f0420",
+            padding: "max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left))",
+            touchAction: "none",
+            overscrollBehavior: "none",
+          }}
+        >
+          <div className="w-full max-w-lg mx-auto flex flex-col flex-1 min-h-0">
+          <div className="flex items-center justify-between gap-2 mb-2 font-bangers text-lg tracking-wide">
+            <button onClick={exitGame} aria-label="Salir del juego" className="badge-cv" style={{ ...HUD_BADGE, touchAction: "manipulation" }}>✕</button>
+            <span className="badge-cv" style={HUD_BADGE}>🎃 {hud.score}</span>
+            <span className="badge-cv" style={HUD_BADGE}>Nivel {hud.level}{hud.combo >= 5 ? " · 🔥 x2" : hud.combo > 0 ? ` · ${hud.combo}/5` : ""}</span>
+            <span className="badge-cv" style={HUD_BADGE}>{"❤️".repeat(Math.max(0, hud.lives)) || "💀"}</span>
           </div>
 
           <div
             ref={area}
             className="relative overflow-hidden rounded-3xl select-none"
             style={{
-              height: "min(70vh, 520px)",
+              flex: 1,
+              minHeight: 0,
               background: "#1a0a2e",
               border: "4px solid #1a1a1a",
               boxShadow: hurt ? "6px 6px 0 #ef4444" : "6px 6px 0 #f97316",
-              touchAction: "manipulation",
+              touchAction: "none",
             }}
           >
             <Moon className="absolute" style={{ right: "8%", top: "5%", width: 70, opacity: 0.9 }} />
@@ -264,7 +323,7 @@ export default function CatchPumpkins() {
                   border: 0,
                   padding: 14,
                   cursor: "pointer",
-                  touchAction: "manipulation",
+                  touchAction: "none",
                 }}
               >
                 <ItemArt type={i.type} />
@@ -305,10 +364,13 @@ export default function CatchPumpkins() {
                 <button onClick={start} className="btn-cv-primary" style={{ background: "#f97316", color: "#1a1a1a" }}>
                   ¡Jugar de nuevo!
                 </button>
+                <button onClick={exitGame} className="btn-cv-secondary mt-3 text-sm">← Volver</button>
               </motion.div>
             )}
           </div>
-        </>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
