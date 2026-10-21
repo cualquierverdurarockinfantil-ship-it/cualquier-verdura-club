@@ -9,19 +9,18 @@ import { X } from "lucide-react";
  * igual que el tema Halloween del Club. Para probar antes: ?halloween=1  (y ?halloween=0 lo apaga).
  *
  * PARA EDITAR: todo lo que cambia está en SHOW (acá abajo).
- * Si el clima no acompaña y se hace en el Mercado de las Artes: poné MOVED_TO_FALLBACK = true.
+ * El show es en el Teatro Español (entrada por Café Cervantes), llueva o no.
  */
 const SHOW = {
-  id: "tacuarock-halloween-2026",
+  id: "tacuarock-halloween-2026-teatro",
   name: "Tacuarock Halloween",
   when: "Sábado 31/10 · 18 h",
-  venue: "Plaza Tambor de Tacuarí",
-  fallbackVenue: "Mercado de las Artes",
+  venue: "Teatro Español",
+  access: "Entrada por Café Cervantes",
   free: true,
   on: "2026-10-19", // inclusive
   off: "2026-11-01", // desde este día ya no se muestra
 };
-const MOVED_TO_FALLBACK = false;
 
 const PREVIEW_KEY = "cv-halloween-preview";
 function readPreview() {
@@ -68,7 +67,7 @@ function MiniPumpkin() {
 }
 
 function details() {
-  const place = MOVED_TO_FALLBACK ? SHOW.fallbackVenue : SHOW.venue;
+  const place = SHOW.venue;
   return { place, line: `${SHOW.when} · ${place}${SHOW.free ? " · Entrada libre" : ""}` };
 }
 
@@ -103,11 +102,9 @@ function Band({ onClose, action }) {
               {SHOW.name}
             </p>
             <p className="font-fredoka text-sm md:text-base mt-1" style={{ color: "#fdba74" }}>{line}</p>
-            {!MOVED_TO_FALLBACK && (
-              <p className="font-fredoka text-xs" style={{ color: "#d8c8f0" }}>
-                Si el clima no acompaña, nos mudamos al {SHOW.fallbackVenue}.
-              </p>
-            )}
+            <p className="font-fredoka text-xs md:text-sm" style={{ color: "#d8c8f0" }}>
+              {SHOW.access}
+            </p>
           </div>
           {action}
         </div>
