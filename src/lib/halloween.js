@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
  *
  * Se prende solo por fecha (hora local del visitante, igual que los banners):
  *   - ON : lunes 19/10/2026
- *   - OFF: domingo 1/11/2026 (el 31/10 todavía está prendido)
+ *   - OFF: viernes 6/11/2026 (queda prendido hasta el jueves 5/11 inclusive; extendido 5 días después de la Tacuarock)
  *
  * Para otro año o para otro tema (Navidad, Primavera...) alcanza con copiar
  * este archivo y cambiar las fechas.
@@ -15,7 +15,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
  *   club.cualquierverdurarock.com/?halloween=0   -> lo fuerza apagado
  */
 export const HALLOWEEN_ON = "2026-10-19"; // inclusive
-export const HALLOWEEN_OFF = "2026-11-01"; // desde este día ya NO se muestra
+export const HALLOWEEN_OFF = "2026-11-06"; // desde este día ya NO se muestra (se ve hasta el 5/11 inclusive)
 
 const STORAGE_KEY = "cv-halloween-preview";
 
@@ -187,7 +187,7 @@ export const CATCH_GAME = {
   available: true,
 };
 
-// Especiales que SOLO aparecen en /juegos mientras dura el tema (19/10 al 31/10)
+// Especiales que SOLO aparecen en /juegos mientras dura el tema (19/10 al 5/11)
 export const HALLOWEEN_GAMES = [
   {
     id: "h-misteriosa",
