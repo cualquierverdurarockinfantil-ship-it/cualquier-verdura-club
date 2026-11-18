@@ -15,7 +15,8 @@ export function GarlandTile({ offset = 0, className = "", style }) {
         const y = 8 + 27 * (1 - Math.pow((((x % 80) - 40) / 40), 2)) * 0.74 + 1;
         const c = BULB_COLORS[(i + offset) % BULB_COLORS.length];
         return (
-          <g key={x} className={`fi-bulb fi-bulb-${(i + offset) % 3}`}>
+          <g key={x} className={`fi-bulb fi-bulb-${(i + offset) % 4}`}>
+            <ellipse cx={x} cy={y + 12} rx="12" ry="14" fill={c} opacity=".3" />
             <path d={`M${x - 3} ${y} h6 l-1 6 h-4 z`} fill={K} />
             <ellipse cx={x} cy={y + 12} rx="6" ry="8" fill={c} stroke={K} strokeWidth="2.2" />
             <ellipse cx={x - 2} cy={y + 9} rx="1.7" ry="2.6" fill="#fff" opacity=".8" />
@@ -43,7 +44,10 @@ export function Pino({ className = "", style }) {
         <path d="M60 -2 l4 9 10 1 -8 6 3 10 -9 -6 -9 6 3 -10 -8 -6 10 -1z" transform="translate(0,2)" fill="#facc15" />
       </g>
       {dots.map(([x, y, c], i) => (
-        <circle key={i} className={`fi-bulb fi-bulb-${i % 3}`} cx={x} cy={y} r="4.6" fill={c} stroke={K} strokeWidth="2" />
+        <g key={i} className={`fi-bulb fi-bulb-${i % 4}`}>
+          <circle cx={x} cy={y} r="9" fill={c} opacity=".3" />
+          <circle cx={x} cy={y} r="4.6" fill={c} stroke={K} strokeWidth="2" />
+        </g>
       ))}
     </svg>
   );

@@ -122,15 +122,17 @@
   overflow: hidden;
   opacity: 0.96;
 }
-/* lamparitas que titilan (3 ritmos) */
+/* lamparitas como las del arbolito: 4 grupos que se prenden y apagan en cadena */
 .fi-bulb {
-  animation: fi-twinkle 2.4s ease-in-out infinite;
+  animation: fi-chase 1.8s ease-in-out infinite;
 }
-.fi-bulb-1 { animation-delay: -0.8s; }
-.fi-bulb-2 { animation-delay: -1.6s; }
-@keyframes fi-twinkle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.45; }
+.fi-bulb-1 { animation-delay: -0.45s; }
+.fi-bulb-2 { animation-delay: -0.9s; }
+.fi-bulb-3 { animation-delay: -1.35s; }
+@keyframes fi-chase {
+  0%, 38%   { opacity: 1; }
+  50%, 88%  { opacity: 0.16; }
+  100%      { opacity: 1; }
 }
 /* luciérnagas: noche de verano */
 .fi-firefly {
@@ -154,5 +156,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .fi-bulb, .fi-firefly { animation: none; }
+  .fi-bulb { opacity: 1; }
   .fi-firefly { opacity: 0.5; }
 }

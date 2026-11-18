@@ -10,13 +10,13 @@ import { FIESTAS_VEG, FIESTAS_KIDS, FIESTAS_ORNAMENTS } from "@/lib/fiestas";
  *  - tienen que TOCAR el pino (aunque sea el borde del sticker con el borde del árbol)
  *  - no pueden pisarse entre sí
  * Si no se puede soltar, el sticker se ve en gris. Tocá un sticker puesto para sacarlo, o arrastralo para moverlo.
- * Dura 1 minuto: al terminar, cuenta los que quedaron. Después podés sacarle una foto al arbolito con un saludo.
+ * Dura 1 minuto y medio: al terminar, cuenta los que quedaron. Después podés sacarle una foto al arbolito con un saludo.
  */
 
 const W = 400; // el escenario es 400 x 500 "unidades"; todo se mide en esas unidades
 const H = 500;
 const S = 64; // lado de cada sticker (todos iguales)
-const GAME_SECONDS = 60;
+const GAME_SECONDS = 90;
 const BEST_KEY = "cv-fiestas-arbolito-best";
 const TOUCH_LIFT = 40; // en celular el sticker se levanta un poco para que el dedo no lo tape
 
@@ -110,9 +110,9 @@ function saveBest(v) {
 }
 
 function resultMessage(n) {
-  if (n >= 22) return "¡Arbolito de la abuela, con todo! 🎄✨";
-  if (n >= 15) return "¡Qué arbolazo! La familia entera lo mira.";
-  if (n >= 8) return "¡Va tomando forma el pino!";
+  if (n >= 26) return "¡Arbolito de la abuela, con todo! 🎄✨";
+  if (n >= 18) return "¡Qué arbolazo! La familia entera lo mira.";
+  if (n >= 10) return "¡Va tomando forma el pino!";
   if (n >= 1) return "¡Un arbolito tímido, pero con onda!";
   return "El pino quedó pelado… ¡probá de nuevo!";
 }
@@ -125,6 +125,69 @@ function loadImg(src) {
     im.onerror = () => resolve(null);
     im.src = src;
   });
+}
+
+const BULBS = ["#ef4444", "#facc15", "#22c55e", "#38bdf8", "#f472b6", "#fb923c"];
+const LOGO_SPLIT = 0.522; // donde termina "CUALQUIER" y empieza "VERDURA" dentro del logo
+
+/** moño rojo de regalo (para las esquinas del marco) */
+function drawBow(g, x, y, s) {
+  g.save();
+  g.translate(x, y);
+  g.scale(s, s);
+  g.lineJoin = "round";
+  g.lineWidth = 5;
+  g.strokeStyle = "#1a1a1a";
+  g.fillStyle = "#dc2626";
+  [-1, 1].forEach((d) => {
+    g.beginPath();
+    g.moveTo(0, 0);
+    g.bezierCurveTo(d * 34, -34, d * 70, -26, d * 62, 2);
+    g.bezierCurveTo(d * 56, 26, d * 22, 20, 0, 0);
+    g.fill();
+    g.stroke();
+  });
+  g.fillStyle = "#b91c1c";
+  [-1, 1].forEach((d) => {
+    g.beginPath();
+    g.moveTo(d * 4, 6);
+    g.lineTo(d * 26, 46);
+    g.lineTo(d * 12, 42);
+    g.lineTo(d * 4, 50);
+    g.lineTo(d * -2, 12);
+    g.closePath();
+    g.fill();
+    g.stroke();
+  });
+  g.fillStyle = "#facc15";
+  g.beginPath();
+  g.arc(0, 0, 13, 0, Math.PI * 2);
+  g.fill();
+  g.stroke();
+  g.restore();
+}
+
+/** lamparita de colores con un halo suave */
+function drawBulb(g, x, y, color) {
+  g.save();
+  g.globalAlpha = 0.28;
+  g.fillStyle = color;
+  g.beginPath();
+  g.arc(x, y, 22, 0, Math.PI * 2);
+  g.fill();
+  g.globalAlpha = 1;
+  g.fillStyle = color;
+  g.strokeStyle = "#1a1a1a";
+  g.lineWidth = 3;
+  g.beginPath();
+  g.ellipse(x, y, 9, 12, 0, 0, Math.PI * 2);
+  g.fill();
+  g.stroke();
+  g.fillStyle = "rgba(255,255,255,.75)";
+  g.beginPath();
+  g.ellipse(x - 3, y - 4, 2.4, 4, 0, 0, Math.PI * 2);
+  g.fill();
+  g.restore();
 }
 
 async function buildPhoto(placed, name) {
@@ -144,61 +207,31 @@ async function buildPhoto(placed, name) {
   // cielo de noche de verano
   const sky = g.createLinearGradient(0, 0, 0, ch);
   sky.addColorStop(0, "#0b2545");
-  sky.addColorStop(0.7, "#12385e");
+  sky.addColorStop(0.65, "#12385e");
   sky.addColorStop(1, "#14532d");
   g.fillStyle = sky;
   g.fillRect(0, 0, cw, ch);
 
-  // estrellitas
+  // destellos dorados
   g.fillStyle = "#fde68a";
   STARS.forEach(([x, y, r], i) => {
     g.globalAlpha = 0.6 + (i % 3) * 0.15;
     g.save();
-    g.translate((x / W) * cw - (x / W) * 0, (y / H) * 1000 + 230);
+    g.translate((x / W) * cw, (y / H) * 980 + 250);
     g.scale(2.6, 2.6);
     g.fill(new Path2D(sparkle(0, 0, r)));
     g.restore();
   });
   g.globalAlpha = 1;
 
-  // guirnalda de luces arriba
-  const colors = ["#ef4444", "#facc15", "#22c55e", "#38bdf8", "#f472b6", "#fb923c"];
-  g.strokeStyle = "#1a1a1a";
-  g.lineWidth = 5;
-  g.beginPath();
-  for (let x = 0; x <= cw; x += 4) {
-    const y = 18 + 34 * Math.abs(Math.sin((x / cw) * Math.PI * 6));
-    if (x === 0) g.moveTo(x, y);
-    else g.lineTo(x, y);
-  }
-  g.stroke();
-  for (let i = 0; i < 12; i++) {
-    const x = 45 + i * 90;
-    const y = 18 + 34 * Math.abs(Math.sin((x / cw) * Math.PI * 6));
-    g.fillStyle = colors[i % colors.length];
-    g.lineWidth = 3;
-    g.beginPath();
-    g.ellipse(x, y + 20, 11, 15, 0, 0, Math.PI * 2);
-    g.fill();
-    g.stroke();
-  }
-
-  // título
-  g.textAlign = "center";
-  g.textBaseline = "alphabetic";
-  const title = name ? `¡Felices fiestas, ${name}!` : "¡Felices fiestas!";
-  g.font = `${title.length > 20 ? 92 : 118}px Bangers, Impact, sans-serif`;
-  g.lineJoin = "round";
-  g.lineWidth = 16;
-  g.strokeStyle = "#dc2626";
-  g.strokeText(title, cw / 2, 190);
-  g.fillStyle = "#fffbeb";
-  g.fillText(title, cw / 2, 190);
-
   // escenario del arbolito: 400x500 unidades -> 720x900
-  const k = 1.8;
+  const k = 1.7;
   const ox = (cw - W * k) / 2;
-  const oy = 215;
+  const oy = 232;
+
+  // personajes a los costados (el tomate con gorro y la berenjena con barba)
+  const [imgTomate, imgBere] = await Promise.all([loadImg(FIESTAS_VEG.tomate), loadImg(FIESTAS_VEG.berenjena)]);
+
   g.save();
   g.translate(ox, oy);
   g.scale(k, k);
@@ -208,12 +241,25 @@ async function buildPhoto(placed, name) {
   g.strokeStyle = "#1a1a1a";
   g.lineWidth = 3;
   g.beginPath();
-  g.ellipse(200, 482, 190, 20, 0, 0, Math.PI * 2);
+  g.ellipse(200, 482, 196, 20, 0, 0, Math.PI * 2);
   g.fill();
   g.stroke();
+  g.restore();
 
+  const drawChar = (im, cx, footY, h) => {
+    if (!im) return;
+    const w = (im.width / im.height) * h;
+    g.drawImage(im, cx - w / 2, footY - h, w, h);
+  };
+  drawChar(imgTomate, 150, 1082, 236);
+  drawChar(imgBere, 935, 1082, 272);
+
+  g.save();
+  g.translate(ox, oy);
+  g.scale(k, k);
   g.lineJoin = "round";
   g.lineWidth = 3.4;
+  g.strokeStyle = "#1a1a1a";
   g.fillStyle = "#92400e";
   g.fillRect(TRUNK.x, TRUNK.y, TRUNK.w, TRUNK.h);
   g.strokeRect(TRUNK.x, TRUNK.y, TRUNK.w, TRUNK.h);
@@ -242,31 +288,100 @@ async function buildPhoto(placed, name) {
   });
   g.restore();
 
-  // pie: saludo + logo
+  // cinta con el saludo
+  g.textAlign = "center";
+  g.textBaseline = "alphabetic";
+  const title = name ? `¡Felices fiestas, ${name}!` : "¡Felices fiestas!";
+  g.fillStyle = "#dc2626";
+  g.strokeStyle = "#1a1a1a";
+  g.lineWidth = 7;
+  g.beginPath();
+  g.roundRect(80, 72, cw - 160, 138, 30);
+  g.fill();
+  g.stroke();
+  g.strokeStyle = "#facc15";
+  g.lineWidth = 4;
+  g.setLineDash([2, 12]);
+  g.lineCap = "round";
+  g.beginPath();
+  g.roundRect(96, 88, cw - 192, 106, 20);
+  g.stroke();
+  g.setLineDash([]);
+  g.font = `${title.length > 20 ? 88 : 112}px Bangers, Impact, sans-serif`;
+  g.lineJoin = "round";
+  g.lineWidth = 12;
+  g.strokeStyle = "#1a1a1a";
+  g.strokeText(title, cw / 2, 176);
+  g.fillStyle = "#fffbeb";
+  g.fillText(title, cw / 2, 176);
+
+  // saludo + logo a color (CUALQUIER en rojo, VERDURA en verde)
   g.fillStyle = "#fffbeb";
   g.font = "44px Fredoka, Arial, sans-serif";
-  g.fillText("Que la pasen en familia, con la mesa llena 🎄", cw / 2, 1190);
-  const plateW = 760;
-  const plateH = 104;
+  g.fillText("Que la pasen en familia, con la mesa llena 🎄", cw / 2, 1150);
+  const plateW = 780;
+  const plateH = 100;
   const px = (cw - plateW) / 2;
-  const py = 1216;
+  const py = 1170;
   g.fillStyle = "#fffbeb";
   g.strokeStyle = "#1a1a1a";
   g.lineWidth = 5;
   g.beginPath();
-  g.roundRect(px, py, plateW, plateH, 26);
+  g.roundRect(px, py, plateW, plateH, 28);
   g.fill();
   g.stroke();
   const logo = await loadImg("/assets/letras-horizontal.svg");
   if (logo) {
-    const lw = 620;
+    const lw = 600;
     const lh = lw * (240.2 / 1826.09);
-    g.drawImage(logo, (cw - lw) / 2, py + (plateH - lh) / 2, lw, lh);
+    const tmp = document.createElement("canvas");
+    tmp.width = Math.round(lw);
+    tmp.height = Math.round(lh);
+    const t = tmp.getContext("2d");
+    t.drawImage(logo, 0, 0, tmp.width, tmp.height);
+    t.globalCompositeOperation = "source-in";
+    const grad = t.createLinearGradient(0, 0, tmp.width, 0);
+    grad.addColorStop(0, "#dc2626");
+    grad.addColorStop(LOGO_SPLIT - 0.001, "#dc2626");
+    grad.addColorStop(LOGO_SPLIT + 0.001, "#16a34a");
+    grad.addColorStop(1, "#16a34a");
+    t.fillStyle = grad;
+    t.fillRect(0, 0, tmp.width, tmp.height);
+    g.drawImage(tmp, (cw - lw) / 2, py + (plateH - lh) / 2, lw, lh);
   } else {
-    g.fillStyle = "#1a1a1a";
+    g.fillStyle = "#16a34a";
     g.font = "56px Bangers, Impact, sans-serif";
-    g.fillText("Cualquier Verdura", cw / 2, py + 70);
+    g.fillText("Cualquier Verdura", cw / 2, py + 72);
   }
+
+  // marco navideño: banda verde con lamparitas de colores y moños en las esquinas
+  const band = 46;
+  g.save();
+  g.fillStyle = "#14532d";
+  g.beginPath();
+  g.rect(0, 0, cw, ch);
+  g.rect(band, band, cw - 2 * band, ch - 2 * band);
+  g.fill("evenodd");
+  g.strokeStyle = "#dc2626";
+  g.lineWidth = 8;
+  g.strokeRect(band, band, cw - 2 * band, ch - 2 * band);
+  g.strokeStyle = "#1a1a1a";
+  g.lineWidth = 5;
+  g.strokeRect(2.5, 2.5, cw - 5, ch - 5);
+  g.restore();
+  const mid = band / 2;
+  let n = 0;
+  for (let x = 100; x <= cw - 100; x += 62) {
+    drawBulb(g, x, mid, BULBS[n % BULBS.length]);
+    drawBulb(g, x + 31, ch - mid, BULBS[(n + 3) % BULBS.length]);
+    n++;
+  }
+  for (let y = 100; y <= ch - 100; y += 62) {
+    drawBulb(g, mid, y, BULBS[(n + 1) % BULBS.length]);
+    drawBulb(g, cw - mid, y + 31, BULBS[(n + 4) % BULBS.length]);
+    n++;
+  }
+  [[58, 58], [cw - 58, 58], [58, ch - 58], [cw - 58, ch - 58]].forEach(([x, y]) => drawBow(g, x, y, 0.62));
 
   return canvas.toDataURL("image/png");
 }
@@ -500,11 +615,11 @@ export default function ArmarArbolito() {
 
   const rules = useMemo(
     () => [
-      "Tenés 1 minuto para decorar el pino con la mayor cantidad de stickers posible.",
+      "Tenés 1 minuto y medio para decorar el pino con la mayor cantidad de stickers posible.",
       "Arrastrá un sticker de la bandeja hasta el árbol. Tiene que tocar el pino (aunque sea solo el borde).",
       "Si el sticker se ve en gris es que no lo podés soltar ahí: o no toca el pino o está pisando a otro.",
       "Para sacar uno, tocalo. Para moverlo, arrastralo (o llevalo fuera del escenario).",
-      "Cuando termina el minuto, cuenta los que quedaron. ¡Después te llevás una foto con tu saludo de fiestas!",
+      "Cuando se acaba el tiempo, cuenta los que quedaron: ¡gana el que más pone! Después te llevás una foto con tu saludo de fiestas.",
     ],
     []
   );
@@ -517,8 +632,11 @@ export default function ArmarArbolito() {
           🎄
         </motion.div>
         <h2 className="text-4xl font-bangers tracking-wider text-cv-dark mb-2">Armá el Arbolito</h2>
-        <p className="font-fredoka text-gray-600 mb-4">
-          Llená el pino de verduras, chicos y adornos. Tienen que tocar el árbol y no pueden pisarse. ¡Tenés un minuto!
+        <p className="font-bangers text-2xl tracking-wide text-cv-green mb-2">¡Gana el que más stickers ponga!</p>
+        <p className="font-fredoka text-gray-600 mb-4 leading-snug">
+          La idea es llenar el pino con la mayor cantidad posible de verduras, chicos y adornos. Tenés <strong>1 minuto y medio</strong>:
+          cada sticker tiene que tocar el árbol y no puede pisar a otro. Si se ve en gris, todavía no lo podés soltar. Al final se
+          cuentan los que quedaron.
         </p>
         <GameRulesButton title="Armá el Arbolito" accentColor="#16a34a" rules={rules} />
         {best > 0 && <p className="font-fredoka text-gray-500 mb-3">Tu récord: <strong>{best}</strong> stickers</p>}

@@ -122,7 +122,7 @@ export const FIESTAS_GAMES = [
   {
     id: "f-arbolito",
     title: "Armá el Arbolito",
-    description: "Pegá verduras, chicos y adornos en el pino. ¡Tienen que tocar el árbol y no pueden pisarse! Tenés un minuto.",
+    description: "Llená el pino de verduras, chicos y adornos: ¡gana el que más stickers ponga! Tienen que tocar el árbol y no pueden pisarse. Tenés 1 minuto y medio.",
     icon: "🎄",
     color: "#16a34a",
     available: true,
