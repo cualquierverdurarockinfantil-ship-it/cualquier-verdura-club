@@ -127,6 +127,23 @@ export const FIESTAS_GAMES = [
     color: "#16a34a",
     available: true,
   },
+  {
+    id: "f-regalos",
+    title: "Regalos a la Chimenea",
+    description: "Papá Noel pasa volando: tocá para soltar los regalos y embocalos por la chimenea. ¡Son 12 y el trineo va cada vez más rápido!",
+    icon: "🎅",
+    color: "#dc2626",
+    available: true,
+  },
+  {
+    id: "f-reyes",
+    title: "Seguí la Estrella",
+    description: "Guiá a los Reyes Magos por el desierto: mantenelos bajo la luz de la estrella, juntá oro, incienso y mirra, y llegá a Belén.",
+    icon: "⭐",
+    color: "#ca8a04",
+    available: true,
+    from: "2027-01-02", // se habilita unos días antes de Reyes
+  },
 ];
 
 /** Juegos de fiestas visibles hoy (respeta `from`; en modo prueba ?fiestas=1 se ven todos) */

@@ -10,6 +10,8 @@ import CatchPumpkins from "@/components/cv/games/CatchPumpkins";
 import SpookyVeggie from "@/components/cv/games/SpookyVeggie";
 import HauntedMemory from "@/components/cv/games/HauntedMemory";
 import ArmarArbolito from "@/components/cv/games/ArmarArbolito";
+import RegalosChimenea from "@/components/cv/games/RegalosChimenea";
+import SeguiLaEstrella from "@/components/cv/games/SeguiLaEstrella";
 import { useHalloween, HALLOWEEN_GAMES, CATCH_GAME } from "@/lib/halloween";
 import { useFiestas, fiestasGamesToday } from "@/lib/fiestas";
 
@@ -24,6 +26,8 @@ const GAME_COMPONENTS = {
   "h-memoria": HauntedMemory,
   // Especiales de Fiestas (8/12 al 10/1)
   "f-arbolito": ArmarArbolito,
+  "f-regalos": RegalosChimenea,
+  "f-reyes": SeguiLaEstrella,
 };
 
 export default function Juegos() {
