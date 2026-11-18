@@ -145,20 +145,25 @@ function Pesebre() {
       <rect x="-72" y="34" width="144" height="76" fill="#fde68a" opacity=".5" />
       {/* paja */}
       <ellipse cx="0" cy="110" rx="84" ry="10" fill="#d6a741" stroke="#1a1a1a" strokeWidth="2.6" />
-      {/* cunita con el Niño */}
-      <path d="M-24 90 h48 l-6 18 h-36 Z" fill="#92400e" stroke="#1a1a1a" strokeWidth="2.6" strokeLinejoin="round" />
-      <ellipse cx="0" cy="88" rx="22" ry="8" fill="#fff" stroke="#1a1a1a" strokeWidth="2.4" />
-      <circle cx="0" cy="80" r="8" fill="#fcd9b0" stroke="#1a1a1a" strokeWidth="2.2" />
-      <circle cx="0" cy="80" r="13" fill="none" stroke="#fde047" strokeWidth="3" opacity=".8" />
-      {/* María */}
-      <path d="M-58 110 Q-60 66 -44 58 Q-30 66 -32 110 Z" fill="#2563eb" stroke="#1a1a1a" strokeWidth="2.8" strokeLinejoin="round" />
-      <circle cx="-45" cy="50" r="10" fill="#fcd9b0" stroke="#1a1a1a" strokeWidth="2.4" />
-      <path d="M-56 48 Q-45 34 -34 48 L-34 56 L-56 56 Z" fill="#fff" stroke="#1a1a1a" strokeWidth="2.4" />
-      {/* José */}
-      <path d="M32 110 Q30 64 46 56 Q62 64 60 110 Z" fill="#a16207" stroke="#1a1a1a" strokeWidth="2.8" strokeLinejoin="round" />
-      <circle cx="46" cy="47" r="10" fill="#fcd9b0" stroke="#1a1a1a" strokeWidth="2.4" />
-      <path d="M36 44 Q46 32 56 44 Q54 38 46 38 Q38 38 36 44Z" fill="#4b2e12" stroke="#1a1a1a" strokeWidth="1.6" />
-      <path d="M66 112 V52" stroke="#78350f" strokeWidth="4" strokeLinecap="round" />
+      {/* los regalos de los reyes, en cofres */}
+      {[
+        { x: -34, c: "#facc15" },
+        { x: 0, c: "#fb923c" },
+        { x: 34, c: "#a855f7" },
+      ].map((k, i) => (
+        <g key={i} transform={`translate(${k.x} ${i === 1 ? 92 : 100})`}>
+          <rect x="-16" y="-14" width="32" height="24" rx="4" fill={k.c} stroke="#1a1a1a" strokeWidth="2.6" />
+          <path d="M-16 -4 h32 M0 -14 v24" stroke="#1a1a1a" strokeWidth="2" />
+          <path d="M-16 -14 Q0 -26 16 -14" fill={k.c} stroke="#1a1a1a" strokeWidth="2.6" />
+          <circle cx="0" cy="-3" r="3" fill="#fff" stroke="#1a1a1a" strokeWidth="1.6" />
+        </g>
+      ))}
+      {/* lucecitas en el techo */}
+      {[-60, -36, -12, 12, 36, 60].map((x, i) => (
+        <circle key={i} cx={x} cy={30 - Math.abs(x) * 0.0 + 6} r="3.6" fill={["#ef4444", "#facc15", "#22c55e", "#3b82f6"][i % 4]} stroke="#1a1a1a" strokeWidth="1.2">
+          <animate attributeName="opacity" values="1;.25;1" dur="1.6s" begin={`${i * -0.4}s`} repeatCount="indefinite" />
+        </circle>
+      ))}
       {/* mulita y vaquita */}
       <ellipse cx="-62" cy="104" rx="14" ry="9" fill="#9ca3af" stroke="#1a1a1a" strokeWidth="2.4" />
       <circle cx="-74" cy="97" r="6" fill="#9ca3af" stroke="#1a1a1a" strokeWidth="2.2" />
@@ -502,7 +507,7 @@ export default function SeguiLaEstrella() {
                 <p className="font-bangers text-3xl tracking-wider text-cv-dark">{result.arrived ? "¡Llegaste a Belén!" : "No alcanzaron…"}</p>
                 <p className="font-fredoka text-gray-700 mb-2">
                   {result.arrived
-                    ? `Los Reyes le dejaron al Niño ${result.kinds?.oro || 0} de oro, ${result.kinds?.incienso || 0} de incienso y ${result.kinds?.mirra || 0} de mirra. ¡Feliz Día de Reyes!`
+                    ? `Dejaron ${result.kinds?.oro || 0} cofres de oro, ${result.kinds?.incienso || 0} de incienso y ${result.kinds?.mirra || 0} de mirra. ¡Felices fiestas y feliz Día de Reyes!`
                     : `Hicieron el ${result.pct}% del camino. ¡Probá de nuevo y seguí bien la luz!`}
                 </p>
                 <p className="font-bangers text-xl text-cv-green">Puntaje: {result.score}</p>

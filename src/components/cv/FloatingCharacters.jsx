@@ -52,6 +52,17 @@ export default function FloatingCharacters({ className = "", fiestas = false }) 
     { src: KID_IMAGES.nio4, alt: "Nene rockero", x: 30, y: 88, size: 85, delay: 0.3, animationType: "rock" },
   ];
 
+  // Tema Fiestas: además de los personajes, algunas cosas de las fiestas (pocas, para no sobrecargar)
+  if (fiestas) {
+    const O = "/assets/fiestas/orn/";
+    items.push(
+      { src: O + "arbolito.svg", alt: "Arbolito", x: 92, y: 28, size: 84, delay: 0.6, animationType: "breathe" },
+      { src: O + "trineo.svg", alt: "Trineo", x: 42, y: 2, size: 120, delay: 1.1, animationType: "float" },
+      { src: O + "regalo.svg", alt: "Regalo", x: 7, y: 32, size: 62, delay: 0.9, animationType: "rock" },
+      { src: O + "reno.svg", alt: "Reno", x: 56, y: 92, size: 84, delay: 1.7, animationType: "rock" }
+    );
+  }
+
   // Tema Fiestas: los mismos personajes, con gorro de Papá Noel / astas
   const festive = (src) => {
     if (!fiestas) return src;

@@ -7,10 +7,12 @@ import SectionHeader from "@/components/cv/SectionHeader";
 import FloatingCharacters from "@/components/cv/FloatingCharacters";
 import { HalloweenFloaters } from "@/components/cv/halloween/HalloweenSky";
 import { useHalloween } from "@/lib/halloween";
+import { useFiestas } from "@/lib/fiestas";
 
 export default function Canciones() {
   const { playTrack, requestPlay, currentTrack, isPlaying } = useMusicPlayer();
   const h = useHalloween();
+  const f = useFiestas() && !h;
 
   const playableSongs = ALL_SONGS.filter(s => s.audioOriginal || s.audioInstrumental);
   const hasAudio = (song) => song.audioOriginal || song.audioInstrumental;
@@ -27,7 +29,7 @@ export default function Canciones() {
   return (
     <div className={`min-h-screen ${h ? "" : "bg-white"}`} style={h ? { background: "#1a0a2e" } : undefined}>
       <section className={`relative py-20 px-4 overflow-hidden ${h ? "" : "bg-cv-green/5"}`} style={h ? { background: "#1a0a2e" } : undefined}>
-        {h ? <HalloweenFloaters opacity={0.55} /> : <FloatingCharacters />}
+        {h ? <HalloweenFloaters opacity={0.55} /> : <FloatingCharacters fiestas={f} />}
         <div className="max-w-4xl mx-auto relative z-10">
           <div className={h ? "hw-header" : ""}>
             <SectionHeader

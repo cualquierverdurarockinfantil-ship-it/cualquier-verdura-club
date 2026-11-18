@@ -1,5 +1,7 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/manifest.webmanifest", "destination": "/api/manifest" },
+    { "source": "/manifest-halloween.webmanifest", "destination": "/api/manifest" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

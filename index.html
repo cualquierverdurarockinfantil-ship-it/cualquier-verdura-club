@@ -20,40 +20,49 @@
     <style>
       #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff}
       html.cv-hw #boot{background:#1a0a2e}
-      #boot .b-hw{display:none}
-      html.cv-hw #boot .b-cv{display:none}
+      #boot .b-hw,#boot .b-fi{display:none}
+      html.cv-hw #boot .b-cv,html.cv-fi #boot .b-cv{display:none}
       html.cv-hw #boot .b-hw{display:block;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 12px rgba(216,200,240,.55))}
+      html.cv-fi #boot .b-fi{display:block}
       #boot img{width:min(84vw,400px);height:auto;animation:bootb 1.4s ease-in-out infinite}
       @keyframes bootb{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
       @media (prefers-reduced-motion:reduce){#boot img{animation:none}}
     </style>
     <script>
-      // Ícono / manifest de Halloween por fecha (mismas fechas que src/lib/halloween.js).
-      // Para otro tema: copiar este bloque y cambiar fechas y prefijo "hw-".
+      // Ícono / pantalla de arranque por fecha (mismas fechas que src/lib/halloween.js y src/lib/fiestas.js).
+      // Sin tema activo queda el tomate original. Para otro tema: sumar una entrada con sus fechas y prefijo.
       (function () {
         try {
-          var on = false;
           var d = new Date();
           var t = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-          on = t >= "2026-10-19" && t < "2026-11-01";
-          var q = new URLSearchParams(location.search).get("halloween");
-          var p = q === "1" || q === "0" ? q : sessionStorage.getItem("cv-halloween-preview");
-          if (p === "1") on = true;
-          if (p === "0") on = false;
-          if (!on) return;
-          document.getElementById("cv-icon").href = "/icons/hw-48.png";
+          var themes = [
+            { key: "halloween", cls: "cv-hw", pre: "hw", from: "2026-10-19", to: "2026-11-06", bg: "#1a0a2e", color: "#1a0a2e" },
+            { key: "fiestas", cls: "cv-fi", pre: "fi", from: "2026-12-08", to: "2027-01-11", bg: "#ffffff", color: "#16a34a" }
+          ];
+          var q = new URLSearchParams(location.search);
+          var active = null;
+          for (var i = 0; i < themes.length; i++) {
+            var th = themes[i];
+            var on = t >= th.from && t < th.to;
+            var qq = q.get(th.key);
+            var p = qq === "1" || qq === "0" ? qq : sessionStorage.getItem("cv-" + th.key + "-preview");
+            if (p === "1") on = true;
+            if (p === "0") on = false;
+            if (on) { active = th; break; }
+          }
+          if (!active) return;
+          document.getElementById("cv-icon").href = "/icons/" + active.pre + "-48.png";
           document.getElementById("cv-icon-svg").remove();
-          document.getElementById("cv-apple").href = "/icons/hw-180.png";
-          document.getElementById("cv-manifest").href = "/manifest-halloween.webmanifest";
-          document.getElementById("cv-theme").content = "#1a0a2e";
-          document.documentElement.style.background = "#1a0a2e";
-          document.documentElement.className += " cv-hw";
+          document.getElementById("cv-apple").href = "/icons/" + active.pre + "-180.png";
+          document.getElementById("cv-theme").content = active.color;
+          document.documentElement.style.background = active.bg;
+          document.documentElement.className += " " + active.cls;
         } catch (e) {}
       })();
     </script>
   </head>
   <body>
-    <div id="root"><div id="boot"><img class="b-cv" src="/icons/boot-cv.png" alt="Club Verdura" /><img class="b-hw" src="/icons/boot-hw.png" alt="" /></div></div>
+    <div id="root"><div id="boot"><img class="b-cv" src="/icons/boot-cv.png" alt="Club Verdura" /><img class="b-hw" src="/icons/boot-hw.png" alt="" /><img class="b-fi" src="/icons/boot-fi.png" alt="Felices fiestas" /></div></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

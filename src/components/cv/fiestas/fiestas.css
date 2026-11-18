@@ -159,3 +159,34 @@
   .fi-bulb { opacity: 1; }
   .fi-firefly { opacity: 0.5; }
 }
+
+/* stickers de los márgenes (FiestasPageDecor) */
+.fi-decor {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  --fi-gut: 8vw;
+  --fi-k: 0.62;
+}
+@media (min-width: 768px) { .fi-decor { --fi-k: 0.85; --fi-gut: 6vw; } }
+@media (min-width: 1280px) { .fi-decor { --fi-k: 1; --fi-gut: 5vw; } }
+.fi-decor-item {
+  position: absolute;
+  object-fit: contain;
+  opacity: 0.5;
+  user-select: none;
+}
+.fi-decor-float   { animation: fi-d-float 6s ease-in-out infinite; }
+.fi-decor-rock    { animation: fi-d-rock 2.6s ease-in-out infinite; }
+.fi-decor-breathe { animation: fi-d-breathe 4.5s ease-in-out infinite; }
+@keyframes fi-d-float   { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-14px) rotate(4deg); } }
+@keyframes fi-d-rock    { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes fi-d-breathe { 0%,100% { transform: scale(1) rotate(-2deg); } 50% { transform: scale(1.07) rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) { .fi-decor-item { animation: none; } }
+
+/* el fondo blanco de cada página deja ver el fondo de fiestas y los stickers de los márgenes */
+.theme-fiestas main .min-h-screen.bg-white {
+  background: transparent;
+}

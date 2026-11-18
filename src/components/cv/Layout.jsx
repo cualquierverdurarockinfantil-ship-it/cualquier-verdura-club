@@ -5,6 +5,7 @@ import PlayChoiceModal from "./PlayChoiceModal";
 import CampaignBanner from "./CampaignBanner";
 import ShowBanner from "./ShowBanner";
 import HalloweenLayer from "./halloween/HalloweenLayer";
+import FiestasPageDecor from "./fiestas/FiestasPageDecor";
 import FiestasLayer from "./fiestas/FiestasLayer";
 import { Pino } from "./fiestas/FiestasArt";
 import { Cat } from "./halloween/HalloweenArt";
@@ -24,7 +25,8 @@ export default function Layout() {
 
   return (
     <MusicPlayerProvider>
-      <div className={`min-h-screen flex flex-col ${halloween ? "hw-bg" : fiestas && !isHome ? "fi-bg" : "bg-white"}`}>
+      <div className={`min-h-screen flex flex-col relative isolate ${halloween ? "hw-bg" : fiestas && !isHome ? "fi-bg" : "bg-white"}`}>
+        {fiestas && !isHome && <FiestasPageDecor />}
         <CampaignBanner />
         {/* display:contents => no cambia el layout; solo sirve para vestir la navbar en Halloween */}
         <div className={`${fiestas ? "fi-nav" : "hw-nav"} contents`}>
