@@ -15,14 +15,15 @@ import { FIESTAS_VEG } from "@/lib/fiestas";
 const W = 400;
 const H = 560;
 const GROUND = 540;
-const GRAVITY = 900;
+const GRAVITY = 1500;
 const SLEIGH_X = 200; // el trineo siempre está en el centro: lo que se mueve es el fondo
-const SLEIGH_Y = 78;
-const GIFTS_TOTAL = 12;
-const LEVEL2_FROM = 6; // desde el regalo 7 las chimeneas ya no están todas a la misma altura
-const BASE_TOP = 424; // altura (borde de arriba) de todas las chimeneas en el nivel 1
-const OPEN = 17; // medio ancho de la boca: si el regalo cae dentro de esto, entra
-const RIM = 26; // entre OPEN y RIM pega en el borde
+const SLEIGH_Y = 150; // el trineo vuela cerca de las chimeneas
+const MAX_MISSES = 3; // el juego termina al errar 3 seguidos
+const PER_LEVEL = 6; // cada 6 regalos metidos sube el nivel
+const BASE_TOP = 372; // altura (borde de arriba) de las chimeneas en el nivel 1
+// medio ancho de la boca por nivel: primero anchas (fácil), después cada vez más finitas
+const OPENS = [27, 21, 17, 14];
+const levelOf = (score) => Math.floor(score / PER_LEVEL) + 1;
 const BEST_KEY = "cv-fiestas-regalos-best";
 
 /* Casas y edificios distintos. w = ancho, r = cuánto baja el techo desde el borde de la chimenea, off = dónde está la chimenea */
@@ -46,8 +47,10 @@ function makeHouse(id, x, level) {
   const d = DESIGNS[(id * 7 + 3) % DESIGNS.length];
   const pal = PALETTE[(id * 5 + 1) % PALETTE.length];
   let top = BASE_TOP;
-  if (level >= 2) top += [-52, 0, 34, -26, 16][id % 5];
-  return { id, x, d, top, wall: pal[0], roof: pal[1], chx: x + d.off };
+  if (level === 2) top += [-30, 0, 20, -14, 10][id % 5];
+  else if (level >= 3) top += [-48, 4, 30, -26, 18, -10, 36][id % 7];
+  const open = OPENS[Math.min(level, OPENS.length) - 1];
+  return { id, x, d, top, open, wall: pal[0], roof: pal[1], chx: x + d.off };
 }
 
 /** un pasito de la caída del regalo (cae derecho: x fija en la pantalla; las casas pasan por debajo) */
@@ -58,13 +61,13 @@ function stepGift(g, dt, houses, scroll) {
     const sx = h.chx - scroll;
     if (g.y < h.top && ny >= h.top) {
       const dd = Math.abs(SLEIGH_X - sx);
-      if (dd <= OPEN) {
+      if (dd <= h.open) {
         out.end = "score";
         out.y = h.top;
         out.house = h;
         return out;
       }
-      if (dd <= RIM) {
+      if (dd <= h.open + 9) {
         out.end = "rim";
         out.house = h;
         return out;
@@ -84,8 +87,8 @@ function stepGift(g, dt, houses, scroll) {
   return out;
 }
 
-function worldSpeed(thrown) {
-  return 105 + thrown * 9;
+function worldSpeed(score) {
+  return Math.min(250, 110 + score * 4);
 }
 
 function readBest() {
@@ -104,10 +107,10 @@ function saveBest(v) {
 }
 
 function resultMessage(n) {
-  if (n >= 12) return "¡Perfecto! Ni un regalo se perdió 🎁✨";
-  if (n >= 9) return "¡Papá Noel te quiere de ayudante!";
-  if (n >= 5) return "¡Bien! Varias familias felices esta noche.";
-  if (n >= 1) return "Algunos llegaron… ¡el año que viene mejor puntería!";
+  if (n >= 40) return "¡Sos el mejor repartidor del Polo Norte! 🎁✨";
+  if (n >= 25) return "¡Papá Noel te quiere de ayudante!";
+  if (n >= 12) return "¡Qué puntería! Un montón de familias felices.";
+  if (n >= 1) return "Algunos llegaron… ¡probá de nuevo con más puntería!";
   return "Ninguno entró… ¡probá de nuevo!";
 }
 
@@ -130,13 +133,14 @@ function Gift({ x, y, rot = 0, s = 1 }) {
   );
 }
 
-function Chimney({ x, top, yr }) {
+function Chimney({ x, top, yr, open }) {
+  const hw = open + 3;
   return (
     <g>
-      <rect x={x - 19} y={top} width="38" height={yr + 16 - top} fill="#b45309" stroke="#1a1a1a" strokeWidth="3" />
-      <path d={`M${x - 19} ${top + 14} h38 M${x - 19} ${top + 28} h38 M${x - 6} ${top} v14 M${x + 8} ${top + 14} v14`} stroke="#1a1a1a" strokeWidth="1.5" opacity=".55" />
-      <rect x={x - 23} y={top - 7} width="46" height="10" rx="3" fill="#78350f" stroke="#1a1a1a" strokeWidth="3" />
-      <ellipse cx={x} cy={top - 2} rx="14" ry="3.5" fill="#1a1a1a" />
+      <rect x={x - hw} y={top} width={hw * 2} height={yr + 16 - top} fill="#b45309" stroke="#1a1a1a" strokeWidth="3" />
+      <path d={`M${x - hw} ${top + 14} h${hw * 2} M${x - hw} ${top + 28} h${hw * 2} M${x - 6} ${top} v14 M${x + 8} ${top + 14} v14`} stroke="#1a1a1a" strokeWidth="1.5" opacity=".55" />
+      <rect x={x - hw - 4} y={top - 7} width={hw * 2 + 8} height="10" rx="3" fill="#78350f" stroke="#1a1a1a" strokeWidth="3" />
+      <ellipse cx={x} cy={top - 2} rx={open - 2} ry="3.5" fill="#1a1a1a" />
     </g>
   );
 }
@@ -219,7 +223,7 @@ function House({ h }) {
   }
   return (
     <g>
-      <Chimney x={d.off} top={top} yr={yr} />
+      <Chimney x={d.off} top={top} yr={yr} open={h.open} />
       {shape}
       <Bulbs y={yr + (d.id === "edificio" ? 12 : 17)} from={-hw + 14} to={hw - 14} n={4} seed={id} />
     </g>
@@ -250,6 +254,7 @@ export default function RegalosChimenea() {
       houses: [],
       nextId: 1,
       thrown: 0,
+      streak: 0,
       score: 0,
       gift: null,
       pops: [],
@@ -264,9 +269,9 @@ export default function RegalosChimenea() {
 
   const drop = useCallback(() => {
     const g = gameRef.current;
-    if (!g || phaseRef.current !== "play" || g.gift || g.thrown >= GIFTS_TOTAL || g.finishAt) return;
+    if (!g || phaseRef.current !== "play" || g.gift || g.finishAt) return;
     g.thrown += 1;
-    g.gift = { y: SLEIGH_Y + 40 + 8 * Math.sin(g.t * 2.3), vy: 40, rot: 0 };
+    g.gift = { y: SLEIGH_Y + 40 + 8 * Math.sin(g.t * 2.3), vy: 60, rot: 0 };
   }, []);
 
   /* el bucle del juego */
@@ -280,10 +285,10 @@ export default function RegalosChimenea() {
       const dt = Math.min(0.04, (now - last) / 1000);
       last = now;
       g.t += dt;
-      g.scroll += worldSpeed(g.thrown) * dt;
+      g.scroll += worldSpeed(g.score) * dt;
 
       // casas que van apareciendo por la derecha (las de nivel 2 vienen con alturas distintas)
-      const level = g.thrown >= LEVEL2_FROM ? 2 : 1;
+      const level = levelOf(g.score);
       for (;;) {
         const lastH = g.houses[g.houses.length - 1];
         if (lastH && lastH.x - g.scroll > W + 180) break;
@@ -303,6 +308,11 @@ export default function RegalosChimenea() {
           const wx = SLEIGH_X + g.scroll;
           if (s.end === "score") {
             g.score += 1;
+            g.streak = 0;
+            if (g.score % PER_LEVEL === 0) {
+              g.bannerT = 2.6;
+              g.bannerLvl = levelOf(g.score);
+            }
             g.pops.push({ id, wx, y: s.y - 24, t: 0, text: "¡+1!", color: "#16a34a" });
             g.anim.push({ id, wx, y: s.y, vy: 90, t: 0, kind: "sink" });
           } else if (s.end === "rim") {
@@ -312,9 +322,11 @@ export default function RegalosChimenea() {
             g.pops.push({ id, wx, y: s.y - 20, t: 0, text: "Uy…", color: "#6b7280" });
             g.anim.push({ id, wx, y: s.y, vy: 0, t: 0, kind: "stay" });
           }
+          if (s.end !== "score") {
+            g.streak += 1;
+            if (g.streak >= MAX_MISSES) g.finishAt = now + 1400;
+          }
           g.gift = null;
-          if (g.thrown === LEVEL2_FROM) g.bannerT = 2.6;
-          if (g.thrown >= GIFTS_TOTAL) g.finishAt = now + 1500;
         }
       }
       if (g.bannerT > 0) g.bannerT -= dt;
@@ -341,6 +353,9 @@ export default function RegalosChimenea() {
         houses: g.houses.filter((h) => h.x - g.scroll < W + 140),
         gift: g.gift,
         thrown: g.thrown,
+        streak: g.streak,
+        lvl: g.bannerLvl || 2,
+        level: levelOf(g.score),
         score: g.score,
         pops: g.pops.slice(),
         anim: g.anim.slice(),
@@ -404,8 +419,9 @@ export default function RegalosChimenea() {
       "Papá Noel vuela siempre en el centro de la pantalla y el pueblo pasa por abajo, con casas y edificios de todo tipo. Todos tienen chimenea.",
       "Tocá la pantalla para soltar un regalo: cae derecho hacia abajo, justo debajo del trineo.",
       "Hay que soltarlo en el momento justo para que, cuando llegue abajo, la chimenea esté pasando por ahí.",
-      "Si el regalo entra por la boca de la chimenea, ¡punto! Si pega en el borde o en el techo, se pierde.",
-      "Son 12 regalos. Cada vez va más rápido y, desde el séptimo, las chimeneas ya no están todas a la misma altura.",
+      "Si el regalo entra por la boca de la chimenea, ¡punto! Si pega en el borde o en el techo, es un error.",
+      "No hay tiempo: el juego sigue hasta que errés 3 regalos seguidos. Cada chimenea que metés cuenta, y si acertás se reinicia la cuenta de errores.",
+      "Cada 6 chimeneas subís de nivel: desde el 2 las chimeneas cambian de altura, y cada vez van más rápido y más finitas.",
     ],
     []
   );
@@ -417,13 +433,13 @@ export default function RegalosChimenea() {
           🎅
         </motion.div>
         <h2 className="text-4xl font-bangers tracking-wider text-cv-dark mb-2">Regalos a la Chimenea</h2>
-        <p className="font-bangers text-2xl tracking-wide text-cv-green mb-2">¡Embocá los 12 regalos!</p>
+        <p className="font-bangers text-2xl tracking-wide text-cv-green mb-2">¡Embocá todas las chimeneas que puedas!</p>
         <p className="font-fredoka text-gray-600 mb-4 leading-snug">
           Papá Noel vuela y el pueblo pasa por abajo. Tocá la pantalla para <strong>soltar un regalo</strong>: cae derecho, así que
-          tenés que calcular el momento justo para que entre por la chimenea que viene pasando. ¡Cada vez va más rápido!
+          tenés que calcular el momento justo para que entre por la chimenea que viene pasando. Seguís hasta errar 3 seguidos, y cada vez se pone más difícil.
         </p>
         <GameRulesButton title="Regalos a la Chimenea" accentColor="#dc2626" rules={rules} />
-        {best > 0 && <p className="font-fredoka text-gray-500 mb-3">Tu récord: <strong>{best}</strong> de {GIFTS_TOTAL}</p>}
+        {best > 0 && <p className="font-fredoka text-gray-500 mb-3">Tu récord: <strong>{best}</strong> chimeneas</p>}
         <div>
           <button onClick={start} className="btn-cv-primary text-xl px-10 py-4">
             ¡A repartir!
@@ -437,7 +453,7 @@ export default function RegalosChimenea() {
   const stageW = Math.max(120, Math.min(area.w, area.h * (W / H), 460));
   const stageH = stageW * (H / W);
   const v = view;
-  const left = v ? GIFTS_TOTAL - v.thrown : GIFTS_TOTAL;
+  const streak = v ? v.streak : 0;
   const sc = v ? v.scroll : 0;
   const bob = v ? Math.sin(v.t * 2.3) : 0;
   const mod = (n, m) => ((n % m) + m) % m;
@@ -461,7 +477,9 @@ export default function RegalosChimenea() {
         </button>
         <span className="rounded-full" style={badge}>🏠 {phase === "end" ? finalScore : v ? v.score : 0}</span>
         {phase === "play" ? (
-          <span className="rounded-full" style={badge}>🎁 {left}</span>
+          <span className="rounded-full" style={{ ...badge, background: streak >= 2 ? "#fecaca" : "#fffbeb" }}>
+            {"❌".repeat(streak)}{"⚪".repeat(MAX_MISSES - streak)}
+          </span>
         ) : (
           <span className="rounded-full" style={{ ...badge, background: "#bbf7d0" }}>¡Se acabó!</span>
         )}
@@ -591,16 +609,16 @@ export default function RegalosChimenea() {
 
               {v?.banner && (
                 <g>
-                  <rect x="40" y="150" width="320" height="64" rx="16" fill="#fffbeb" stroke="#1a1a1a" strokeWidth="3" />
-                  <text x="200" y="178" textAnchor="middle" fontFamily="Bangers, Fredoka, sans-serif" fontSize="26" fill="#dc2626">¡Segunda parte!</text>
-                  <text x="200" y="202" textAnchor="middle" fontFamily="Fredoka, sans-serif" fontSize="15" fill="#1a1a1a">Ahora las chimeneas cambian de altura</text>
+                  <rect x="40" y="250" width="320" height="64" rx="16" fill="#fffbeb" stroke="#1a1a1a" strokeWidth="3" />
+                  <text x="200" y="278" textAnchor="middle" fontFamily="Bangers, Fredoka, sans-serif" fontSize="26" fill="#dc2626">¡Nivel {v.lvl}!</text>
+                  <text x="200" y="302" textAnchor="middle" fontFamily="Fredoka, sans-serif" fontSize="15" fill="#1a1a1a">{v.lvl === 2 ? "Chimeneas a distinta altura" : "¡Más rápido y chimeneas más finitas!"}</text>
                 </g>
               )}
             </g>
           </svg>
 
           {phase === "play" && v && v.thrown === 0 && (
-            <div className="absolute inset-x-0 top-[34%] text-center pointer-events-none">
+            <div className="absolute inset-x-0 top-[44%] text-center pointer-events-none">
               <span className="font-bangers tracking-wider text-xl px-4 py-1 rounded-full" style={{ background: "#fffbeb", border: "2px solid #1a1a1a" }}>
                 👆 ¡Tocá para soltar un regalo!
               </span>
@@ -616,7 +634,7 @@ export default function RegalosChimenea() {
                 style={{ background: "#fffbeb" }}
               >
                 <div className="text-5xl mb-1">🎅</div>
-                <p className="font-bangers text-4xl tracking-wider text-cv-dark">{finalScore} de {GIFTS_TOTAL}</p>
+                <p className="font-bangers text-4xl tracking-wider text-cv-dark">{finalScore} chimeneas</p>
                 <p className="font-fredoka text-gray-700 mb-2">{resultMessage(finalScore)}</p>
                 {newBest && <p className="font-bangers text-lg text-cv-green mb-1">🏆 ¡Nuevo récord!</p>}
                 {best > 0 && <p className="font-fredoka text-sm text-gray-500 mb-3">Tu récord: {best}</p>}

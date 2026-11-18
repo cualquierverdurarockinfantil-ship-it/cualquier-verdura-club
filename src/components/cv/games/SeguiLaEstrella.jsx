@@ -24,8 +24,8 @@ const BEST_KEY = "cv-fiestas-reyes-best";
 const KINGS = [
   // el del medio va adelante (más lejos, más chico); los de los costados, un poco atrás
   { id: "tomate", src: "/assets/fiestas/reyes/tomate.webp", dx: 0, dy: -30, z: 0.86, blanket: "#2563eb" },
-  { id: "berenjena", src: "/assets/fiestas/reyes/berenjena.webp", dx: -62, dy: 0, z: 1, blanket: "#dc2626" },
-  { id: "calabaza", src: "/assets/fiestas/reyes/calabaza.webp", dx: 62, dy: 0, z: 1, blanket: "#16a34a" },
+  { id: "berenjena", src: "/assets/fiestas/reyes/berenjena.webp", dx: -42, dy: 0, z: 1, blanket: "#dc2626" },
+  { id: "calabaza", src: "/assets/fiestas/reyes/calabaza.webp", dx: 42, dy: 0, z: 1, blanket: "#16a34a" },
 ];
 const PESEBRE_X = 290;
 
@@ -220,7 +220,10 @@ export default function SeguiLaEstrella() {
       }
       if (g.stun > 0) g.stun -= dt;
 
-      const aligned = !g.arriveAt && Math.abs(g.cx - sx) <= BEAM && g.stun <= 0;
+      // avanza mientras CUALQUIER parte de CUALQUIER rey toque la luz (a la altura de la caravana la luz mide ~±bw)
+      const bw = 6 + (BEAM - 6) * ((CARAVAN_Y - 60) / (H - 60));
+      const touching = KINGS.some((kg) => Math.abs(g.cx + kg.dx - sx) <= bw + 30 * kg.z);
+      const aligned = !g.arriveAt && touching && g.stun <= 0;
       if (aligned && !g.arriveAt) g.progress += dt;
       const speed = g.arriveAt ? 150 * (1 - arrP) : aligned ? 150 : g.stun > 0 ? 20 : 45;
       g.scroll = (g.scroll + speed * dt) % 80;
