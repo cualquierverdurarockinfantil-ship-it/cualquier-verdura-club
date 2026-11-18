@@ -22,10 +22,12 @@ const BEAM = 62; // medio ancho de la luz de la estrella
 const BEST_KEY = "cv-fiestas-reyes-best";
 
 const KINGS = [
-  { id: "berenjena", src: "/assets/fiestas/reyes/berenjena.webp", dx: -58, w: 62 },
-  { id: "tomate", src: "/assets/fiestas/reyes/tomate.webp", dx: 0, w: 68 },
-  { id: "calabaza", src: "/assets/fiestas/reyes/calabaza.webp", dx: 58, w: 62 },
+  // el del medio va adelante (más lejos, más chico); los de los costados, un poco atrás
+  { id: "tomate", src: "/assets/fiestas/reyes/tomate.webp", dx: 0, dy: -30, z: 0.86, blanket: "#2563eb" },
+  { id: "berenjena", src: "/assets/fiestas/reyes/berenjena.webp", dx: -62, dy: 0, z: 1, blanket: "#dc2626" },
+  { id: "calabaza", src: "/assets/fiestas/reyes/calabaza.webp", dx: 62, dy: 0, z: 1, blanket: "#16a34a" },
 ];
+const PESEBRE_X = 290;
 
 const GIFT_KINDS = [
   { id: "oro", label: "Oro", color: "#facc15" },
@@ -99,6 +101,71 @@ function Item({ it }) {
   );
 }
 
+/** camello visto de atrás, con la verdura montada arriba (la manta le tapa la parte de abajo) */
+function Camel({ k, step, stun }) {
+  const a = Math.sin(step) * 3.5;
+  const w = 62;
+  return (
+    <g transform={`translate(${k.dx} ${k.dy}) scale(${k.z})`}>
+      {/* patas traseras */}
+      <g stroke="#1a1a1a" strokeWidth="2.6" fill="#b9803f">
+        <rect x="-17" y={-24 + (stun ? 0 : a)} width="11" height="24" rx="4" />
+        <rect x="6" y={-24 - (stun ? 0 : a)} width="11" height="24" rx="4" />
+      </g>
+      <g fill="#4b2e12">
+        <rect x="-17" y={-4 + (stun ? 0 : a)} width="11" height="5" rx="2" />
+        <rect x="6" y={-4 - (stun ? 0 : a)} width="11" height="5" rx="2" />
+      </g>
+      {/* cola */}
+      <path d={`M0 -36 q${a} 14 ${a * 0.5} 26`} stroke="#1a1a1a" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <ellipse cx={a * 0.5} cy="-8" rx="4" ry="5" fill="#6b4423" stroke="#1a1a1a" strokeWidth="2" />
+      {/* cuerpo y joroba */}
+      <ellipse cx="0" cy="-40" rx="27" ry="24" fill="#c8924f" stroke="#1a1a1a" strokeWidth="3" />
+      <ellipse cx="0" cy="-60" rx="15" ry="11" fill="#c8924f" stroke="#1a1a1a" strokeWidth="3" />
+      {/* verdura montada */}
+      <image href={k.src} x={-w / 2} y={-62 - w * 1.02 + (stun ? 4 : Math.abs(a) * 0.3)} width={w} height={w * 1.1} preserveAspectRatio="xMidYMax meet" />
+      {/* manta */}
+      <path d="M-24 -58 Q0 -66 24 -58 L28 -30 Q0 -22 -28 -30 Z" fill={k.blanket} stroke="#1a1a1a" strokeWidth="2.6" strokeLinejoin="round" />
+      <path d="M-27 -33 Q0 -26 27 -33" stroke="#fde047" strokeWidth="3" fill="none" />
+      {[-20, -10, 0, 10, 20].map((x) => (
+        <path key={x} d={`M${x} -27 v6`} stroke="#fde047" strokeWidth="2.2" strokeLinecap="round" />
+      ))}
+    </g>
+  );
+}
+
+function Pesebre() {
+  return (
+    <g>
+      {/* establo */}
+      <rect x="-76" y="-4" width="152" height="112" fill="#7c4a1e" opacity=".0" />
+      <path d="M-70 110 V30 M70 110 V30" stroke="#78350f" strokeWidth="9" strokeLinecap="round" />
+      <path d="M-86 34 L0 -26 L86 34 Z" fill="#d6a741" stroke="#1a1a1a" strokeWidth="3.5" strokeLinejoin="round" />
+      <path d="M-62 28 L-40 8 M-30 26 L-8 0 M0 24 L22 2 M34 26 L54 8" stroke="#a16207" strokeWidth="3" strokeLinecap="round" />
+      <rect x="-72" y="34" width="144" height="76" fill="#fde68a" opacity=".5" />
+      {/* paja */}
+      <ellipse cx="0" cy="110" rx="84" ry="10" fill="#d6a741" stroke="#1a1a1a" strokeWidth="2.6" />
+      {/* cunita con el Niño */}
+      <path d="M-24 90 h48 l-6 18 h-36 Z" fill="#92400e" stroke="#1a1a1a" strokeWidth="2.6" strokeLinejoin="round" />
+      <ellipse cx="0" cy="88" rx="22" ry="8" fill="#fff" stroke="#1a1a1a" strokeWidth="2.4" />
+      <circle cx="0" cy="80" r="8" fill="#fcd9b0" stroke="#1a1a1a" strokeWidth="2.2" />
+      <circle cx="0" cy="80" r="13" fill="none" stroke="#fde047" strokeWidth="3" opacity=".8" />
+      {/* María */}
+      <path d="M-58 110 Q-60 66 -44 58 Q-30 66 -32 110 Z" fill="#2563eb" stroke="#1a1a1a" strokeWidth="2.8" strokeLinejoin="round" />
+      <circle cx="-45" cy="50" r="10" fill="#fcd9b0" stroke="#1a1a1a" strokeWidth="2.4" />
+      <path d="M-56 48 Q-45 34 -34 48 L-34 56 L-56 56 Z" fill="#fff" stroke="#1a1a1a" strokeWidth="2.4" />
+      {/* José */}
+      <path d="M32 110 Q30 64 46 56 Q62 64 60 110 Z" fill="#a16207" stroke="#1a1a1a" strokeWidth="2.8" strokeLinejoin="round" />
+      <circle cx="46" cy="47" r="10" fill="#fcd9b0" stroke="#1a1a1a" strokeWidth="2.4" />
+      <path d="M36 44 Q46 32 56 44 Q54 38 46 38 Q38 38 36 44Z" fill="#4b2e12" stroke="#1a1a1a" strokeWidth="1.6" />
+      <path d="M66 112 V52" stroke="#78350f" strokeWidth="4" strokeLinecap="round" />
+      {/* mulita y vaquita */}
+      <ellipse cx="-62" cy="104" rx="14" ry="9" fill="#9ca3af" stroke="#1a1a1a" strokeWidth="2.4" />
+      <circle cx="-74" cy="97" r="6" fill="#9ca3af" stroke="#1a1a1a" strokeWidth="2.2" />
+    </g>
+  );
+}
+
 export default function SeguiLaEstrella() {
   const [phase, setPhase] = useState("intro"); // intro | play | end
   const [view, setView] = useState(null);
@@ -139,18 +206,25 @@ export default function SeguiLaEstrella() {
       const dt = Math.min(0.04, (now - last) / 1000);
       last = now;
       g.t += dt;
-      const sx = starX(g.t);
+      const arrP = g.arriveAt ? Math.min(1, (now - g.arriveAt) / 3000) : 0;
+      const sx = starX(g.t) * (1 - arrP) + PESEBRE_X * arrP;
 
       // caravana: sigue al dedo (más lenta si tropezó)
       const k = g.stun > 0 ? 3 : 9;
-      g.cx += (targetRef.current - g.cx) * Math.min(1, k * dt);
-      g.cx = Math.max(86, Math.min(W - 86, g.cx));
+      if (g.arriveAt) {
+        // llegaron: los reyes se corren a un costado y frenan
+        g.cx += (100 - g.cx) * Math.min(1, 2.2 * dt);
+      } else {
+        g.cx += (targetRef.current - g.cx) * Math.min(1, k * dt);
+        g.cx = Math.max(100, Math.min(W - 100, g.cx));
+      }
       if (g.stun > 0) g.stun -= dt;
 
-      const aligned = Math.abs(g.cx - sx) <= BEAM && g.stun <= 0;
+      const aligned = !g.arriveAt && Math.abs(g.cx - sx) <= BEAM && g.stun <= 0;
       if (aligned && !g.arriveAt) g.progress += dt;
-      const speed = aligned ? 150 : g.stun > 0 ? 20 : 45;
+      const speed = g.arriveAt ? 150 * (1 - arrP) : aligned ? 150 : g.stun > 0 ? 20 : 45;
       g.scroll = (g.scroll + speed * dt) % 80;
+      g.walk = (g.walk || 0) + (speed * dt) / 14;
 
       // cosas que aparecen en el camino (cerca de la luz de la estrella, para tentar a salirse)
       if (!g.arriveAt) {
@@ -204,14 +278,15 @@ export default function SeguiLaEstrella() {
         items: g.items.slice(),
         pops: g.pops.slice(),
         scroll: g.scroll,
+        walk: g.walk || 0,
         left: Math.max(0, TIME_LIMIT - g.t),
         gifts: g.gifts,
         arriving: !!g.arriveAt,
-        arriveP: g.arriveAt ? Math.min(1, (now - g.arriveAt) / 2200) : 0,
+        arriveP: arrP,
       });
 
       const timeUp = g.t >= TIME_LIMIT;
-      if ((g.arriveAt && now - g.arriveAt > 2400) || timeUp) {
+      if ((g.arriveAt && now - g.arriveAt > 4600) || timeUp) {
         const arrivedOk = !!g.arriveAt;
         const score = (arrivedOk ? 5 : 0) + g.gifts;
         const prev = readBest();
@@ -297,7 +372,7 @@ export default function SeguiLaEstrella() {
   const stageW = Math.max(120, Math.min(area.w, area.h * (W / H), 460));
   const stageH = stageW * (H / W);
   const v = view;
-  const walk = v ? Math.sin(v.scroll / 8) * 3 : 0;
+  
 
   const overlay = (
     <div
@@ -381,14 +456,10 @@ export default function SeguiLaEstrella() {
                 <polygon points={`${v.sx - 6},60 ${v.sx + 6},60 ${v.sx + BEAM},${H} ${v.sx - BEAM},${H}`} fill="url(#rs-beam)" />
                 <Star x={v.sx} y={52} s={1.1} />
 
-                {/* Belén al llegar */}
+                {/* el pesebre aparece al llegar */}
                 {v.arriving && (
-                  <g opacity={v.arriveP} transform={`translate(${W / 2} ${190 + (1 - v.arriveP) * -20})`}>
-                    <path d="M-80 120 L-80 40 L0 -4 L80 40 L80 120 Z" fill="#a16207" stroke="#1a1a1a" strokeWidth="3.5" strokeLinejoin="round" />
-                    <path d="M-92 44 L0 -14 L92 44" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinejoin="round" />
-                    <rect x="-34" y="52" width="68" height="68" rx="6" fill="#fde68a" stroke="#1a1a1a" strokeWidth="3" />
-                    <text x="0" y="98" textAnchor="middle" fontSize="38">👶</text>
-                    <text x="0" y="-26" textAnchor="middle" fontFamily="Bangers, sans-serif" fontSize="26" fill="#fde047" stroke="#1a1a1a" strokeWidth="4" paintOrder="stroke">¡Belén!</text>
+                  <g opacity={Math.min(1, v.arriveP * 2.2)} transform={`translate(${PESEBRE_X} ${196 - (1 - v.arriveP) * 24})`}>
+                    <Pesebre />
                   </g>
                 )}
 
@@ -399,18 +470,9 @@ export default function SeguiLaEstrella() {
                 {/* caravana */}
                 <g transform={`translate(${v.cx} ${CARAVAN_Y})`} opacity={v.stun ? 0.65 : 1}>
                   {v.aligned && <ellipse cx="0" cy="22" rx="86" ry="12" fill="#fde047" opacity=".35" />}
-                  {KINGS.map((k, i) => (
-                    <image
-                      key={k.id}
-                      href={k.src}
-                      x={k.dx - k.w / 2}
-                      y={-k.w * 0.95 + (i % 2 ? walk : -walk) + (v.stun ? 6 : 0)}
-                      width={k.w}
-                      height={k.w * 1.1}
-                      preserveAspectRatio="xMidYMax meet"
-                    />
+                  {KINGS.map((k) => (
+                    <Camel key={k.id} k={k} step={v.walk} stun={v.stun || v.arriveP >= 0.85} />
                   ))}
-                  <path d="M-90 28 q90 14 180 0" stroke="#92400e" strokeWidth="5" fill="none" strokeLinecap="round" opacity=".6" />
                 </g>
 
                 {v.pops.map((p) => (
@@ -434,10 +496,10 @@ export default function SeguiLaEstrella() {
             <div className="absolute inset-0 flex items-center justify-center p-4" style={{ background: "rgba(30,27,75,.72)", borderRadius: 24 }}>
               <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="card-cv p-5 text-center w-full" style={{ background: "#fffbeb" }}>
                 <div className="text-5xl mb-1">{result.arrived ? "👑" : "🐪"}</div>
-                <p className="font-bangers text-3xl tracking-wider text-cv-dark">{result.arrived ? "¡Llegaron a Belén!" : "No alcanzaron…"}</p>
+                <p className="font-bangers text-3xl tracking-wider text-cv-dark">{result.arrived ? "¡Llegaste a Belén!" : "No alcanzaron…"}</p>
                 <p className="font-fredoka text-gray-700 mb-2">
                   {result.arrived
-                    ? `Llevaron ${result.gifts} regalo${result.gifts === 1 ? "" : "s"} al Niño. ¡Feliz Día de Reyes!`
+                    ? `Los Reyes le dejaron al Niño ${result.kinds?.oro || 0} de oro, ${result.kinds?.incienso || 0} de incienso y ${result.kinds?.mirra || 0} de mirra. ¡Feliz Día de Reyes!`
                     : `Hicieron el ${result.pct}% del camino. ¡Probá de nuevo y seguí bien la luz!`}
                 </p>
                 <p className="font-bangers text-xl text-cv-green">Puntaje: {result.score}</p>
