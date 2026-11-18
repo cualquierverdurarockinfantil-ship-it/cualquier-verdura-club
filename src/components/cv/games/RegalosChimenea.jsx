@@ -262,6 +262,8 @@ export default function RegalosChimenea() {
       id: 1,
       finishAt: 0,
       bannerT: 0,
+      msgT: 0,
+      warned: false,
     };
     setNewBest(false);
     setPhase("play");
@@ -324,12 +326,21 @@ export default function RegalosChimenea() {
           }
           if (s.end !== "score") {
             g.streak += 1;
-            if (g.streak >= MAX_MISSES) g.finishAt = now + 1400;
+            if (g.streak >= MAX_MISSES) {
+              g.finishAt = now + 2400;
+              g.msg = { title: "¡Tercer strike!", sub: "Quedaste afuera", color: "#dc2626" };
+              g.msgT = 3;
+            } else if (!g.warned) {
+              g.warned = true;
+              g.msg = { title: "¡Primer strike!", sub: "No erres 3 seguidos o perdés", color: "#d97706" };
+              g.msgT = 2.8;
+            }
           }
           g.gift = null;
         }
       }
       if (g.bannerT > 0) g.bannerT -= dt;
+      if (g.msgT > 0) g.msgT -= dt;
       g.pops.forEach((p) => {
         p.t += dt;
         p.y -= 30 * dt;
@@ -359,7 +370,8 @@ export default function RegalosChimenea() {
         score: g.score,
         pops: g.pops.slice(),
         anim: g.anim.slice(),
-        banner: g.bannerT > 0,
+        banner: g.bannerT > 0 && !(g.msgT > 0),
+        msg: g.msgT > 0 ? g.msg : null,
       });
 
       if (g.finishAt && now >= g.finishAt) {
@@ -606,6 +618,14 @@ export default function RegalosChimenea() {
                   {p.text}
                 </text>
               ))}
+
+              {v?.msg && (
+                <g>
+                  <rect x="30" y="236" width="340" height="76" rx="16" fill="#fffbeb" stroke="#1a1a1a" strokeWidth="3" />
+                  <text x="200" y="272" textAnchor="middle" fontFamily="Bangers, Fredoka, sans-serif" fontSize="32" fill={v.msg.color}>{v.msg.title}</text>
+                  <text x="200" y="300" textAnchor="middle" fontFamily="Fredoka, sans-serif" fontSize="16" fill="#1a1a1a">{v.msg.sub}</text>
+                </g>
+              )}
 
               {v?.banner && (
                 <g>

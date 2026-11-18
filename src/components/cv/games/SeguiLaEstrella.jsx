@@ -221,7 +221,7 @@ export default function SeguiLaEstrella() {
         g.cx += (100 - g.cx) * Math.min(1, 2.2 * dt);
       } else {
         g.cx += (targetRef.current - g.cx) * Math.min(1, k * dt);
-        g.cx = Math.max(100, Math.min(W - 100, g.cx));
+        g.cx = Math.max(-42, Math.min(W + 42, g.cx)); // se puede salir de la pantalla hasta dejar medio rey adentro
       }
       if (g.stun > 0) g.stun -= dt;
 
@@ -350,7 +350,9 @@ export default function SeguiLaEstrella() {
   const moveTo = (clientX) => {
     const r = svgRef.current?.getBoundingClientRect();
     if (!r) return;
-    targetRef.current = ((clientX - r.left) / r.width) * W;
+    // el recorrido es un poco más ancho que la pantalla: arrastrando hasta el borde la caravana se esconde casi toda
+    const frac = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    targetRef.current = W / 2 + (frac - 0.5) * (W + 110);
   };
 
   if (phase === "intro") {
