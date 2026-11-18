@@ -4,6 +4,7 @@ import { ALBUM, VEGETABLES, SHOWS, NEWS, KID_IMAGES } from "@/lib/clubData";
 import SectionHeader from "@/components/cv/SectionHeader";
 import FloatingCharacters from "@/components/cv/FloatingCharacters";
 import HalloweenSky from "@/components/cv/halloween/HalloweenSky";
+import MesaFamiliar from "@/components/cv/fiestas/MesaFamiliar";
 import { useHalloween, vegImage, kidImage } from "@/lib/halloween";
 import { useFiestas, fiestasVegImage, fiestasKidImage } from "@/lib/fiestas";
 
@@ -199,11 +200,15 @@ function KidsBanner({ h, f }) {
   return (
     <section className="py-16 px-4 overflow-hidden" style={{ background: h ? "#2e1650" : "#facc1510" }}>
       <div className="max-w-5xl mx-auto">
+        {f ? (
+          <MesaFamiliar />
+        ) : (
         <div className="flex items-end justify-center gap-4 md:gap-8">
           {[KID_IMAGES.nio1, KID_IMAGES.nio2, KID_IMAGES.nio3, KID_IMAGES.nio4, KID_IMAGES.nio5].map((src, i) => (
             <motion.img key={i} src={fiestasKidImage(kidImage(src, h), f)} alt={`Fan ${i + 1}`} className="object-contain" style={{ width: i === 2 ? 140 : 100, height: i === 2 ? 140 : 100 }} animate={{ y: [0, -(6 + i * 3), 0], rotate: [-3 + i, 3 - i, -3 + i] }} transition={{ duration: 2 + i * 0.3, repeat: Infinity, ease: "easeInOut" }} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} />
           ))}
         </div>
+        )}
         <motion.p
           className={`text-center font-bangers text-3xl md:text-4xl mt-6 tracking-wider ${h ? "hw-ghost-text" : "text-cv-dark"}`}
           initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
