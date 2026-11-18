@@ -9,7 +9,9 @@ import MysteryVeggie from "@/components/cv/games/MysteryVeggie";
 import CatchPumpkins from "@/components/cv/games/CatchPumpkins";
 import SpookyVeggie from "@/components/cv/games/SpookyVeggie";
 import HauntedMemory from "@/components/cv/games/HauntedMemory";
+import ArmarArbolito from "@/components/cv/games/ArmarArbolito";
 import { useHalloween, HALLOWEEN_GAMES, CATCH_GAME } from "@/lib/halloween";
+import { useFiestas, fiestasGamesToday } from "@/lib/fiestas";
 
 const GAME_COMPONENTS = {
   memoria: MemoryGame,
@@ -20,11 +22,14 @@ const GAME_COMPONENTS = {
   "atrapa-calabaza": CatchPumpkins,
   "h-misteriosa": SpookyVeggie,
   "h-memoria": HauntedMemory,
+  // Especiales de Fiestas (8/12 al 10/1)
+  "f-arbolito": ArmarArbolito,
 };
 
 export default function Juegos() {
   const [activeGame, setActiveGame] = useState(null);
   const h = useHalloween();
+  const f = useFiestas() && !h;
 
   const ActiveComponent = activeGame ? GAME_COMPONENTS[activeGame] : null;
 
@@ -97,6 +102,19 @@ export default function Juegos() {
                     </h2>
                   </div>
                   {[CATCH_GAME, ...HALLOWEEN_GAMES].map((game, i) => renderCard(game, i))}
+                  <div className="md:col-span-2 text-center mt-4">
+                    <h2 className="font-bangers text-2xl tracking-wider text-cv-dark">Los juegos de siempre</h2>
+                  </div>
+                </>
+              )}
+              {f && (
+                <>
+                  <div className="md:col-span-2 text-center">
+                    <h2 className="font-bangers text-3xl tracking-wider text-cv-dark" style={{ textShadow: "2px 2px 0 #dc2626" }}>
+                      🎄 Especiales de Fiestas
+                    </h2>
+                  </div>
+                  {fiestasGamesToday().map((game, i) => renderCard(game, i))}
                   <div className="md:col-span-2 text-center mt-4">
                     <h2 className="font-bangers text-2xl tracking-wider text-cv-dark">Los juegos de siempre</h2>
                   </div>

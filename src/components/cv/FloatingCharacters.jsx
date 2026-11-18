@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { VEG_IMAGES, KID_IMAGES } from "@/lib/clubData";
+import { fiestasKidImage, FIESTAS_VEG } from "@/lib/fiestas";
 
 // Real character images floating as decoration
 const FloatingChar = ({ src, alt, x, y, size = 80, delay = 0, animationType = "float" }) => {
@@ -39,7 +40,7 @@ const FloatingChar = ({ src, alt, x, y, size = 80, delay = 0, animationType = "f
   );
 };
 
-export default function FloatingCharacters({ className = "" }) {
+export default function FloatingCharacters({ className = "", fiestas = false }) {
   const items = [
     { src: VEG_IMAGES.tomate, alt: "Tomate", x: 3, y: 5, size: 110, delay: 0, animationType: "rock" },
     { src: VEG_IMAGES.brocoli, alt: "Brócoli", x: 86, y: 4, size: 100, delay: 1, animationType: "float" },
@@ -51,10 +52,17 @@ export default function FloatingCharacters({ className = "" }) {
     { src: KID_IMAGES.nio4, alt: "Nene rockero", x: 30, y: 88, size: 85, delay: 0.3, animationType: "rock" },
   ];
 
+  // Tema Fiestas: los mismos personajes, con gorro de Papá Noel / astas
+  const festive = (src) => {
+    if (!fiestas) return src;
+    const id = Object.keys(VEG_IMAGES).find((k) => VEG_IMAGES[k] === src);
+    return (id && FIESTAS_VEG[id]) || fiestasKidImage(src, true);
+  };
+
   return (
     <div className={`absolute inset-0 overflow-hidden ${className}`}>
       {items.map((item, i) => (
-        <FloatingChar key={i} {...item} />
+        <FloatingChar key={i} {...item} src={festive(item.src)} />
       ))}
     </div>
   );

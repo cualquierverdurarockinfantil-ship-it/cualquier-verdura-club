@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { VEGETABLES, KIDS_CHARACTERS } from "@/lib/clubData";
 import SectionHeader from "@/components/cv/SectionHeader";
 import { useHalloween, spookyVeg, kidImage } from "@/lib/halloween";
+import { useFiestas, fiestasVegImage, fiestasKidImage } from "@/lib/fiestas";
 
 function VegetableCard({ veg, onClick, h }) {
   return (
@@ -101,7 +102,7 @@ function VegetableModal({ veg, onClose }) {
   );
 }
 
-function KidCard({ kid, h }) {
+function KidCard({ kid, h, f }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -117,7 +118,7 @@ function KidCard({ kid, h }) {
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       >
         <img
-          src={kidImage(kid.image, h)}
+          src={fiestasKidImage(kidImage(kid.image, h), f)}
           alt={kid.name}
           className="w-28 h-28 object-contain"
         />
@@ -138,7 +139,9 @@ export default function Verduras() {
   const [selectedVeg, setSelectedVeg] = useState(null);
   const h = useHalloween();
   // en Halloween: imágenes y textos terror (se apaga solo el 1/11)
-  const vegs = VEGETABLES.map((v) => spookyVeg(v, h));
+  const f = useFiestas() && !h;
+  // en Fiestas (8/12 al 10/1): las verduras con gorro de Papá Noel y astas de reno
+  const vegs = VEGETABLES.map((v) => spookyVeg(v, h)).map((v) => (f ? { ...v, image: fiestasVegImage(v.id, v.image, f) } : v));
 
   return (
     <div className={`min-h-screen ${h ? "" : "bg-white"}`} style={h ? { background: "#1a0a2e" } : undefined}>
@@ -204,7 +207,7 @@ export default function Verduras() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {KIDS_CHARACTERS.map((kid) => (
-              <KidCard key={kid.id} kid={kid} h={h} />
+              <KidCard key={kid.id} kid={kid} h={h} f={f} />
             ))}
           </div>
         </div>

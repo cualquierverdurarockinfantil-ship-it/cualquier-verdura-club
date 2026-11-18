@@ -1,0 +1,158 @@
+/* ============================================================
+   TEMA FIESTAS — Club Verdura (Navidad argentina: luces, pino, familia)
+   Todo lo global cuelga de <html class="theme-fiestas"> (lo pone useFiestas)
+   ============================================================ */
+
+:root {
+  --fi-green: #14532d;
+  --fi-green-2: #166534;
+  --fi-red: #dc2626;
+  --fi-gold: #facc15;
+  --fi-cream: #fff8ec;
+  --fi-night: #0b2545;
+}
+
+/* ---------- Fondo general (claro, cálido, con lucecitas sueltas) ---------- */
+.fi-bg {
+  background-color: var(--fi-cream);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><g fill-opacity='0.16'><circle cx='30' cy='34' r='4' fill='%23dc2626'/><circle cx='112' cy='20' r='3' fill='%23facc15'/><circle cx='150' cy='96' r='4' fill='%2322c55e'/><circle cx='64' cy='120' r='3.4' fill='%2338bdf8'/><circle cx='20' cy='150' r='3' fill='%23facc15'/><circle cx='118' cy='158' r='4' fill='%23dc2626'/><path d='M84 62 l2.2 6.6 6.8 .4 -5.4 4.2 1.9 6.7 -5.5 -3.9 -5.7 3.9 2 -6.7 -5.4 -4.2 6.8 -.4z' fill='%23facc15'/></g></svg>");
+  background-size: 180px 180px;
+}
+
+/* ---------- Navbar (envuelta en .fi-nav, que es display:contents) ---------- */
+.theme-fiestas .fi-nav :is(nav, header),
+.theme-fiestas .fi-nav [class*="bg-white"],
+.theme-fiestas .fi-nav [class*="bg-background"] {
+  background: var(--fi-green) !important;
+  border-color: var(--fi-gold) !important;
+}
+.theme-fiestas .fi-nav :is(nav, header) {
+  border-bottom: 4px solid var(--fi-gold) !important;
+  box-shadow: 0 4px 0 var(--fi-red) !important;
+}
+.theme-fiestas .fi-nav,
+.theme-fiestas .fi-nav * {
+  color: #fffbeb;
+}
+.theme-fiestas .fi-nav a:not(:has(img)),
+.theme-fiestas .fi-nav button {
+  background: var(--fi-red) !important;
+  color: #fff !important;
+  border: 2px solid #1a1a1a !important;
+  box-shadow: 2px 2px 0 #1a1a1a !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+}
+.theme-fiestas .fi-nav a:not(:has(img)) *,
+.theme-fiestas .fi-nav button * {
+  color: #fff !important;
+}
+.theme-fiestas .fi-nav a:not(:has(img)):hover,
+.theme-fiestas .fi-nav button:hover {
+  background: #ef4444 !important;
+}
+/* menú de la hamburguesa (celular) */
+.theme-fiestas .fi-nav [class*="fixed"]:not(nav):not(header),
+.theme-fiestas .fi-nav [class*="absolute"]:not(nav):not(header),
+.theme-fiestas .fi-nav [style*="background"]:not(a):not(button):not(img):not(nav):not(header) {
+  background: var(--fi-green) !important;
+  border-color: var(--fi-gold) !important;
+}
+.theme-fiestas .fi-nav [class*="fixed"]:not(nav):not(header) a:not(:has(img)),
+.theme-fiestas .fi-nav [class*="fixed"]:not(nav):not(header) button {
+  font-size: 1.15em;
+  padding: 0.55rem 1.6rem !important;
+}
+/* la página actual se marca en dorado */
+.theme-fiestas .fi-nav [class*="bg-cv-green"],
+.theme-fiestas .fi-nav [class*="bg-cv-yellow"],
+.theme-fiestas .fi-nav [class*="bg-green"],
+.theme-fiestas .fi-nav [class*="bg-yellow"],
+.theme-fiestas .fi-nav [aria-current="page"],
+.theme-fiestas .fi-nav a.active {
+  background: var(--fi-gold) !important;
+  color: #1a1a1a !important;
+}
+.theme-fiestas .fi-nav img {
+  filter: brightness(0) invert(0.96);
+}
+
+/* ---------- Toques globales ---------- */
+.theme-fiestas ::selection {
+  background: var(--fi-gold);
+  color: #1a1a1a;
+}
+.theme-fiestas .card-cv {
+  box-shadow: 6px 6px 0 var(--fi-green-2);
+}
+.theme-fiestas .card-cv:hover {
+  box-shadow: 8px 8px 0 var(--fi-green-2);
+}
+
+/* ---------- Home: noche de verano completa ---------- */
+.fi-home {
+  background: var(--fi-night);
+  color: #fffbeb;
+}
+.theme-fiestas .fi-header h1,
+.theme-fiestas .fi-header h2,
+.theme-fiestas .fi-header h3,
+.theme-fiestas .fi-text {
+  color: #fffbeb !important;
+  -webkit-text-fill-color: #fffbeb !important;
+  text-shadow: 3px 3px 0 var(--fi-red) !important;
+}
+.theme-fiestas .fi-header p {
+  color: #fde68a !important;
+}
+
+/* ---------- Capa de efectos (fija, no se puede tocar) ---------- */
+.fi-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 30;
+}
+.fi-garland {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  overflow: hidden;
+  opacity: 0.96;
+}
+/* lamparitas que titilan (3 ritmos) */
+.fi-bulb {
+  animation: fi-twinkle 2.4s ease-in-out infinite;
+}
+.fi-bulb-1 { animation-delay: -0.8s; }
+.fi-bulb-2 { animation-delay: -1.6s; }
+@keyframes fi-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+/* luciérnagas: noche de verano */
+.fi-firefly {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fef08a;
+  box-shadow: 0 0 10px 4px rgba(250, 240, 100, 0.65);
+  opacity: 0;
+  animation: fi-firefly var(--dur, 20s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes fi-firefly {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  12%  { opacity: 0.9; }
+  35%  { opacity: 0.25; transform: translate(40px, -30px); }
+  55%  { opacity: 0.95; transform: translate(10px, -70px); }
+  80%  { opacity: 0.3; transform: translate(-40px, -40px); }
+  100% { opacity: 0; transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fi-bulb, .fi-firefly { animation: none; }
+  .fi-firefly { opacity: 0.5; }
+}

@@ -5,14 +5,15 @@ import SectionHeader from "@/components/cv/SectionHeader";
 import FloatingCharacters from "@/components/cv/FloatingCharacters";
 import HalloweenSky from "@/components/cv/halloween/HalloweenSky";
 import { useHalloween, vegImage, kidImage } from "@/lib/halloween";
+import { useFiestas, fiestasVegImage, fiestasKidImage } from "@/lib/fiestas";
 
-function HeroSection({ h }) {
+function HeroSection({ h, f }) {
   return (
     <section
       className={`relative flex flex-col overflow-hidden px-4 ${h ? "" : "bg-white"}`}
       style={{ height: "100dvh" }}
     >
-      {h ? <HalloweenSky /> : <FloatingCharacters />}
+      {h ? <HalloweenSky /> : <FloatingCharacters fiestas={f} />}
 
       {/* gap fijo entre los 4 bloques, ya no se reparte el sobrante con justify-between */}
       <div className="relative z-10 flex flex-col items-center justify-center gap-6 md:gap-8 w-full max-w-lg mx-auto py-2" style={{ height: "100%" }}>
@@ -94,18 +95,30 @@ function HeroSection({ h }) {
           </Link>
         </motion.div>
 
+        {f && (
+          <motion.p
+            className="font-bangers text-xl md:text-2xl tracking-wider text-center"
+            style={{ color: "#166534", textShadow: "2px 2px 0 #fde68a" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+          >
+            🎄 ¡Felices fiestas desde el Club Verdura!
+          </motion.p>
+        )}
+
       </div>
     </section>
   );
 }
 
-function WelcomeSection({ h }) {
+function WelcomeSection({ h, f }) {
   return (
     <section className="relative py-24 px-4 overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/assets/fondo-plaza.jpg)` }} />
       <div className={`absolute inset-0 ${h ? "bg-[#1a0a2e]/90" : "bg-white/80"}`} />
-      <motion.img src={kidImage(KID_IMAGES.nio2, h)} alt="" className="absolute left-0 bottom-0 w-28 md:w-40 object-contain pointer-events-none" style={{ zIndex: 2 }} animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} />
-      <motion.img src={kidImage(KID_IMAGES.nio1, h)} alt="" className="absolute right-0 bottom-0 w-28 md:w-40 object-contain pointer-events-none" style={{ zIndex: 2 }} animate={{ y: [0, -8, 0] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }} />
+      <motion.img src={fiestasKidImage(kidImage(KID_IMAGES.nio2, h), f)} alt="" className="absolute left-0 bottom-0 w-28 md:w-40 object-contain pointer-events-none" style={{ zIndex: 2 }} animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} />
+      <motion.img src={fiestasKidImage(kidImage(KID_IMAGES.nio1, h), f)} alt="" className="absolute right-0 bottom-0 w-28 md:w-40 object-contain pointer-events-none" style={{ zIndex: 2 }} animate={{ y: [0, -8, 0] }} transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }} />
       <div className="max-w-3xl mx-auto text-center relative z-10">
         <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
           <h2 className={`text-5xl md:text-6xl font-bangers mb-6 tracking-wide ${h ? "hw-ghost-text" : "text-cv-dark"}`}>
@@ -135,7 +148,7 @@ function WelcomeSection({ h }) {
   );
 }
 
-function CharactersPreview({ h }) {
+function CharactersPreview({ h, f }) {
   return (
     <section className={`py-20 px-4 ${h ? "" : "bg-cv-green/5"}`} style={h ? { background: "#1a0a2e" } : undefined}>
       <div className="max-w-6xl mx-auto">
@@ -148,7 +161,7 @@ function CharactersPreview({ h }) {
               <Link to="/verduras">
                 <motion.div className="card-cv p-4 text-center" whileHover={{ scale: 1.05 }} style={{ background: h ? "#fff7ed" : veg.color + "15" }}>
                   <motion.div className="flex justify-center mb-3" animate={{ rotate: [-5, 5, -5] }} transition={{ duration: 2 + i * 0.4, repeat: Infinity }}>
-                    <img src={vegImage(veg.id, veg.image, h)} alt={veg.name} className="w-24 h-24 object-contain" />
+                    <img src={fiestasVegImage(veg.id, vegImage(veg.id, veg.image, h), f)} alt={veg.name} className="w-24 h-24 object-contain" />
                   </motion.div>
                   <h3 className="font-bangers text-cv-dark text-xl tracking-wider">{veg.name}</h3>
                   <p className="text-sm font-fredoka text-gray-500 mt-1">{veg.role}</p>
@@ -182,20 +195,20 @@ function AlbumPreview({ h }) {
   );
 }
 
-function KidsBanner({ h }) {
+function KidsBanner({ h, f }) {
   return (
     <section className="py-16 px-4 overflow-hidden" style={{ background: h ? "#2e1650" : "#facc1510" }}>
       <div className="max-w-5xl mx-auto">
         <div className="flex items-end justify-center gap-4 md:gap-8">
           {[KID_IMAGES.nio1, KID_IMAGES.nio2, KID_IMAGES.nio3, KID_IMAGES.nio4, KID_IMAGES.nio5].map((src, i) => (
-            <motion.img key={i} src={kidImage(src, h)} alt={`Fan ${i + 1}`} className="object-contain" style={{ width: i === 2 ? 140 : 100, height: i === 2 ? 140 : 100 }} animate={{ y: [0, -(6 + i * 3), 0], rotate: [-3 + i, 3 - i, -3 + i] }} transition={{ duration: 2 + i * 0.3, repeat: Infinity, ease: "easeInOut" }} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} />
+            <motion.img key={i} src={fiestasKidImage(kidImage(src, h), f)} alt={`Fan ${i + 1}`} className="object-contain" style={{ width: i === 2 ? 140 : 100, height: i === 2 ? 140 : 100 }} animate={{ y: [0, -(6 + i * 3), 0], rotate: [-3 + i, 3 - i, -3 + i] }} transition={{ duration: 2 + i * 0.3, repeat: Infinity, ease: "easeInOut" }} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} />
           ))}
         </div>
         <motion.p
           className={`text-center font-bangers text-3xl md:text-4xl mt-6 tracking-wider ${h ? "hw-ghost-text" : "text-cv-dark"}`}
           initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
         >
-          {h ? "¡Noche de Halloween en el Club!" : "¡El club ya está abierto!"}
+          {h ? "¡Noche de Halloween en el Club!" : f ? "¡Felices fiestas en familia, desde el Club!" : "¡El club ya está abierto!"}
         </motion.p>
       </div>
     </section>
@@ -204,13 +217,14 @@ function KidsBanner({ h }) {
 
 export default function Home() {
   const h = useHalloween();
+  const f = useFiestas() && !h;
   return (
     <div className={h ? "hw-home" : ""}>
-      <HeroSection h={h} />
-      <WelcomeSection h={h} />
+      <HeroSection h={h} f={f} />
+      <WelcomeSection h={h} f={f} />
       <AlbumPreview h={h} />
-      <CharactersPreview h={h} />
-      <KidsBanner h={h} />
+      <CharactersPreview h={h} f={f} />
+      <KidsBanner h={h} f={f} />
     </div>
   );
 }

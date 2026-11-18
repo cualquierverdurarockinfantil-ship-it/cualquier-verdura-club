@@ -5,27 +5,32 @@ import PlayChoiceModal from "./PlayChoiceModal";
 import CampaignBanner from "./CampaignBanner";
 import ShowBanner from "./ShowBanner";
 import HalloweenLayer from "./halloween/HalloweenLayer";
+import FiestasLayer from "./fiestas/FiestasLayer";
+import { Pino } from "./fiestas/FiestasArt";
 import { Cat } from "./halloween/HalloweenArt";
 import { Outlet, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MusicPlayerProvider } from "@/context/MusicPlayerContext";
 import { useHalloween } from "@/lib/halloween";
+import { useFiestas } from "@/lib/fiestas";
 
 export default function Layout() {
   // true solo del 19/10 al 31/10 (ver src/lib/halloween.js)
   const halloween = useHalloween();
+  // true del 8/12 al 10/1 (ver src/lib/fiestas.js); Halloween tiene prioridad si alguien fuerza los dos en modo prueba
+  const fiestas = useFiestas() && !halloween;
   // en la Home el hero va pegado a la navbar; en el resto damos aire para la guirnalda
   const isHome = useLocation().pathname === "/";
 
   return (
     <MusicPlayerProvider>
-      <div className={`min-h-screen flex flex-col ${halloween ? "hw-bg" : "bg-white"}`}>
+      <div className={`min-h-screen flex flex-col ${halloween ? "hw-bg" : fiestas && !isHome ? "fi-bg" : "bg-white"}`}>
         <CampaignBanner />
         {/* display:contents => no cambia el layout; solo sirve para vestir la navbar en Halloween */}
-        <div className="hw-nav contents">
+        <div className={`${fiestas ? "fi-nav" : "hw-nav"} contents`}>
           <Navbar />
         </div>
-        <main className={`flex-1 ${halloween && !isHome ? "pt-[6.5rem]" : "pt-16"}`}>
+        <main className={`flex-1 ${(halloween || fiestas) && !isHome ? "pt-[6.5rem]" : "pt-16"}`}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -44,11 +49,20 @@ export default function Layout() {
           </div>
         )}
 
+        {/* pinitos con luces sentados sobre el footer */}
+        {fiestas && (
+          <div className="relative h-0 z-10 pointer-events-none" aria-hidden="true">
+            <Pino className="absolute left-3 md:left-10 bottom-0 w-14 md:w-20 h-auto" />
+            <Pino className="absolute right-3 md:right-10 bottom-0 w-12 md:w-16 h-auto" />
+          </div>
+        )}
+
         <Footer />
         <PlayerSpacer />
         <PlayerBar />
         <PlayChoiceModal />
         {halloween && <HalloweenLayer />}
+        {fiestas && <FiestasLayer isHome={isHome} />}
       </div>
     </MusicPlayerProvider>
   );
