@@ -10,7 +10,7 @@ import { FIESTAS_VEG, FIESTAS_KIDS, FIESTAS_ORNAMENTS } from "@/lib/fiestas";
  *  - tienen que TOCAR el pino (aunque sea el borde del sticker con el borde del árbol)
  *  - no pueden pisarse entre sí
  * Si no se puede soltar, el sticker se ve en gris. Tocá un sticker puesto para sacarlo, o arrastralo para moverlo.
- * Dura 1 minuto y medio: al terminar, cuenta los que quedaron. Después podés sacarle una foto al arbolito con un saludo.
+ * Dura 1 minuto y medio: al terminar, cuenta los que quedaron. Después podés descargar una imagen de tu arbolito con "¡Felices fiestas!".
  */
 
 const W = 400; // el escenario es 400 x 500 "unidades"; todo se mide en esas unidades
@@ -58,8 +58,14 @@ function inTree(px, py) {
   if (TIERS.some((t) => inTriangle(px, py, t))) return true;
   return px >= TRUNK.x && px <= TRUNK.x + TRUNK.w && py >= TRUNK.y && py <= TRUNK.y + TRUNK.h;
 }
-/** El sticker toca el pino si algún punto de su cuadrado cae sobre el árbol */
-function touchesTree(cx, cy) {
+/* Contorno real de cada sticker: una grilla de N x N que dice qué celdas tienen dibujo (alfa) y cuáles son aire.
+   Así "tocar" y "pisar" se miden con la silueta, no con el cuadrado. */
+const MASK_N = 40;
+const MASKS = {}; // id -> { grid: Uint8Array, pts: [[dx, dy], ...] }
+const MIN_OVERLAP_CELLS = 3; // un roce mínimo entre dos siluetas no cuenta como pisarse
+
+/** Fallback (si todavía no cargó la silueta): se usa el cuadrado entero */
+function touchesTreeBox(cx, cy) {
   const n = 6;
   const inset = S * 0.06;
   for (let i = 0; i < n; i++) {
@@ -71,9 +77,34 @@ function touchesTree(cx, cy) {
   }
   return false;
 }
-function overlaps(cx, cy, others) {
-  const lim = S * 0.8;
-  return others.some((o) => Math.abs(o.x - cx) < lim && Math.abs(o.y - cy) < lim);
+function touchesTree(type, cx, cy) {
+  const m = MASKS[type];
+  if (!m) return touchesTreeBox(cx, cy);
+  for (const [ox, oy] of m.pts) if (inTree(cx + ox, cy + oy)) return true;
+  return false;
+}
+function overlaps(type, cx, cy, others) {
+  const m = MASKS[type];
+  for (const o of others) {
+    const dx = cx - o.x;
+    const dy = cy - o.y;
+    if (Math.abs(dx) >= S || Math.abs(dy) >= S) continue; // ni cerca
+    const mo = MASKS[o.type];
+    if (!m || !mo) {
+      if (Math.abs(dx) < S * 0.8 && Math.abs(dy) < S * 0.8) return true;
+      continue;
+    }
+    let hits = 0;
+    for (const [ox, oy] of m.pts) {
+      const rx = ox + dx; // el punto, medido desde el centro del otro sticker
+      const ry = oy + dy;
+      if (rx <= -S / 2 || rx >= S / 2 || ry <= -S / 2 || ry >= S / 2) continue;
+      const i = Math.floor(((rx + S / 2) / S) * MASK_N);
+      const j = Math.floor(((ry + S / 2) / S) * MASK_N);
+      if (mo.grid[j * MASK_N + i] && ++hits >= MIN_OVERLAP_CELLS) return true;
+    }
+  }
+  return false;
 }
 const inBounds = (cx, cy) => cx >= S / 2 && cx <= W - S / 2 && cy >= S / 2 && cy <= H - S / 2;
 
@@ -109,6 +140,42 @@ function saveBest(v) {
   }
 }
 
+async function buildMasks() {
+  const cell = S / MASK_N;
+  await Promise.all(
+    STICKERS.map(async (st) => {
+      const im = await loadImg(st.src);
+      if (!im) return;
+      const big = MASK_N * 2;
+      const c = document.createElement("canvas");
+      c.width = c.height = big;
+      const g = c.getContext("2d", { willReadFrequently: true });
+      const r = Math.min(big / im.width, big / im.height);
+      const w = im.width * r;
+      const h = im.height * r;
+      g.drawImage(im, (big - w) / 2, (big - h) / 2, w, h);
+      const d = g.getImageData(0, 0, big, big).data;
+      const grid = new Uint8Array(MASK_N * MASK_N);
+      const pts = [];
+      for (let j = 0; j < MASK_N; j++) {
+        for (let i = 0; i < MASK_N; i++) {
+          let on = 0;
+          for (let b = 0; b < 4; b++) {
+            const x = i * 2 + (b & 1);
+            const y = j * 2 + (b >> 1);
+            if (d[(y * big + x) * 4 + 3] > 60) on = 1;
+          }
+          if (on) {
+            grid[j * MASK_N + i] = 1;
+            pts.push([-S / 2 + (i + 0.5) * cell, -S / 2 + (j + 0.5) * cell]);
+          }
+        }
+      }
+      MASKS[st.id] = { grid, pts };
+    })
+  );
+}
+
 function resultMessage(n) {
   if (n >= 26) return "¡Arbolito de la abuela, con todo! 🎄✨";
   if (n >= 18) return "¡Qué arbolazo! La familia entera lo mira.";
@@ -128,7 +195,6 @@ function loadImg(src) {
 }
 
 const BULBS = ["#ef4444", "#facc15", "#22c55e", "#38bdf8", "#f472b6", "#fb923c"];
-const LOGO_SPLIT = 0.522; // donde termina "CUALQUIER" y empieza "VERDURA" dentro del logo
 
 /** moño rojo de regalo (para las esquinas del marco) */
 function drawBow(g, x, y, s) {
@@ -190,7 +256,7 @@ function drawBulb(g, x, y, color) {
   g.restore();
 }
 
-async function buildPhoto(placed, name) {
+async function buildPhoto(placed) {
   const cw = 1080;
   const ch = 1350;
   const canvas = document.createElement("canvas");
@@ -291,7 +357,7 @@ async function buildPhoto(placed, name) {
   // cinta con el saludo
   g.textAlign = "center";
   g.textBaseline = "alphabetic";
-  const title = name ? `¡Felices fiestas, ${name}!` : "¡Felices fiestas!";
+  const title = "¡Felices fiestas!";
   g.fillStyle = "#dc2626";
   g.strokeStyle = "#1a1a1a";
   g.lineWidth = 7;
@@ -330,24 +396,11 @@ async function buildPhoto(placed, name) {
   g.roundRect(px, py, plateW, plateH, 28);
   g.fill();
   g.stroke();
-  const logo = await loadImg("/assets/letras-horizontal.svg");
+  const logo = await loadImg("/assets/fiestas/logo-verde-sombra-roja.png");
   if (logo) {
     const lw = 600;
-    const lh = lw * (240.2 / 1826.09);
-    const tmp = document.createElement("canvas");
-    tmp.width = Math.round(lw);
-    tmp.height = Math.round(lh);
-    const t = tmp.getContext("2d");
-    t.drawImage(logo, 0, 0, tmp.width, tmp.height);
-    t.globalCompositeOperation = "source-in";
-    const grad = t.createLinearGradient(0, 0, tmp.width, 0);
-    grad.addColorStop(0, "#dc2626");
-    grad.addColorStop(LOGO_SPLIT - 0.001, "#dc2626");
-    grad.addColorStop(LOGO_SPLIT + 0.001, "#16a34a");
-    grad.addColorStop(1, "#16a34a");
-    t.fillStyle = grad;
-    t.fillRect(0, 0, tmp.width, tmp.height);
-    g.drawImage(tmp, (cw - lw) / 2, py + (plateH - lh) / 2, lw, lh);
+    const lh = lw * (logo.height / logo.width);
+    g.drawImage(logo, (cw - lw) / 2, py + (plateH - lh) / 2, lw, lh);
   } else {
     g.fillStyle = "#16a34a";
     g.font = "56px Bangers, Impact, sans-serif";
@@ -394,8 +447,7 @@ export default function ArmarArbolito() {
   const [drag, setDrag] = useState(null); // {type, fromId, cx, cy, valid, moved}
   const [best, setBest] = useState(() => readBest());
   const [newBest, setNewBest] = useState(false);
-  const [name, setName] = useState("");
-  const [photo, setPhoto] = useState(null);
+    const [photo, setPhoto] = useState(null);
   const [photoBusy, setPhotoBusy] = useState(false);
 
   const stageRef = useRef(null);
@@ -422,10 +474,10 @@ export default function ArmarArbolito() {
   }, []);
 
   const evaluate = useCallback(
-    (cx, cy, fromId) => {
+    (cx, cy, fromId, type) => {
       const { x, y } = toUnits(cx, cy);
       const others = placedRef.current.filter((p) => p.id !== fromId);
-      const valid = inBounds(x, y) && touchesTree(x, y) && !overlaps(x, y, others);
+      const valid = inBounds(x, y) && touchesTree(type, x, y) && !overlaps(type, x, y, others);
       return { x, y, valid };
     },
     [toUnits]
@@ -440,7 +492,7 @@ export default function ArmarArbolito() {
     const liftPx = (lift / W) * stageRef.current.getBoundingClientRect().width;
     const cx = e.clientX;
     const cy = e.clientY - liftPx;
-    const { valid } = evaluate(cx, cy, fromId);
+    const { valid } = evaluate(cx, cy, fromId, type);
     const d = { type, fromId, cx, cy, liftPx, startX: e.clientX, startY: e.clientY, valid, moved: false };
     dragRef.current = d;
     setDrag(d);
@@ -454,7 +506,7 @@ export default function ArmarArbolito() {
       const cx = e.clientX;
       const cy = e.clientY - d.liftPx;
       const moved = d.moved || Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > 8;
-      const { valid } = evaluate(cx, cy, d.fromId);
+      const { valid } = evaluate(cx, cy, d.fromId, d.type);
       const nd = { ...d, cx, cy, valid, moved };
       dragRef.current = nd;
       setDrag(nd);
@@ -465,7 +517,7 @@ export default function ArmarArbolito() {
       dragRef.current = null;
       setDrag(null);
       if (cancel) return;
-      const { x, y, valid } = evaluate(d.cx, d.cy, d.fromId);
+      const { x, y, valid } = evaluate(d.cx, d.cy, d.fromId, d.type);
       const r = stageRef.current?.getBoundingClientRect();
       const outside = r ? e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom : false;
 
@@ -494,6 +546,11 @@ export default function ArmarArbolito() {
       window.removeEventListener("pointercancel", cancel);
     };
   }, [evaluate]);
+
+  /* siluetas de los stickers (para medir bien "toca el pino" y "pisa a otro") */
+  useEffect(() => {
+    buildMasks();
+  }, []);
 
   /* reloj */
   useEffect(() => {
@@ -534,7 +591,7 @@ export default function ArmarArbolito() {
     setPhotoBusy(true);
     const t = setTimeout(async () => {
       try {
-        const url = await buildPhoto(placedRef.current, name.trim());
+        const url = await buildPhoto(placedRef.current);
         if (!cancelled) setPhoto(url);
       } catch {
         if (!cancelled) setPhoto(null);
@@ -546,8 +603,7 @@ export default function ArmarArbolito() {
       cancelled = true;
       clearTimeout(t);
     };
-    // la foto se rehace si cambia el nombre
-  }, [phase, name]);
+  }, [phase]);
 
   /* el escenario se achica o agranda según el espacio que deje la pantalla */
   useEffect(() => {
@@ -593,22 +649,6 @@ export default function ArmarArbolito() {
     a.remove();
   };
 
-  const share = async () => {
-    if (!photo) return;
-    try {
-      const blob = await (await fetch(photo)).blob();
-      const file = new File([blob], "felices-fiestas-club-verdura.png", { type: "image/png" });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: "¡Felices fiestas!", text: "Mi arbolito del Club Verdura 🎄" });
-        return;
-      }
-    } catch {
-      /* si el usuario cancela o no se puede, cae a descargar */
-    }
-    download();
-  };
-
-  const canShare = typeof navigator !== "undefined" && !!navigator.share;
   const dragSrc = drag ? SRC_BY_ID[drag.type] : null;
   const px = sizePx();
   const timeLow = timeLeft <= 10;
@@ -619,7 +659,7 @@ export default function ArmarArbolito() {
       "Arrastrá un sticker de la bandeja hasta el árbol. Tiene que tocar el pino (aunque sea solo el borde).",
       "Si el sticker se ve en gris es que no lo podés soltar ahí: o no toca el pino o está pisando a otro.",
       "Para sacar uno, tocalo. Para moverlo, arrastralo (o llevalo fuera del escenario).",
-      "Cuando se acaba el tiempo, cuenta los que quedaron: ¡gana el que más pone! Después te llevás una foto con tu saludo de fiestas.",
+      "Cuando se acaba el tiempo, cuenta los que quedaron: ¡gana el que más pone! Después podés descargar una imagen de tu arbolito.",
     ],
     []
   );
@@ -793,17 +833,6 @@ export default function ArmarArbolito() {
             {newBest && <p className="font-bangers text-xl tracking-wider text-cv-red mt-1">¡Nuevo récord! 🏆</p>}
             {!newBest && best > 0 && <p className="font-fredoka text-sm text-gray-500">Tu récord: {best}</p>}
 
-            <div className="mt-4">
-              <label className="block font-fredoka text-sm text-gray-600 mb-1">¿Para quién es el saludo? (opcional)</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value.slice(0, 18))}
-                placeholder="Ej: Abuela, Mati, la familia…"
-                className="w-full rounded-full px-4 py-2 font-fredoka text-center"
-                style={{ border: "3px solid #1a1a1a", background: "#fff", userSelect: "text", WebkitUserSelect: "text" }}
-              />
-            </div>
-
             <div
               className="mt-4 rounded-2xl overflow-hidden mx-auto"
               style={{ border: "3px solid #1a1a1a", maxWidth: 300, aspectRatio: "4 / 5", background: "#0b2545" }}
@@ -819,13 +848,8 @@ export default function ArmarArbolito() {
 
             <div className="mt-4 flex flex-col gap-2">
               <button onClick={download} disabled={!photo} className="btn-cv-primary justify-center" style={{ opacity: photo ? 1 : 0.5 }}>
-                ⬇️ Descargar mi foto
+                ⬇️ Descargar mi arbolito
               </button>
-              {canShare && (
-                <button onClick={share} disabled={!photo} className="btn-cv-secondary justify-center" style={{ opacity: photo ? 1 : 0.5 }}>
-                  📤 Compartir
-                </button>
-              )}
               <button onClick={start} className="btn-cv-secondary justify-center">
                 🔄 Armar otro arbolito
               </button>
