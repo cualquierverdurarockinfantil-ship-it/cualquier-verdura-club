@@ -487,14 +487,7 @@ export default function RegalosChimenea() {
         >
           ✕ Salir
         </button>
-        <span className="rounded-full" style={badge}>🏠 {phase === "end" ? finalScore : v ? v.score : 0}</span>
-        {phase === "play" ? (
-          <span className="rounded-full" style={{ ...badge, background: streak >= 2 ? "#fecaca" : "#fffbeb" }}>
-            {"❌".repeat(streak)}{"⚪".repeat(MAX_MISSES - streak)}
-          </span>
-        ) : (
-          <span className="rounded-full" style={{ ...badge, background: "#bbf7d0" }}>¡Se acabó!</span>
-        )}
+        <span />
       </div>
 
       <div ref={areaRef} className="flex-1 min-h-0 flex items-center justify-center px-3 pb-3">
@@ -636,6 +629,18 @@ export default function RegalosChimenea() {
               )}
             </g>
           </svg>
+
+          {/* contadores dentro del recuadro del juego */}
+          <div className="absolute left-0 right-0 flex items-start justify-between pointer-events-none font-bangers tracking-wider" style={{ top: 12, paddingLeft: 14, paddingRight: 14, fontSize: Math.max(15, stageW * 0.05) }}>
+            <span className="rounded-full" style={{ ...badge, padding: "2px 12px" }}>🏠 {phase === "end" ? finalScore : v ? v.score : 0}</span>
+            {phase === "play" ? (
+              <span className="rounded-full" style={{ ...badge, background: streak >= 2 ? "#fecaca" : "#fffbeb" }}>
+                {"❌".repeat(streak)}{"⚪".repeat(MAX_MISSES - streak)}
+              </span>
+            ) : (
+              <span className="rounded-full" style={{ ...badge, background: "#bbf7d0" }}>¡Se acabó!</span>
+            )}
+          </div>
 
           {phase === "play" && v && v.thrown === 0 && (
             <div className="absolute inset-x-0 top-[44%] text-center pointer-events-none">
